@@ -2,13 +2,13 @@
 
 ## Team Members
 
-- **Senior Engineer**: Core/infrastructure + all non-auth/non-resume APIs (ATS, AI, LaTeX, notifications, payments, subscriptions, health/admin)
+- **Backend Leader**: Core/infrastructure + all non-auth/non-resume APIs (ATS, AI, LaTeX, notifications, payments, subscriptions, health/admin)
 - **Auth Developer**: All authentication-related files
 - **Resume Developer**: All resume-related files
 
 ## Backend Files
 
-### Senior Engineer
+### Backend Leader
 - `backend/src/server.js`
 - `backend/src/config/database.js`
 - `backend/src/middleware/error/errorHandler.js`

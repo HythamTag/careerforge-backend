@@ -11,6 +11,16 @@ const sanitizeInput = require('./middleware/security/sanitizeInput');
 const errorHandler = require('./middleware/error/errorHandler');
 const logger = require('./middleware/logging/logger');
 
+// Import routes
+const healthRoutes = require('./routes/health');
+const authRoutes = require('./routes/auth');
+const resumeRoutes = require('./routes/resume');
+const atsRoutes = require('./routes/ats');
+const aiRoutes = require('./routes/ai');
+const latexRoutes = require('./routes/latex');
+const notificationRoutes = require('./routes/notifications');
+const paymentRoutes = require('./routes/payment');
+
 const app = express();
 
 app.set('trust proxy', 1);
@@ -30,6 +40,17 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(sanitizeInput);
 app.use(apiLimiter);
 
+// API routes
+app.use('/api/v1/health', healthRoutes);
+app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1/resumes', resumeRoutes);
+app.use('/api/v1/ats', atsRoutes);
+app.use('/api/v1/ai', aiRoutes);
+app.use('/api/v1/latex', latexRoutes);
+app.use('/api/v1/notifications', notificationRoutes);
+app.use('/api/v1/payments', paymentRoutes);
+
+// Health check at root level too
 app.get('/health', (req, res) => {
   res.status(200).json({
     status: 'OK',
