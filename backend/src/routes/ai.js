@@ -1,5 +1,6 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
+const AIController = require("../controllers/aiController");
 
 /**
  * AI enhancement routes
@@ -7,9 +8,6 @@ const router = express.Router();
  * Routes: POST /ai/enhance
  */
 
-router.post('/enhance', (req, res) => {
-  // TODO: Implement AI resume enhancement
-  res.status(501).json({ message: 'AI enhancement not implemented' });
-});
+router.post("/enhance", AIController.enhanceSection);
 
 module.exports = router;
