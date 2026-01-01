@@ -117,7 +117,7 @@ async function startServer() {
     }
 
     // DEBUG: Temporary endpoint to inspect indexes
-    app.get('/debug/indexes', async (req, res) => {
+    app.get('/v1/debug/indexes', async (req, res) => {
       try {
         const mongoose = require('mongoose');
         const collection = mongoose.connection.db.collection('users');
