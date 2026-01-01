@@ -104,7 +104,8 @@ class EnvironmentLoader {
       // ==========================================
       // DATABASE CONFIGURATION
       // ==========================================
-      MONGODB_URI: process.env.MONGODB_URI,
+      // Automatically fallback to MONGO_URL if MONGODB_URI is not set (fixes Railway/Local mismatch)
+      MONGODB_URI: process.env.MONGODB_URI || process.env.MONGO_URL,
       DB_NAME: process.env.DB_NAME || 'resume_enhancer',
 
       // ==========================================

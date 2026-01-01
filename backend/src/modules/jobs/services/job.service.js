@@ -627,11 +627,87 @@ class JobService extends EventEmitter {
   }
 
   /**
-     * Get job statistics
+     * Get detailed job statistics
+     * Returns breakdown by status, type, success rate, and recent activity timeline.
      * @public
      */
   async getJobStats(userId = null) {
-    return await this.jobRepository.getStats(userId);
+    // 1. Base query filter
+    const filter = {};
+    if (userId) {
+      filter.userId = userId;
+    }
+
+    // 2. Fetch raw counts via aggregation for performance
+    const [statusStats, typeStats, timelineStats, totalCount] = await Promise.all([
+      // Count by status
+      this.jobRepository.model.aggregate([
+        { $match: filter },
+        { $group: { _id: '$status', count: { $sum: 1 } } }
+      ]),
+      // Count by type
+      this.jobRepository.model.aggregate([
+        { $match: filter },
+        { $group: { _id: '$type', count: { $sum: 1 } } }
+      ]),
+      // Timeline (Last 7 days)
+      this.jobRepository.model.aggregate([
+        {
+          $match: {
+            ...filter,
+            createdAt: { $gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) }
+          }
+        },
+        {
+          $group: {
+            _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } },
+            count: { $sum: 1 }
+          }
+        },
+        { $sort: { _id: 1 } }
+      ]),
+      // Total count
+      this.jobRepository.count(filter)
+    ]);
+
+    // 3. Transform aggregation results into clean objects
+    const summary = {
+      total: totalCount,
+      completed: 0,
+      failed: 0,
+      processing: 0,
+      pending: 0,
+      cancelled: 0
+    };
+
+    statusStats.forEach(stat => {
+      if (summary.hasOwnProperty(stat._id)) {
+        summary[stat._id] = stat.count;
+      }
+    });
+
+    const byType = {};
+    typeStats.forEach(stat => {
+      byType[stat._id] = stat.count;
+    });
+
+    const recentActivity = timelineStats.map(stat => ({
+      date: stat._id,
+      count: stat.count
+    }));
+
+    // 4. Calculate Success Rate
+    const finishedJobs = summary.completed + summary.failed;
+    const successRate = finishedJobs > 0
+      ? parseFloat(((summary.completed / finishedJobs) * 100).toFixed(1))
+      : 0;
+
+    return {
+      summary,
+      byType,
+      successRate,
+      recentActivity
+    };
   }
 
   /**

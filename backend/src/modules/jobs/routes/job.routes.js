@@ -51,6 +51,37 @@ router.get('/', authMiddleware, validateGetUserJobsQueryMiddleware, jobControlle
  *     tags:
  *       - Jobs
  *     summary: Get overall job statistics
+ *     description: Returns detailed statistics including status breakdown, type distribution, success rate, and 7-day timeline.
+ *     responses:
+ *       200:
+ *         description: Statistics retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success: { type: 'boolean', example: true }
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     summary:
+ *                       type: object
+ *                       properties:
+ *                         total: { type: 'integer' }
+ *                         completed: { type: 'integer' }
+ *                         failed: { type: 'integer' }
+ *                         processing: { type: 'integer' }
+ *                     byType:
+ *                       type: object
+ *                       additionalProperties: { type: 'integer' }
+ *                     successRate: { type: 'number' }
+ *                     recentActivity:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           date: { type: 'string' }
+ *                           count: { type: 'integer' }
  */
 router.get('/stats', authMiddleware, jobController.getJobStats.bind(jobController));
 
