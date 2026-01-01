@@ -2,8 +2,9 @@
 // CORE MODULES
 // ==========================================
 const logger = require('@utils/logger');
+
 const config = require('@config');
-const { ERROR_CODES, DATABASE, HTTP_STATUS } = require('@constants');
+const { ERROR_CODES, VENDOR_ERROR_CODES, HTTP_STATUS } = require('@constants');
 const { AppError } = require('@errors');
 
 const errorMiddleware = (err, req, res, next) => {
@@ -25,10 +26,10 @@ const errorMiddleware = (err, req, res, next) => {
     error = err;
   } else if (err.name === 'CastError') {
     error = new AppError('Resource not found', HTTP_STATUS.NOT_FOUND, ERROR_CODES.NOT_FOUND);
-  } else if (err.code === DATABASE?.MONGODB_DUPLICATE_KEY_ERROR || err.code === 11000) {
+  } else if (err.code === VENDOR_ERROR_CODES.MONGODB_DUPLICATE_KEY || err.code === 11000) {
     const key = Object.keys(err.keyValue || {})[0];
     const value = err.keyValue ? err.keyValue[key] : '';
-    error = new AppError(`Duplicate field value entered: ${key} = ${value}`, HTTP_STATUS.BAD_REQUEST, ERROR_CODES.DB_DUPLICATE_KEY);
+    error = new AppError(`Duplicate field value entered: ${key}`, HTTP_STATUS.BAD_REQUEST, ERROR_CODES.DB_DUPLICATE_KEY);
     // Add debug info to error object
     error.duplicateKey = { key, value };
   } else if (err.name === 'ValidationError') {
@@ -50,7 +51,6 @@ const errorMiddleware = (err, req, res, next) => {
       code: error.code ? error.code : ERROR_CODES.UNKNOWN_ERROR,
       message: error.message,
       duplicateKey: error.duplicateKey,
-      rawErr: err, // DEBUG: Expose full error object
     },
   };
 
