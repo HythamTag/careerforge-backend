@@ -33,30 +33,54 @@ class BrowserManagerAdapter {
   }
 
   /**
-     * Connect to Docker browserless/chrome container
-     * @private
-     * @returns {Promise<Browser>} Puppeteer browser instance
-     */
+   * Connect to Docker browserless/chrome container OR launch local browser
+   * @private
+   * @returns {Promise<Browser>} Puppeteer browser instance
+   */
   async _connectToDocker() {
+    // Strategy 1: Connect to remote browser (if endpoint configured)
+    if (this.dockerEndpoint) {
+      try {
+        const browser = await puppeteer.connect({
+          browserWSEndpoint: this.dockerEndpoint,
+        });
+
+        logger.info('Connected to Docker Puppeteer', {
+          operation: 'Browser connection',
+          endpoint: this.dockerEndpoint,
+        });
+
+        return browser;
+      } catch (error) {
+        logger.warn('Failed to connect to browserless container, falling back to local launch', {
+          error: error.message,
+          endpoint: this.dockerEndpoint
+        });
+        // Fall through to local launch
+      }
+    }
+
+    // Strategy 2: Launch local browser (Fallback / Default for Railway)
+    // This requires Chromium to be installed in the Docker container (see Dockerfile)
     try {
-      const browser = await puppeteer.connect({
-        browserWSEndpoint: this.dockerEndpoint,
+      logger.info('Launching local Puppeteer browser...');
+      const browser = await puppeteer.launch({
+        executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined,
+        headless: 'new',
+        args: [
+          '--no-sandbox',
+          '--disable-setuid-sandbox',
+          '--disable-dev-shm-usage', // Crucial for Docker
+          '--disable-gpu'
+        ]
       });
-
-      logger.info('Connected to Docker Puppeteer', {
-        operation: 'Browser connection',
-        endpoint: this.dockerEndpoint,
-      });
-
+      logger.info('Local Puppeteer browser launched');
       return browser;
-    } catch (error) {
-      logger.logError(error, {
-        operation: 'Browser connection',
-        endpoint: this.dockerEndpoint,
-      });
+    } catch (launchError) {
+      logger.logError(launchError, { operation: 'Browser Launch' });
       throw new FileError(
-        `Failed to connect to Docker Puppeteer at ${this.dockerEndpoint}. ` +
-                'Ensure the Puppeteer container is running: docker compose -f docker-compose.puppeteer.yml up -d',
+        `Failed to launch local browser: ${launchError.message}. ` +
+        'If running in Docker, ensure Chromium is installed and PUPPETEER_EXECUTABLE_PATH is set.'
       );
     }
   }

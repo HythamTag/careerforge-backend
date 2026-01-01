@@ -7,17 +7,17 @@ export default defineConfig({
     port: 5173,
     proxy: {
       '/v1': {
-        target: 'http://localhost:5000',
+        target: process.env.VITE_API_TARGET || 'http://localhost:5000',
         changeOrigin: true,
         secure: false,
       },
       '/api': {
-        target: 'http://localhost:5000',
+        target: process.env.VITE_API_TARGET || 'http://localhost:5000',
         changeOrigin: true,
         secure: false,
       },
       '/health': {
-        target: 'http://localhost:5000',
+        target: process.env.VITE_API_TARGET || 'http://localhost:5000',
         changeOrigin: true,
         secure: false,
       },

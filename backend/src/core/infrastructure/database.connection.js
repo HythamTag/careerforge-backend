@@ -5,6 +5,7 @@ const config = require('@config');
 async function connectDatabase() {
   try {
     const options = {
+      dbName: config.database.dbName,
       maxPoolSize: config.database.options.maxPoolSize,
       serverSelectionTimeoutMS: config.database.options.serverSelectionTimeoutMS,
       socketTimeoutMS: config.database.options.socketTimeoutMS,

@@ -7,7 +7,21 @@ WORKDIR /app
 COPY backend/package*.json ./
 
 # Install dependencies
+# Install dependencies
 RUN npm ci --omit=dev && npm cache clean --force
+
+# Install Chromium for Puppeteer (Alpine)
+RUN apk add --no-cache \
+    chromium \
+    nss \
+    freetype \
+    harfbuzz \
+    ca-certificates \
+    ttf-freefont
+
+# Tell Puppeteer to skip installing Chrome since we use the apk one
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
+    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
 
 # Copy backend source
 COPY backend/src ./src
