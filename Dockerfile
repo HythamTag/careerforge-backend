@@ -26,7 +26,7 @@ ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
 # Copy backend source
 COPY backend/src ./src
 COPY backend/config ./config
-COPY backend/scripts ./scripts
+COPY backend/scripts ./backend/scripts
 
 # Create uploads directory with proper permissions BEFORE switching user
 RUN mkdir -p /app/uploads /app/src/core/uploads /app/logs \
