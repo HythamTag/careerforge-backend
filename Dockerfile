@@ -23,9 +23,9 @@ RUN apk add --no-cache \
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
     PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
 
-# Copy backend source
-COPY backend/src ./src
-COPY backend/config ./config
+# Copy backend source (maintain structure for start-prod.js)
+COPY backend/src ./backend/src
+COPY backend/config ./backend/config
 COPY backend/scripts ./backend/scripts
 
 # Create uploads directory with proper permissions BEFORE switching user
