@@ -27,35 +27,60 @@ const cvOptimizerController = new CVOptimizerController(
   CVService
 );
 
+const { authMiddleware } = require('@middleware');
+
 // All optimization routes require authentication
-// router.use(authMiddleware); // Uncomment when auth is ready
+router.use(authMiddleware);
 
 /**
- * @route POST /v1/optimize
- * @desc Optimize entire CV content
- * @access Private
+ * @openapi
+ * /v1/optimize:
+ *   post:
+ *     tags:
+ *       - CVs
+ *     summary: Optimize entire CV content
+ *     description: Uses AI to enhance the entire content of a CV based on industry best practices.
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - cvId
+ *             properties:
+ *               cvId:
+ *                 type: string
+ *               targetRole:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Optimization job started or completed
  */
 router.post('/', validateOptimizeCvMiddleware, cvOptimizerController.optimizeCV.bind(cvOptimizerController));
 
 /**
- * @route POST /v1/optimize/sections
- * @desc Optimize specific CV sections
- * @access Private
+ * @openapi
+ * /v1/optimize/sections:
+ *   post:
+ *     tags:
+ *       - CVs
+ *     summary: Optimize specific CV sections
  */
 router.post('/sections', validateOptimizeSectionsMiddleware, cvOptimizerController.optimizeSections.bind(cvOptimizerController));
 
 /**
- * @route POST /v1/optimize/tailor
- * @desc Tailor CV for specific job
- * @access Private
+ * @openapi
+ * /v1/optimize/tailor:
+ *   post:
+ *     tags:
+ *       - CVs
+ *     summary: Tailor CV for specific job
  */
 router.post('/tailor', validateTailorForJobMiddleware, cvOptimizerController.tailorForJob.bind(cvOptimizerController));
 
-/**
- * @route GET /v1/optimize/capabilities
- * @desc Get optimization capabilities
- * @access Public
- */
 router.get('/capabilities', validateCapabilitiesQueryMiddleware, cvOptimizerController.getCapabilities.bind(cvOptimizerController));
 
 module.exports = router;

@@ -16,9 +16,42 @@ const validator = require('../validators/cv-parsing.validator');
 const controller = resolve('cvParsingController');
 
 /**
- * @route POST /v1/parse
- * @desc Start a CV parsing job
- * @access Private
+ * @openapi
+ * /v1/parse:
+ *   post:
+ *     tags:
+ *       - CVs
+ *     summary: Start a CV parsing job
+ *     description: Triggers the AI parsing process for a previously uploaded CV.
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - cvId
+ *             properties:
+ *               cvId:
+ *                 type: string
+ *                 description: ID of the uploaded CV
+ *     responses:
+ *       202:
+ *         description: Parsing job started
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     jobId:
+ *                       type: string
  */
 router.post(
   '/',
@@ -28,9 +61,17 @@ router.post(
 );
 
 /**
- * @route GET /v1/parse/history
- * @desc Get user's parsing job history
- * @access Private
+ * @openapi
+ * /v1/parse/history:
+ *   get:
+ *     tags:
+ *       - CVs
+ *     summary: Get user's parsing job history
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: History returned successfully
  */
 router.get(
   '/history',
@@ -39,22 +80,12 @@ router.get(
   controller.getParsingHistory.bind(controller)
 );
 
-/**
- * @route GET /v1/parse/stats
- * @desc Get user's parsing statistics
- * @access Private
- */
 router.get(
   '/stats',
   authMiddleware,
   controller.getParsingStats.bind(controller)
 );
 
-/**
- * @route GET /v1/parse/formats
- * @desc Get supported file formats
- * @access Private
- */
 router.get(
   '/formats',
   authMiddleware,
@@ -62,9 +93,21 @@ router.get(
 );
 
 /**
- * @route GET /v1/parse/:jobId
- * @desc Get parsing job status
- * @access Private
+ * @openapi
+ * /v1/parse/{jobId}:
+ *   get:
+ *     tags:
+ *       - CVs
+ *     summary: Get parsing job status
+ *     parameters:
+ *       - in: path
+ *         name: jobId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: job status returned successfully
  */
 router.get(
   '/:jobId',
@@ -73,9 +116,15 @@ router.get(
 );
 
 /**
- * @route GET /v1/parse/:jobId/result
- * @desc Get parsing job result
- * @access Private
+ * @openapi
+ * /v1/parse/{jobId}/result:
+ *   get:
+ *     tags:
+ *       - CVs
+ *     summary: Get parsing job result
+ *     responses:
+ *       200:
+ *         description: Job result returned
  */
 router.get(
   '/:jobId/result',
@@ -83,22 +132,12 @@ router.get(
   controller.getJobResult.bind(controller)
 );
 
-/**
- * @route POST /v1/parse/:jobId/cancel
- * @desc Cancel a pending/processing parsing job
- * @access Private
- */
 router.post(
   '/:jobId/cancel',
   authMiddleware,
   controller.cancelJob.bind(controller)
 );
 
-/**
- * @route POST /v1/parse/:jobId/retry
- * @desc Retry a failed parsing job
- * @access Private
- */
 router.post(
   '/:jobId/retry',
   authMiddleware,

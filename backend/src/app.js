@@ -12,6 +12,8 @@ require('module-alias/register');
 // ==========================================
 const express = require('express');
 const cors = require('cors');
+const swaggerUi = require('swagger-ui-express');
+const swaggerSpec = require('@config/swagger.config');
 
 // ==========================================
 // CORE MODULES (Module Aliases)
@@ -143,6 +145,16 @@ app.use('/v1/optimize', CvOptimizerModule.routes);
 app.use('/v1/jobs', JobsModule.routes);
 app.use('/v1/health', HealthModule.routes);
 app.use('/v1/webhooks', WebhooksModule.routes);
+
+// ==========================================
+// API DOCUMENTATION (SWAGGER)
+// ==========================================
+app.use('/v1/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+  swaggerOptions: {
+    persistAuthorization: true,
+  },
+  customSiteTitle: 'CareerForge API Documentation'
+}));
 
 // ==========================================
 // METRICS ENDPOINT (Prometheus format)

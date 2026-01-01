@@ -24,6 +24,37 @@ const generationController = new GenerationController(generationService);
 
 // Generation routes
 // Generation routes
+/**
+ * @openapi
+ * /v1/generation:
+ *   post:
+ *     tags:
+ *       - Generation
+ *     summary: Start CV PDF generation
+ *     description: Triggers the process of generating a PDF file for a specific CV version.
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - cvId
+ *               - versionId
+ *             properties:
+ *               cvId:
+ *                 type: string
+ *               versionId:
+ *                 type: string
+ *               template:
+ *                 type: string
+ *                 example: 'modern'
+ *     responses:
+ *       202:
+ *         description: Generation job started
+ */
 router.post(
   '/',
   authMiddleware,
@@ -45,6 +76,17 @@ router.get(
   generationController.getGenerationStats.bind(generationController)
 );
 
+/**
+ * @openapi
+ * /v1/generation/preview:
+ *   post:
+ *     tags:
+ *       - Generation
+ *     summary: Generate CV preview (HTML)
+ *     responses:
+ *       200:
+ *         description: Preview HTML returned successfully
+ */
 router.post(
   '/preview',
   authMiddleware,
@@ -52,12 +94,29 @@ router.post(
   generationController.previewGeneration.bind(generationController)
 );
 
+/**
+ * @openapi
+ * /v1/generation/{jobId}:
+ *   get:
+ *     tags:
+ *       - Generation
+ *     summary: Get generation job status
+ */
 router.get(
   '/:jobId',
   authMiddleware,
   validateJobIdParamsMiddleware,
   generationController.getGenerationStatus.bind(generationController)
 );
+
+/**
+ * @openapi
+ * /v1/generation/{jobId}/download:
+ *   get:
+ *     tags:
+ *       - Generation
+ *     summary: Download generated PDF
+ */
 router.get(
   '/:jobId/download',
   authMiddleware,
