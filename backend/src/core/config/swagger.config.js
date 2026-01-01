@@ -69,28 +69,62 @@ const options = {
                 User: {
                     type: 'object',
                     properties: {
-                        _id: {
-                            type: 'string',
-                            example: '507f1f77bcf86cd799439011'
+                        _id: { type: 'string', example: '507f1f77bcf86cd799439011' },
+                        email: { type: 'string', format: 'email', example: 'user@example.com' },
+                        username: { type: 'string', example: 'johndoe' },
+                        firstName: { type: 'string', example: 'John' },
+                        lastName: { type: 'string', example: 'Doe' },
+                        role: { type: 'string', enum: ['user', 'admin'], example: 'user' },
+                        avatarUrl: { type: 'string', format: 'uri' },
+                        isEmailVerified: { type: 'boolean', example: false },
+                        subscription: {
+                            type: 'object',
+                            properties: {
+                                plan: { type: 'string', enum: ['free', 'pro', 'enterprise'], example: 'free' },
+                                status: { type: 'string', enum: ['active', 'canceled', 'expired'], example: 'active' }
+                            }
                         },
-                        email: {
-                            type: 'string',
-                            format: 'email',
-                            example: 'user@example.com'
+                        createdAt: { type: 'string', format: 'date-time' }
+                    }
+                },
+                Job: {
+                    type: 'object',
+                    properties: {
+                        _id: { type: 'string', example: '65842f77bcf86cd799439012' },
+                        type: { type: 'string', enum: ['parsing', 'optimization', 'generation', 'ats-analysis'], example: 'parsing' },
+                        status: { type: 'string', enum: ['pending', 'processing', 'completed', 'failed', 'canceled'], example: 'completed' },
+                        priority: { type: 'integer', example: 10 },
+                        progress: { type: 'number', minimum: 0, maximum: 100, example: 50 },
+                        data: { type: 'object' },
+                        result: { type: 'object' },
+                        error: { type: 'object' },
+                        startedAt: { type: 'string', format: 'date-time' },
+                        completedAt: { type: 'string', format: 'date-time' }
+                    }
+                },
+                Webhook: {
+                    type: 'object',
+                    properties: {
+                        _id: { type: 'string', example: '75842f77bcf86cd799439013' },
+                        url: { type: 'string', format: 'uri', example: 'https://api.example.com/webhooks' },
+                        events: {
+                            type: 'array',
+                            items: { type: 'string' },
+                            example: ['cv.parsed', 'job.completed']
                         },
-                        username: {
-                            type: 'string',
-                            example: 'johndoe'
-                        },
-                        role: {
-                            type: 'string',
-                            enum: ['user', 'admin'],
-                            example: 'user'
-                        },
-                        createdAt: {
-                            type: 'string',
-                            format: 'date-time'
-                        }
+                        isActive: { type: 'boolean', example: true },
+                        secret: { type: 'string', description: 'Used for signature verification' }
+                    }
+                },
+                AtsAnalysis: {
+                    type: 'object',
+                    properties: {
+                        _id: { type: 'string', example: '85842f77bcf86cd799439014' },
+                        cvId: { type: 'string' },
+                        jobDescription: { type: 'string' },
+                        score: { type: 'number', example: 85.5 },
+                        feedback: { type: 'object' },
+                        tailoringSuggestions: { type: 'array', items: { type: 'string' } }
                     }
                 },
                 CV: {

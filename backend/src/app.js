@@ -161,6 +161,15 @@ app.use('/v1/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
 // ==========================================
 const HealthController = require('@modules/health/controllers/health.controller');
 const healthController = new HealthController(resolve('healthService'));
+/**
+ * @openapi
+ * /v1/metrics:
+ *   get:
+ *     tags: [Health]
+ *     summary: Get prometheus metrics
+ *     responses:
+ *       200: { description: 'Metrics retrieved successfully' }
+ */
 app.get('/v1/metrics', healthController.getMetrics.bind(healthController));
 
 // Using /v1/ API versioning exclusively

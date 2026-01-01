@@ -26,31 +26,166 @@ const webhookService = resolve('webhookService');
 const webhookController = new WebhookController(webhookService);
 
 // Webhook management
+/**
+ * @openapi
+ * /v1/webhooks:
+ *   post:
+ *     tags:
+ *       - Webhooks
+ *     summary: Register a new webhook
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [url, events]
+ *             properties:
+ *               url: { type: 'string', format: 'uri' }
+ *               events: { type: 'array', items: { type: 'string' } }
+ *               secret: { type: 'string' }
+ *     responses:
+ *       201:
+ *         description: Webhook registered successfully
+ */
 router.post('/', authMiddleware, validateCreateWebhookMiddleware, webhookController.createWebhook.bind(webhookController));
+
+/**
+ * @openapi
+ * /v1/webhooks:
+ *   get:
+ *     tags:
+ *       - Webhooks
+ *     summary: List user webhooks
+ */
 router.get('/', authMiddleware, validateGetWebhooksQueryMiddleware, webhookController.getWebhooks.bind(webhookController));
 
 // Statistics (must come before parameterized routes)
+/**
+ * @openapi
+ * /v1/webhooks/stats:
+ *   get:
+ *     tags:
+ *       - Webhooks
+ *     summary: Get webhook delivery statistics
+ */
 router.get('/stats', authMiddleware, webhookController.getWebhookStats.bind(webhookController));
 
 // Admin operations (must come before parameterized routes)
+/**
+ * @openapi
+ * /v1/webhooks/cleanup:
+ *   post:
+ *     tags:
+ *       - Webhooks
+ *     summary: Cleanup old webhook deliveries
+ */
 router.post('/cleanup', authMiddleware, validateCleanupDeliveriesMiddleware, webhookController.cleanupDeliveries.bind(webhookController));
 
 // Individual webhook operations
+/**
+ * @openapi
+ * /v1/webhooks/{id}:
+ *   get:
+ *     tags:
+ *       - Webhooks
+ *     summary: Get webhook details
+ */
 router.get('/:id', authMiddleware, validateWebhookIdParamsMiddleware, webhookController.getWebhook.bind(webhookController));
+
+/**
+ * @openapi
+ * /v1/webhooks/{id}:
+ *   put:
+ *     tags:
+ *       - Webhooks
+ *     summary: Update webhook configuration
+ */
 router.put('/:id', authMiddleware, validateWebhookIdParamsMiddleware, validateUpdateWebhookMiddleware, webhookController.updateWebhook.bind(webhookController));
+
+/**
+ * @openapi
+ * /v1/webhooks/{id}:
+ *   delete:
+ *     tags:
+ *       - Webhooks
+ *     summary: Delete a webhook
+ */
 router.delete('/:id', authMiddleware, validateWebhookIdParamsMiddleware, webhookController.deleteWebhook.bind(webhookController));
 
 // Webhook testing and management
+/**
+ * @openapi
+ * /v1/webhooks/{id}/test:
+ *   post:
+ *     tags:
+ *       - Webhooks
+ *     summary: Send a test event to the webhook URL
+ */
 router.post('/:id/test', authMiddleware, validateWebhookIdParamsMiddleware, webhookController.testWebhook.bind(webhookController));
+
+/**
+ * @openapi
+ * /v1/webhooks/{id}/suspend:
+ *   post:
+ *     tags:
+ *       - Webhooks
+ *     summary: Suspend a webhook (stop sending events)
+ */
 router.post('/:id/suspend', authMiddleware, validateWebhookIdParamsMiddleware, webhookController.suspendWebhook.bind(webhookController));
+
+/**
+ * @openapi
+ * /v1/webhooks/{id}/activate:
+ *   post:
+ *     tags:
+ *       - Webhooks
+ *     summary: Activate a suspended webhook
+ */
 router.post('/:id/activate', authMiddleware, validateWebhookIdParamsMiddleware, webhookController.activateWebhook.bind(webhookController));
 
 // Delivery management
+/**
+ * @openapi
+ * /v1/webhooks/{id}/deliveries:
+ *   get:
+ *     tags:
+ *       - Webhooks
+ *     summary: Get delivery logs for a webhook
+ */
 router.get('/:id/deliveries', authMiddleware, validateWebhookIdParamsMiddleware, validateDeliveriesQueryMiddleware, webhookController.getWebhookDeliveries.bind(webhookController));
+
+/**
+ * @openapi
+ * /v1/webhooks/{id}/deliveries/{deliveryId}:
+ *   get:
+ *     tags:
+ *       - Webhooks
+ *     summary: Get specific delivery attempt details
+ */
 router.get('/:id/deliveries/:deliveryId', authMiddleware, validateDeliveryIdParamsMiddleware, webhookController.getDeliveryDetails.bind(webhookController));
+
+/**
+ * @openapi
+ * /v1/webhooks/{id}/deliveries/{deliveryId}/retry:
+ *   post:
+ *     tags:
+ *       - Webhooks
+ *     summary: Manually retry a webhook delivery
+ */
 router.post('/:id/deliveries/:deliveryId/retry', authMiddleware, validateDeliveryIdParamsMiddleware, webhookController.retryDelivery.bind(webhookController));
 
 // Trends and analytics
+/**
+ * @openapi
+ * /v1/webhooks/{id}/trends:
+ *   get:
+ *     tags:
+ *       - Webhooks
+ *     summary: Get delivery result trends
+ */
 router.get('/:id/trends', authMiddleware, validateWebhookIdParamsMiddleware, validateTrendsQueryMiddleware, webhookController.getWebhookTrends.bind(webhookController));
 
 module.exports = router;
