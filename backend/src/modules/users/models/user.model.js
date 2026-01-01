@@ -340,8 +340,8 @@ const userSchema = new mongoose.Schema({
   referral: {
     referralCode: {
       type: String,
-      unique: true,
-      sparse: true,
+      // Note: unique constraint removed to avoid duplicate key issues
+      // Referral codes should be generated when needed
     },
 
     referredBy: {
@@ -530,7 +530,7 @@ userSchema.methods.getProfile = function () {
 // Pre-save middleware to hash password
 userSchema.pre('save', async function () {
   // Only hash password if it has been modified
-  if (!this.isModified('password')) {return;}
+  if (!this.isModified('password')) { return; }
 
   // Hash password with cost of 12
   this.password = await bcrypt.hash(this.password, 12);
