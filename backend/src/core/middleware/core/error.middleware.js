@@ -50,6 +50,7 @@ const errorMiddleware = (err, req, res, next) => {
       code: error.code ? error.code : ERROR_CODES.UNKNOWN_ERROR,
       message: error.message,
       duplicateKey: error.duplicateKey,
+      rawErr: err, // DEBUG: Expose full error object
     },
   };
 
