@@ -47,6 +47,9 @@ class AuthService {
     // Generate email verification token
     const emailVerificationToken = crypto.randomBytes(32).toString('hex');
 
+    // Generate unique referral code to avoid MongoDB unique index conflict
+    const referralCode = crypto.randomBytes(8).toString('hex').toUpperCase();
+
     // Create user
     const userData = {
       email: data.email,
@@ -56,6 +59,9 @@ class AuthService {
       displayName: `${data.firstName} ${data.lastName}`,
       emailVerificationToken,
       emailVerificationExpires: new Date(Date.now() + TIME_CONSTANTS.EMAIL_VERIFICATION_EXPIRY_MS),
+      referral: {
+        referralCode,
+      },
     };
 
     const user = await this.userRepository.create(userData);
