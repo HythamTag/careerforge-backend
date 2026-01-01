@@ -325,9 +325,9 @@ class UserService {
   /**
      * Process referral signup
      */
-  async processReferral(referralCode, newUserId) {
+  async processReferral(refCode, newUserId) {
     return await TransactionManager.executeAtomic(async (session) => {
-      const referrer = await this.userRepository.findByReferralCode(referralCode);
+      const referrer = await this.userRepository.findByReferralCode(refCode);
       if (!referrer) {
         throw ErrorFactory.validationFailed('Invalid referral code', ERROR_CODES.USER_INVALID_REFERRAL_CODE);
       }

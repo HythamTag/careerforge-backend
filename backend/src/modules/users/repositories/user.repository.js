@@ -77,8 +77,8 @@ class UserRepository {
   /**
      * Find user by referral code
      */
-  async findByReferralCode(referralCode) {
-    return await this.model.findByReferralCode(referralCode);
+  async findByReferralCode(refCode) {
+    return await this.model.findByReferralCode(refCode);
   }
 
   /**

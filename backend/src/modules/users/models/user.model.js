@@ -338,9 +338,9 @@ const userSchema = new mongoose.Schema({
 
   // Referral Information
   referral: {
-    referralCode: {
+    refCode: {
       type: String,
-      // Note: unique constraint removed to avoid duplicate key issues
+      // Note: unique constraint removed/renamed to avoid duplicate key issues
       // Referral codes should be generated when needed
     },
 
@@ -457,7 +457,7 @@ userSchema.methods.generatePasswordResetToken = function () {
 };
 
 userSchema.methods.generateReferralCode = function () {
-  this.referral.referralCode = crypto.randomBytes(4).toString('hex').toUpperCase();
+  this.referral.refCode = crypto.randomBytes(4).toString('hex').toUpperCase();
 };
 
 userSchema.methods.incrementUsage = function (type, amount = 1) {
@@ -538,7 +538,7 @@ userSchema.pre('save', async function () {
 
 // Pre-save middleware to generate referral code for new users
 userSchema.pre('save', async function () {
-  if (this.isNew && !this.referral.referralCode) {
+  if (this.isNew && !this.referral.refCode) {
     this.generateReferralCode();
   }
 });
@@ -559,9 +559,9 @@ userSchema.statics.findActiveByEmail = function (email) {
   });
 };
 
-userSchema.statics.findByReferralCode = function (referralCode) {
+userSchema.statics.findByReferralCode = function (refCode) {
   return this.findOne({
-    'referral.referralCode': referralCode.toUpperCase(),
+    'referral.refCode': refCode.toUpperCase(),
   });
 };
 

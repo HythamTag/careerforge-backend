@@ -48,7 +48,7 @@ class AuthService {
     const emailVerificationToken = crypto.randomBytes(32).toString('hex');
 
     // Generate unique referral code to avoid MongoDB unique index conflict
-    const referralCode = crypto.randomBytes(8).toString('hex').toUpperCase();
+    const refCode = crypto.randomBytes(8).toString('hex').toUpperCase();
 
     // Create user
     const userData = {
@@ -60,7 +60,7 @@ class AuthService {
       emailVerificationToken,
       emailVerificationExpires: new Date(Date.now() + TIME_CONSTANTS.EMAIL_VERIFICATION_EXPIRY_MS),
       referral: {
-        referralCode,
+        refCode,
       },
     };
 
