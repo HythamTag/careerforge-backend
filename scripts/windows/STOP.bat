@@ -1,4 +1,6 @@
 @echo off
+cd /d "%~dp0"
+cd ..\..
 REM ========================================
 REM CV ENHANCER - STOP ALL SERVICES
 REM ========================================

@@ -1,4 +1,6 @@
 @echo off
+cd /d "%~dp0"
+cd ..\..
 setlocal
 echo =========================================================
 echo  CareerForge Frontend Launcher
