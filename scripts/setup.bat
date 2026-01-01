@@ -1,15 +1,12 @@
 @echo off
 cd /d "%~dp0"
-REM ========================================
-REM CV ENHANCER - FIRST TIME SETUP
-REM ========================================
+cd ..
+setlocal
+title CareerForge - Setup
 
-title CV Enhancer - Setup
-
-echo.
-echo ========================================
-echo   CV ENHANCER - SETUP
-echo ========================================
+echo ========================================================
+echo   CAREERFORGE - SETUP
+echo ========================================================
 echo.
 
 REM [0/7] Check for Administrator privileges

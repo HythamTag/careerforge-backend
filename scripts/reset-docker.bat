@@ -1,10 +1,12 @@
 @echo off
 cd /d "%~dp0"
+cd ..
+setlocal
+title CareerForge - Docker Reset
 
-echo.
-echo ========================================
-echo   DOCKER DESKTOP NUCLEAR RESET
-echo ========================================
+echo ========================================================
+echo   CAREERFORGE - DOCKER RESET
+echo ========================================================
 echo.
 
 REM Check for Administrator privileges

@@ -1,16 +1,12 @@
 @echo off
 cd /d "%~dp0"
-cd ..\..
-REM ========================================
-REM CV ENHANCER - START ALL SERVICES
-REM ========================================
+cd ..
+setlocal
+title CareerForge - Start Services
 
-title CV Enhancer - Starting Services
-
-echo.
-echo ========================================
-echo   CV ENHANCER - STARTING
-echo ========================================
+echo ========================================================
+echo   CAREERFORGE - STARTING SERVICES
+echo ========================================================
 echo.
 
 REM [0/8] Check for Administrator privileges

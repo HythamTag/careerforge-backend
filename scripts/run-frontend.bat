@@ -1,10 +1,12 @@
 @echo off
 cd /d "%~dp0"
-cd ..\..
+cd ..
 setlocal
-echo =========================================================
-echo  CareerForge Frontend Launcher
-echo =========================================================
+title CareerForge - Frontend
+
+echo ========================================================
+echo   CAREERFORGE - FRONTEND
+echo ========================================================
 echo.
 echo Select Backend Mode:
 echo   1. Localhost (Default) - connects to http://localhost:5000

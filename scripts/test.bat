@@ -1,15 +1,12 @@
 @echo off
-setlocal EnableDelayedExpansion
-REM ========================================
-REM HEALTH CHECK
-REM ========================================
+cd /d "%~dp0"
+cd ..
+setlocal enabledelayedexpansion
+title CareerForge - Health Check
 
-title CV Enhancer - Health Check
-
-echo.
-echo ========================================
-echo   CV ENHANCER - HEALTH CHECK
-echo ========================================
+echo ========================================================
+echo   CAREERFORGE - HEALTH CHECK
+echo ========================================================
 echo.
 
 set ERRORS=0
@@ -49,7 +46,7 @@ if errorlevel 1 (
 
 REM [4/7] Ollama
 echo [4/7] Ollama AI...
-docker ps --filter "name=cv-enhancer-ollama" --format "{{.Names}}" 2>nul | findstr "cv-enhancer-ollama" >nul
+docker ps --filter "name=ollama" --format "{{.Names}}" 2>nul | findstr "ollama" >nul
 if errorlevel 1 (
     echo X NOT RUNNING
     set /a ERRORS+=1
@@ -90,7 +87,7 @@ if %errorlevel% equ 0 (
 )
 
 echo.
-echo ========================================
+echo ========================================================
 if !ERRORS! equ 0 (
     echo   STATUS: HEALTHY
     echo   All services running
@@ -98,9 +95,9 @@ if !ERRORS! equ 0 (
     echo   STATUS: ISSUES DETECTED
     echo   Errors: !ERRORS!
     echo.
-    echo   Run STOP.bat then START.bat
+    echo   Run stop.bat then start.bat
 )
-echo ========================================
+echo ========================================================
 echo.
 pause
 endlocal
