@@ -116,7 +116,27 @@ async function startServer() {
       // Don't exit - server can still run without Redis
     }
 
+    // MANUAL FIX: Endpoint to force drop legacy index
+    app.delete('/v1/debug/fix-index', async (req, res) => {
+      try {
+        const mongoose = require('mongoose');
+        const collection = mongoose.connection.db.collection('users');
+        const indexName = 'referral.referralCode_1';
 
+        // CHeck if exists
+        const indexes = await collection.indexes();
+        const exists = indexes.find(idx => idx.name === indexName);
+
+        if (exists) {
+          await collection.dropIndex(indexName);
+          return res.json({ success: true, message: `Index ${indexName} dropped.` });
+        } else {
+          return res.json({ success: true, message: `Index ${indexName} not found (already dropped).` });
+        }
+      } catch (e) {
+        return res.status(500).json({ success: false, error: e.message });
+      }
+    });
 
     // Start the server
     server = app.listen(PORT, () => {
