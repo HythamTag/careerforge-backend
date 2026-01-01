@@ -1,0 +1,18 @@
+
+You are an expert CV parser. Extract the following sections from the CV text below.
+Return strictly valid JSON.
+
+SECTIONS TO EXTRACT:
+1. workExperience (Array: title, company, location, startDate, endDate, current, description)
+2. projects (Array: title, description, url, technologies)
+
+RULES:
+- Focus ONLY on Work History and Projects.
+- "description" should catch bullet points. Keep them as a single string joined by newlines, or a proper paragraph.
+- If technologies are listed in a project, extract them as an array of strings.
+- Dates: Use "MM/YYYY" or "YYYY".
+- Do NOT hallucinate. If not found, ignore.
+- Output JSON ONLY.
+
+CV TEXT:
+{{cvText}}

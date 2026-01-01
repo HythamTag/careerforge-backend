@@ -1,0 +1,380 @@
+# ============================================================================
+# CV ENHANCER - REST API TEST COLLECTION
+# ============================================================================
+# 
+# For use with VS Code REST Client extension
+# https://marketplace.visualstudio.com/items?itemName=humao.rest-client
+#
+# USAGE:
+#   1. Install REST Client extension in VS Code
+#   2. Open this file
+#   3. Click "Send Request" above any request
+#
+# VARIABLES:
+#   Set these in VS Code settings or use .env file
+# ============================================================================
+
+### Variables
+@baseUrl = http://localhost:5000/api/v1
+@authToken = {{$dotenv AUTH_TOKEN}}
+@testEmail = testuser@example.com
+@testPassword = Password123!
+@cvId = {{$dotenv CV_ID}}
+
+# ============================================================================
+# HEALTH CHECK
+# ============================================================================
+
+### Health Check (No Auth Required)
+GET http://localhost:5000/health
+Content-Type: application/json
+
+### API Health with Version
+GET {{baseUrl}}/health
+Content-Type: application/json
+
+# ============================================================================
+# AUTHENTICATION
+# ============================================================================
+
+### Register New User
+# @name register
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+    "firstName": "Test",
+    "lastName": "User",
+    "email": "{{testEmail}}",
+    "password": "{{testPassword}}"
+}
+
+### Login
+# @name login
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+    "email": "{{testEmail}}",
+    "password": "{{testPassword}}"
+}
+
+### Refresh Token
+POST {{baseUrl}}/auth/refresh
+Content-Type: application/json
+
+{
+    "refreshToken": "your-refresh-token-here"
+}
+
+### Get Current User (Requires Auth)
+GET {{baseUrl}}/auth/me
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+### Logout
+POST {{baseUrl}}/auth/logout
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+### Forgot Password
+POST {{baseUrl}}/auth/forgot-password
+Content-Type: application/json
+
+{
+    "email": "{{testEmail}}"
+}
+
+### Reset Password
+POST {{baseUrl}}/auth/reset-password
+Content-Type: application/json
+
+{
+    "token": "reset-token-from-email",
+    "password": "NewPassword123!"
+}
+
+### Verify Email
+GET {{baseUrl}}/auth/verify-email/your-verification-token
+Content-Type: application/json
+
+### Resend Verification Email
+POST {{baseUrl}}/auth/resend-verification
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+# ============================================================================
+# CV CRUD OPERATIONS
+# ============================================================================
+
+### Upload CV (PDF File)
+# @name uploadCV
+POST {{baseUrl}}/cvs/upload
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+Authorization: Bearer {{authToken}}
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="file"; filename="test-cv.pdf"
+Content-Type: application/pdf
+
+< ./samples/Hytham Tag CV.pdf
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+### Create Empty CV
+POST {{baseUrl}}/cvs
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+    "title": "My New CV",
+    "content": {
+        "personalInfo": {
+            "firstName": "John",
+            "lastName": "Doe",
+            "email": "john@example.com",
+            "phone": "+1234567890"
+        },
+        "professionalSummary": "Experienced software developer...",
+        "workExperience": [],
+        "education": [],
+        "skills": []
+    }
+}
+
+### Get All User CVs
+GET {{baseUrl}}/cvs
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+### Get All CVs with Pagination
+GET {{baseUrl}}/cvs?page=1&limit=10&sort=createdAt&order=desc
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+### Search CVs
+GET {{baseUrl}}/cvs/search?q=software&page=1&limit=10
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+### Get CV Stats
+GET {{baseUrl}}/cvs/stats
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+### Get Single CV
+GET {{baseUrl}}/cvs/{{cvId}}
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+### Get CV Status (Parsing Progress)
+GET {{baseUrl}}/cvs/{{cvId}}/status
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+### Update CV
+PUT {{baseUrl}}/cvs/{{cvId}}
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+    "title": "Updated CV Title",
+    "content": {
+        "professionalSummary": "Updated summary..."
+    }
+}
+
+### Delete CV
+DELETE {{baseUrl}}/cvs/{{cvId}}
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+### Duplicate CV
+POST {{baseUrl}}/cvs/{{cvId}}/duplicate
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+    "title": "Copy of My CV"
+}
+
+### Archive CV
+POST {{baseUrl}}/cvs/{{cvId}}/archive
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+### Publish CV
+POST {{baseUrl}}/cvs/{{cvId}}/publish
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+# ============================================================================
+# CV VERSIONS
+# ============================================================================
+
+### Get All Versions
+GET {{baseUrl}}/cvs/{{cvId}}/versions
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+### Get Specific Version
+GET {{baseUrl}}/cvs/{{cvId}}/versions/version-id-here
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+### Activate Version
+POST {{baseUrl}}/cvs/{{cvId}}/versions/version-id-here/activate
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+# ============================================================================
+# CV OPTIMIZATION
+# ============================================================================
+
+### Optimize CV
+POST {{baseUrl}}/cvs/{{cvId}}/optimize
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+    "targetRole": "Senior Software Engineer",
+    "targetIndustry": "Technology",
+    "keywords": ["JavaScript", "React", "Node.js"]
+}
+
+### Get Optimization Status
+GET {{baseUrl}}/cvs/{{cvId}}/optimize/status
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+# ============================================================================
+# ATS ANALYSIS
+# ============================================================================
+
+### Analyze CV for ATS
+POST {{baseUrl}}/cvs/{{cvId}}/ats/analyze
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+    "jobDescription": "We are looking for a Senior Software Engineer with 5+ years of experience in JavaScript, React, and Node.js..."
+}
+
+### Get ATS Score
+GET {{baseUrl}}/cvs/{{cvId}}/ats/score
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+# ============================================================================
+# CV GENERATION (Export/Download)
+# ============================================================================
+
+### Export CV as PDF
+GET {{baseUrl}}/cvs/{{cvId}}/export?format=pdf
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+### Export CV as DOCX
+GET {{baseUrl}}/cvs/{{cvId}}/export?format=docx
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+### Generate CV with Template
+POST {{baseUrl}}/cvs/{{cvId}}/generate
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+    "templateId": "modern",
+    "format": "pdf",
+    "customization": {
+        "primaryColor": "#4F46E5"
+    }
+}
+
+# ============================================================================
+# JOB STATUS
+# ============================================================================
+
+### Get Job Status
+GET {{baseUrl}}/jobs/job-id-here
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+### Get All User Jobs
+GET {{baseUrl}}/jobs?page=1&limit=10
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+# ============================================================================
+# USER PROFILE
+# ============================================================================
+
+### Get User Profile
+GET {{baseUrl}}/users/me
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+### Update User Profile
+PUT {{baseUrl}}/users/me
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+    "firstName": "Updated",
+    "lastName": "Name"
+}
+
+### Change Password
+POST {{baseUrl}}/users/me/change-password
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+    "currentPassword": "OldPassword123!",
+    "newPassword": "NewPassword123!"
+}
+
+### Delete Account
+DELETE {{baseUrl}}/users/me
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+# ============================================================================
+# WEBHOOKS (Admin/Developer Use)
+# ============================================================================
+
+### Register Webhook
+POST {{baseUrl}}/webhooks
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+    "url": "https://your-server.com/webhook",
+    "events": ["cv.parsed", "cv.optimized", "ats.analyzed"]
+}
+
+### Get Webhooks
+GET {{baseUrl}}/webhooks
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+### Delete Webhook
+DELETE {{baseUrl}}/webhooks/webhook-id-here
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+# ============================================================================
+# QUICK TEST FLOW (Execute in Order)
+# ============================================================================
+# 
+# 1. Register (or Login if already registered)
+# 2. Copy the accessToken from login response
+# 3. Set AUTH_TOKEN in your environment
+# 4. Upload a CV file
+# 5. Copy the CV ID from upload response
+# 6. Set CV_ID in your environment
+# 7. Check CV status (wait for parsing)
+# 8. Get CV content
+# 9. Try optimization or ATS analysis
+#
+# ============================================================================

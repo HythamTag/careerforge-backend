@@ -1,0 +1,9 @@
+FROM browserless/chrome:latest
+
+EXPOSE 3000
+
+# Environment variables
+ENV CONNECTION_TIMEOUT=300000
+ENV MAX_CONCURRENT_SESSIONS=5
+ENV PREBOOT_CHROME=true
+ENV KEEP_ALIVE=true

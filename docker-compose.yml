@@ -1,0 +1,426 @@
+# ==============================================================================
+# 🐳 CV ENHANCER - PRODUCTION INFRASTRUCTURE
+# ==============================================================================
+#
+# ARCHITECTURE: Triple Ollama Isolation
+# - ollama-parser    → Port 11434 → Low latency CV parsing
+# - ollama-optimizer → Port 11435 → High context CV optimization
+# - ollama-ats       → Port 11436 → Analytical ATS feedback
+#
+# HARDWARE PROFILES:
+# - gpu-3090: RTX 3090 (24GB VRAM) - High Performance
+# - gpu-3060: RTX 3060 (12GB VRAM) - Balanced
+# - cpu:      CPU Only             - Fallback
+#
+# USAGE:
+#   docker compose --profile gpu-3090 up -d
+#   docker compose --profile gpu-3060 up -d
+#   docker compose --profile cpu up -d
+#
+# DESIGN PRINCIPLES:
+# 1. .env contains ONLY logical routing (hosts + models)
+# 2. Hardware tuning lives ONLY in this file via profiles
+# 3. Each Ollama has isolated volume (no shared /root/.ollama)
+# 4. GPU parallelism comes from container isolation, NOT OLLAMA_NUM_PARALLEL
+# 5. Tuned for LOW LATENCY, not throughput
+#
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# YAML ANCHORS - Reusable Base Configurations
+# ------------------------------------------------------------------------------
+
+# GPU Base: Used by all GPU-enabled Ollama containers
+x-ollama-gpu-base: &ollama-gpu-base
+  image: ollama/ollama:latest
+  restart: unless-stopped
+  deploy:
+    resources:
+      reservations:
+        devices:
+          - driver: nvidia
+            count: all
+            capabilities: [gpu]
+  healthcheck:
+    test: ["CMD", "ollama", "list"]
+    interval: 30s
+    timeout: 10s
+    retries: 5
+    start_period: 30s
+
+# CPU Base: Used by CPU-only Ollama containers
+x-ollama-cpu-base: &ollama-cpu-base
+  image: ollama/ollama:latest
+  restart: unless-stopped
+  healthcheck:
+    test: ["CMD", "ollama", "list"]
+    interval: 30s
+    timeout: 10s
+    retries: 5
+    start_period: 30s
+
+services:
+
+  # ============================================================================
+  # SERVICE 1: OLLAMA PARSER
+  # ============================================================================
+  # Purpose: Fast CV text extraction and parsing
+  # Latency: ~1-2 seconds
+  # Context: Low (4096)
+  # Port: 11434
+  # ============================================================================
+
+  # --- RTX 3090 Profile ---
+  parser-3090:
+    <<: *ollama-gpu-base
+    profiles: ["gpu-3090"]
+    container_name: ollama-parser
+    ports: ["11434:11434"]
+    # CRITICAL: Dedicated volume - NEVER share /root/.ollama between containers
+    volumes: ["ollama_parser_data:/root/.ollama"]
+    networks:
+      default:
+        aliases: ["ollama-parser"]
+    environment:
+      - OLLAMA_HOST=0.0.0.0
+      # Flash attention for faster inference
+      - OLLAMA_FLASH_ATTENTION=true
+      # Optimized for latency (single request focus)
+      - OLLAMA_NUM_CTX=4096
+      # Low batch = minimal waiting
+      - OLLAMA_NUM_BATCH=128
+      - OLLAMA_NUM_THREAD=8
+      # Parallel=4 allows 3 chunks + 1 spare to run concurrently
+      - OLLAMA_NUM_PARALLEL=4
+      # Only load one model at a time (saves VRAM)
+      - OLLAMA_MAX_LOADED_MODELS=1
+      # Keep model loaded for 2 hours
+      - OLLAMA_KEEP_ALIVE=2h
+
+  # --- RTX 3060 Profile ---
+  parser-3060:
+    <<: *ollama-gpu-base
+    profiles: ["gpu-3060"]
+    container_name: ollama-parser
+    ports: ["11434:11434"]
+    volumes: ["ollama_parser_data:/root/.ollama"]
+    networks:
+      default:
+        aliases: ["ollama-parser"]
+    environment:
+      - OLLAMA_HOST=0.0.0.0
+      - OLLAMA_FLASH_ATTENTION=true
+      # Reduced context for 12GB VRAM
+      - OLLAMA_NUM_CTX=3072
+      # Smaller batch for lower VRAM
+      - OLLAMA_NUM_BATCH=64
+      - OLLAMA_NUM_THREAD=8
+      - OLLAMA_NUM_PARALLEL=1
+      - OLLAMA_MAX_LOADED_MODELS=1
+      - OLLAMA_KEEP_ALIVE=1h
+
+  # --- CPU Profile ---
+  parser-cpu:
+    <<: *ollama-cpu-base
+    profiles: ["cpu"]
+    container_name: ollama-parser
+    ports: ["11434:11434"]
+    volumes: ["ollama_parser_data:/root/.ollama"]
+    networks:
+      default:
+        aliases: ["ollama-parser"]
+    environment:
+      - OLLAMA_HOST=0.0.0.0
+      # Conservative context for CPU
+      - OLLAMA_NUM_CTX=2048
+      # Small batch for CPU
+      - OLLAMA_NUM_BATCH=32
+      # More threads for CPU-bound work
+      - OLLAMA_NUM_THREAD=8
+      - OLLAMA_NUM_PARALLEL=1
+      - OLLAMA_MAX_LOADED_MODELS=1
+      # Shorter keep-alive on CPU (memory pressure)
+      - OLLAMA_KEEP_ALIVE=30m
+
+  # ============================================================================
+  # SERVICE 2: OLLAMA OPTIMIZER
+  # ============================================================================
+  # Purpose: Creative CV rewriting and optimization
+  # Latency: ~6-10 seconds
+  # Context: High (8192)
+  # Port: 11435
+  # ============================================================================
+
+  # --- RTX 3090 Profile ---
+  optimizer-3090:
+    <<: *ollama-gpu-base
+    profiles: ["gpu-3090"]
+    container_name: ollama-optimizer
+    ports: ["11435:11434"]
+    volumes: ["ollama_optimizer_data:/root/.ollama"]
+    networks:
+      default:
+        aliases: ["ollama-optimizer"]
+    environment:
+      - OLLAMA_HOST=0.0.0.0
+      - OLLAMA_FLASH_ATTENTION=true
+      # Aggressively reduced to force full GPU offload (no CPU spillover)
+      - OLLAMA_NUM_CTX=2048
+      # Optimized for latency
+      - OLLAMA_NUM_BATCH=128
+      - OLLAMA_NUM_THREAD=8
+      - OLLAMA_NUM_PARALLEL=1
+      - OLLAMA_MAX_LOADED_MODELS=1
+      - OLLAMA_KEEP_ALIVE=2h
+
+  # --- RTX 3060 Profile ---
+  optimizer-3060:
+    <<: *ollama-gpu-base
+    profiles: ["gpu-3060"]
+    container_name: ollama-optimizer
+    ports: ["11435:11434"]
+    volumes: ["ollama_optimizer_data:/root/.ollama"]
+    networks:
+      default:
+        aliases: ["ollama-optimizer"]
+    environment:
+      - OLLAMA_HOST=0.0.0.0
+      - OLLAMA_FLASH_ATTENTION=true
+      # Aggressively reduced for 12GB VRAM stability
+      - OLLAMA_NUM_CTX=2048
+      - OLLAMA_NUM_BATCH=128
+      - OLLAMA_NUM_THREAD=8
+      - OLLAMA_NUM_PARALLEL=1
+      - OLLAMA_MAX_LOADED_MODELS=1
+      - OLLAMA_KEEP_ALIVE=1h
+
+  # --- CPU Profile ---
+  optimizer-cpu:
+    <<: *ollama-cpu-base
+    profiles: ["cpu"]
+    container_name: ollama-optimizer
+    ports: ["11435:11434"]
+    volumes: ["ollama_optimizer_data:/root/.ollama"]
+    networks:
+      default:
+        aliases: ["ollama-optimizer"]
+    environment:
+      - OLLAMA_HOST=0.0.0.0
+      # Reduced for CPU
+      - OLLAMA_NUM_CTX=4096
+      - OLLAMA_NUM_BATCH=32
+      - OLLAMA_NUM_THREAD=8
+      - OLLAMA_NUM_PARALLEL=1
+      - OLLAMA_MAX_LOADED_MODELS=1
+      - OLLAMA_KEEP_ALIVE=30m
+
+  # ============================================================================
+  # SERVICE 3: OLLAMA ATS
+  # ============================================================================
+  # Purpose: ATS scoring, feedback, and analysis
+  # Latency: ~4-7 seconds
+  # Context: Medium (6144)
+  # Port: 11436
+  # ============================================================================
+
+  # --- RTX 3090 Profile ---
+  ats-3090:
+    <<: *ollama-gpu-base
+    profiles: ["gpu-3090"]
+    container_name: ollama-ats
+    ports: ["11436:11434"]
+    volumes: ["ollama_ats_data:/root/.ollama"]
+    networks:
+      default:
+        aliases: ["ollama-ats"]
+    environment:
+      - OLLAMA_HOST=0.0.0.0
+      - OLLAMA_FLASH_ATTENTION=true
+      # Optimized for gemma2:2b (CV + Job content ~3k tokens)
+      - OLLAMA_NUM_CTX=4096
+      - OLLAMA_NUM_BATCH=128
+      - OLLAMA_NUM_THREAD=8
+      - OLLAMA_NUM_PARALLEL=1
+      - OLLAMA_MAX_LOADED_MODELS=1
+      - OLLAMA_KEEP_ALIVE=2h
+
+  # --- RTX 3060 Profile ---
+  ats-3060:
+    <<: *ollama-gpu-base
+    profiles: ["gpu-3060"]
+    container_name: ollama-ats
+    ports: ["11436:11434"]
+    volumes: ["ollama_ats_data:/root/.ollama"]
+    networks:
+      default:
+        aliases: ["ollama-ats"]
+    environment:
+      - OLLAMA_HOST=0.0.0.0
+      - OLLAMA_FLASH_ATTENTION=true
+      # Reduced for 12GB VRAM
+      - OLLAMA_NUM_CTX=4096
+      - OLLAMA_NUM_BATCH=128
+      - OLLAMA_NUM_THREAD=8
+      - OLLAMA_NUM_PARALLEL=1
+      - OLLAMA_MAX_LOADED_MODELS=1
+      - OLLAMA_KEEP_ALIVE=1h
+
+  # --- CPU Profile ---
+  ats-cpu:
+    <<: *ollama-cpu-base
+    profiles: ["cpu"]
+    container_name: ollama-ats
+    ports: ["11436:11434"]
+    volumes: ["ollama_ats_data:/root/.ollama"]
+    networks:
+      default:
+        aliases: ["ollama-ats"]
+    environment:
+      - OLLAMA_HOST=0.0.0.0
+      - OLLAMA_NUM_CTX=3072
+      - OLLAMA_NUM_BATCH=32
+      - OLLAMA_NUM_THREAD=8
+      - OLLAMA_NUM_PARALLEL=1
+      - OLLAMA_MAX_LOADED_MODELS=1
+      - OLLAMA_KEEP_ALIVE=30m
+
+  # ============================================================================
+  # CORE INFRASTRUCTURE SERVICES
+  # ============================================================================
+  # These run on ALL profiles (no profile restriction)
+  # ============================================================================
+
+  mongodb:
+    image: mongo:latest
+    container_name: cv-enhancer-mongodb
+    restart: unless-stopped
+    ports: ["27017:27017"]
+    volumes:
+      - mongodb_data:/data/db
+      - mongodb_keyfile:/keyfile
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER:-admin}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:-admin123}
+      MONGO_INITDB_DATABASE: cv_enhancer
+    entrypoint: >
+      bash -euc "
+        mkdir -p /keyfile;
+        if [ ! -f /keyfile/keyfile ]; then
+          openssl rand -base64 756 > /keyfile/keyfile;
+          chmod 400 /keyfile/keyfile;
+        fi;
+        exec mongod --replSet rs0 --bind_ip_all --keyFile /keyfile/keyfile
+      "
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+    networks:
+      - default
+
+  mongodb-setup:
+    image: mongo:latest
+    container_name: cv-enhancer-mongodb-setup
+    restart: "no"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    volumes:
+      - mongodb_keyfile:/keyfile
+    entrypoint: >
+      bash -euc "
+        sleep 5;
+        mongosh --host mongodb:27017 -u ${MONGO_ROOT_USER:-admin} -p ${MONGO_ROOT_PASSWORD:-admin123} --authenticationDatabase admin --eval '
+          if (rs.status().ok) { print(\"✅ Replica set ready\"); }
+          else { rs.initiate({ _id: \"rs0\", members: [{ _id: 0, host: \"localhost:27017\" }] }); print(\"🚀 Replica set initialized\"); }
+        '
+      "
+    networks:
+      - default
+
+  redis:
+    image: redis:7-alpine
+    container_name: cv-enhancer-redis
+    restart: unless-stopped
+    ports: ["6379:6379"]
+    volumes: ["redis_data:/data"]
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - default
+
+  puppeteer:
+    image: browserless/chrome:latest
+    container_name: cv-enhancer-puppeteer
+    restart: unless-stopped
+    ports: ["3000:3000"]
+    environment:
+      - CONNECTION_TIMEOUT=300000
+      - MAX_CONCURRENT_SESSIONS=5
+      - ENABLE_DEBUGGER=false
+      - PREBOOT_CHROME=true
+      - KEEP_ALIVE=true
+      - DEFAULT_BLOCK_ADS=true
+      - DEFAULT_STEALTH=true
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/json/version"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - default
+    deploy:
+      resources:
+        limits: { memory: 2G }
+        reservations: { memory: 512M }
+
+  # Ollama Web UI - Available on all profiles for debugging
+  ollama-webui:
+    image: ghcr.io/open-webui/open-webui:latest
+    container_name: cv-enhancer-webui
+    restart: unless-stopped
+    ports: ["8080:8080"]
+    volumes: ["ollama_webui_data:/app/backend/data"]
+    profiles: ["gpu-3090", "gpu-3060", "cpu"]
+    environment:
+      # Points to optimizer for manual testing
+      - OLLAMA_BASE_URL=http://ollama-optimizer:11434
+      - WEBUI_SECRET_KEY=cv-enhancer-webui-secret-key-2024
+      - WEBUI_NAME=CV Enhancer AI (System)
+      - WEBUI_AUTH=False
+    networks:
+      - default
+
+# ==============================================================================
+# VOLUMES
+# ==============================================================================
+# CRITICAL: Each Ollama container has its OWN volume
+# This ensures:
+# 1. Independent model loading
+# 2. No KV cache conflicts
+# 3. Clean isolation between workloads
+# ==============================================================================
+
+volumes:
+  # Core infrastructure
+  mongodb_data:
+  mongodb_keyfile:
+  redis_data:
+  
+  # Ollama containers - ISOLATED volumes (NEVER share these)
+  ollama_parser_data:
+    driver: local
+  ollama_optimizer_data:
+    driver: local
+  ollama_ats_data:
+    driver: local
+  
+  # Web UI data
+  ollama_webui_data:
+    driver: local

@@ -1,0 +1,22 @@
+node_modules
+npm-debug.log
+.env
+.env.local
+.env.*.local
+.git
+.gitignore
+README.md
+tests
+coverage
+logs
+*.log
+uploads
+temp
+.vscode
+.idea
+*.swp
+*.swo
+.DS_Store
+*.pdf
+*.docx
+Hytham Tag CV.pdf

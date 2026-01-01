@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{personalInfo.firstName}} {{personalInfo.lastName}} - CV</title>
+    <style>
+        body {
+            font-family: 'Helvetica', 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px;
+        }
+
+        /* Header */
+        .header {
+            text-align: left;
+            margin-bottom: 40px;
+            border-bottom: 2px solid #333;
+            padding-bottom: 20px;
+        }
+
+        .name {
+            font-size: 36px;
+            font-weight: bold;
+            margin: 0 0 10px 0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .title {
+            font-size: 18px;
+            color: #666;
+            margin: 0 0 15px 0;
+            font-weight: normal;
+        }
+
+        .contact-info {
+            font-size: 14px;
+            color: #555;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+        }
+
+        .contact-item a {
+            color: #555;
+            text-decoration: none;
+        }
+
+        /* Content Layout */
+        .main-content {
+            display: flex;
+            gap: 40px;
+        }
+
+        .left-column {
+            flex: 2;
+        }
+
+        .right-column {
+            flex: 1;
+        }
+
+        /* Sections */
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: bold;
+            text-transform: uppercase;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 5px;
+            margin-bottom: 15px;
+            letter-spacing: 0.5px;
+        }
+
+        /* Experience & Education Items */
+        .item {
+            margin-bottom: 20px;
+        }
+
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 5px;
+        }
+
+        .item-title {
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .item-subtitle {
+            font-size: 14px;
+            font-style: italic;
+            color: #444;
+        }
+
+        .item-date {
+            font-size: 12px;
+            color: #777;
+            white-space: nowrap;
+        }
+
+        .item-description {
+            font-size: 14px;
+            margin-top: 5px;
+        }
+
+        .item-description ul {
+            margin: 5px 0 0 20px;
+            padding: 0;
+        }
+
+        .item-description li {
+            margin-bottom: 3px;
+        }
+
+        /* Skills */
+        .skills-category {
+            margin-bottom: 15px;
+        }
+
+        .skills-category-title {
+            font-weight: bold;
+            font-size: 14px;
+            margin-bottom: 5px;
+            color: #444;
+        }
+
+        .skills-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .skill-tag {
+            background: #f0f0f0;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        /* Projects */
+        .project-item {
+            margin-bottom: 15px;
+        }
+
+        .project-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 3px;
+        }
+
+        .project-link {
+            font-size: 12px;
+            color: #007bff;
+            text-decoration: none;
+            margin-left: 10px;
+        }
+
+        .project-tech {
+            font-size: 12px;
+            color: #666;
+            margin-top: 2px;
+        }
+
+        /* Languages */
+        .language-item {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1 class="name">{{personalInfo.firstName}} {{personalInfo.lastName}}</h1>
+            {{#if title}}<h2 class="title">{{title}}</h2>{{/if}}
+
+            <div class="contact-info">
+                {{#if personalInfo.email}}<span class="contact-item">{{personalInfo.email}}</span>{{/if}}
+                {{#if personalInfo.phone}}<span class="contact-item">{{personalInfo.phone}}</span>{{/if}}
+                {{#if personalInfo.country}}<span class="contact-item">{{personalInfo.country}}</span>{{/if}}
+
+                {{#each personalInfo.links}}
+                <span class="contact-item">
+                    <a href="{{url}}" target="_blank">{{label}}</a>
+                </span>
+                {{/each}}
+            </div>
+        </header>
+
+        <div class="main-content">
+            <!-- Left Column: Summary, Experience, Projects -->
+            <div class="left-column">
+
+                {{#if professionalSummary}}
+                <section class="section">
+                    <h3 class="section-title">Professional Summary</h3>
+                    <p style="font-size: 14px;">{{professionalSummary}}</p>
+                </section>
+                {{/if}}
+
+                {{#if workExperience.length}}
+                <section class="section">
+                    <h3 class="section-title">Experience</h3>
+                    {{#each workExperience}}
+                    <div class="item">
+                        <div class="item-header">
+                            <span class="item-title">{{title}}</span>
+                            <span class="item-date">
+                                {{startDate}} {{#if endDate}}- {{endDate}}{{else}}{{#if current}}- Present{{/if}}{{/if}}
+                            </span>
+                        </div>
+                        <div class="item-subtitle">{{company}}{{#if location}} | {{location}}{{/if}}</div>
+                        {{#if description}}
+                        <div class="item-description">{{{description}}}</div>
+                        {{/if}}
+                    </div>
+                    {{/each}}
+                </section>
+                {{/if}}
+
+                {{#if projects.length}}
+                <section class="section">
+                    <h3 class="section-title">Projects</h3>
+                    {{#each projects}}
+                    <div class="project-item">
+                        <div class="project-header">
+                            <span class="item-title">
+                                {{title}}
+                                {{#if url}}<a href="{{url}}" class="project-link" target="_blank">View
+                                    Project</a>{{/if}}
+                            </span>
+                        </div>
+                        <div class="item-description">{{{description}}}</div>
+                        {{#if technologies.length}}
+                        <div class="project-tech">Tech: {{#each technologies}}{{this}}{{#unless @last}},
+                            {{/unless}}{{/each}}</div>
+                        {{/if}}
+                    </div>
+                    {{/each}}
+                </section>
+                {{/if}}
+            </div>
+
+            <!-- Right Column: Education, Skills, Certifications, Languages -->
+            <div class="right-column">
+
+                {{#if education.length}}
+                <section class="section">
+                    <h3 class="section-title">Education</h3>
+                    {{#each education}}
+                    <div class="item">
+                        <div class="item-title" style="font-size: 14px;">{{degree}}</div>
+                        <div class="item-subtitle">{{institution}}</div>
+                        <div class="item-date">
+                            {{startDate}} {{#if endDate}}- {{endDate}}{{else}}{{#if current}}- Present{{/if}}{{/if}}
+                        </div>
+                    </div>
+                    {{/each}}
+                </section>
+                {{/if}}
+
+                {{#if skills.length}}
+                <section class="section">
+                    <h3 class="section-title">Skills</h3>
+                    {{#each skills}}
+                    <div class="skills-category">
+                        <div class="skills-category-title">{{category}}</div>
+                        <div class="skills-list">
+                            {{#each skills}}
+                            <span class="skill-tag">{{this}}</span>
+                            {{/each}}
+                        </div>
+                    </div>
+                    {{/each}}
+                </section>
+                {{/if}}
+
+                {{#if certifications.length}}
+                <section class="section">
+                    <h3 class="section-title">Certifications</h3>
+                    {{#each certifications}}
+                    <div class="item">
+                        <div class="item-title" style="font-size: 14px;">{{name}}</div>
+                        <div class="item-subtitle">{{company}}</div>
+                        {{#if startDate}}<div class="item-date">{{startDate}}</div>{{/if}}
+                    </div>
+                    {{/each}}
+                </section>
+                {{/if}}
+
+                {{#if languages.length}}
+                <section class="section">
+                    <h3 class="section-title">Languages</h3>
+                    {{#each languages}}
+                    <div class="language-item">
+                        <span style="font-weight: bold;">{{name}}</span>
+                        <span>{{proficiency}}</span>
+                    </div>
+                    {{/each}}
+                </section>
+                {{/if}}
+
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

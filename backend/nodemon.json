@@ -1,0 +1,17 @@
+{
+    "watch": [
+        "src"
+    ],
+    "ext": "js,mjs,cjs,json",
+    "ignore": [
+        "src/**/*.test.js",
+        "src/**/*.spec.js",
+        "logs/*",
+        "uploads/*",
+        "coverage/*",
+        "*.log"
+    ],
+    "execMap": {
+        "js": "node -r module-alias/register"
+    }
+}

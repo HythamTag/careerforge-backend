@@ -1,0 +1,53 @@
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# IDEs and Editors
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# OS metadata
+thumbs.db
+
+# Build outputs
+dist/
+build/
+coverage/
+
+# Uploads & Storage (Keep directory structure but ignore content)
+backend/src/uploads/*
+!backend/src/uploads/.gitkeep
+backend/src/core/uploads/*
+!backend/src/core/uploads/.gitkeep
+uploads/
+tmp/
+
+# Testing
+backend/tests/manual/api_ats_optimizer_test.js
+backend/tests/manual/api_upload_test.js
+backend/tests/fixtures/
+# Keep the scripts but maybe ignore results if they generate any
+test-results/
+
+# Docker
+docker-data/
+
+# Railway & Deployment
+.railway/

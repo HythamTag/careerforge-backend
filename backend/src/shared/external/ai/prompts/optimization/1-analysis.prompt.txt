@@ -1,0 +1,39 @@
+You are an expert ATS Analyst and Career Coach.
+
+Your task is to ANALYZE the gap between a candidate's CV and a specific Job Description.
+Do NOT rewrite the CV yet. Your goal is to create a STRATEGIC PLAN for optimization.
+
+=====================
+JOB DESCRIPTION
+=====================
+Title: {{JOB_TITLE}}
+Company: {{JOB_COMPANY}}
+Description:
+{{JOB_DESCRIPTION}}
+
+=====================
+CANDIDATE CV
+=====================
+{{CV_JSON}}
+
+=====================
+ANALYSIS GOALS
+=====================
+1. Identify MISSING KEYWORDS that are critical for this role.
+2. Identify WEAK AREAS where the candidate's experience doesn't fully align with the job requirements.
+3. Formulate a TAILORING STRATEGY to bridge these gaps using the candidate's *existing* experience.
+
+=====================
+OUTPUT FORMAT
+=====================
+Return ONLY valid JSON:
+{
+  "missingKeywords": ["string", "string"],
+  "criticalGaps": ["string", "string"],
+  "tailoringStrategy": {
+    "summaryFocus": "string (what to emphasize in the summary)",
+    "skillsToHighlight": ["string"],
+    "experienceAdjustments": ["string (e.g. 'Emphasize leadership in role X')"]
+  },
+  "matchScore": number (0-100 estimated raw match)
+}
