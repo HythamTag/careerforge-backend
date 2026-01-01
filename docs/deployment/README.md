@@ -1,6 +1,6 @@
 # Deployment Documentation
 
-This folder contains all deployment-related documentation for the CV Enhancer project.
+This folder contains all deployment-related documentation for the CareerForge project.
 
 ## 📚 Documentation Files
 

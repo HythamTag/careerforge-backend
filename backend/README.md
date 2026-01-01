@@ -1,4 +1,4 @@
-# CV Enhancer Backend
+# CareerForge Backend
 
 AI-powered CV parsing and ATS optimization backend built with Node.js, Express, and MongoDB.
 

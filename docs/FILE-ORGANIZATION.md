@@ -1,4 +1,4 @@
-# CV Enhancer - File Organization
+# CareerForge - File Organization
 
 This document describes the organization and location of all project files.
 

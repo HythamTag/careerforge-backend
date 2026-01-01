@@ -32,9 +32,17 @@ build/
 coverage/
 
 # Uploads & Storage (Keep directory structure but ignore content)
+backend/uploads/*
+!backend/uploads/.gitkeep
 backend/src/uploads/*
 !backend/src/uploads/.gitkeep
 backend/src/core/uploads/*
+!backend/src/core/uploads/.gitkeep
+
+# Logs
+logs/
+backend/logs/
+*.log
 !backend/src/core/uploads/.gitkeep
 uploads/
 tmp/

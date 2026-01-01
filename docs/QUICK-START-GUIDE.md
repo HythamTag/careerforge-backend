@@ -1,4 +1,4 @@
-# CV Enhancer - Quick Start Guide
+# CareerForge - Quick Start Guide
 
 This guide is for beginners. Follow these steps exactly to get the project running locally.
 

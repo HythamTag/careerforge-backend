@@ -1,7 +1,7 @@
 {
-  "name": "cv-enhancer-backend",
+  "name": "careerforge-backend",
   "version": "1.0.0",
-  "description": "CV Enhancer Backend - AI-powered CV parsing and ATS optimization",
+  "description": "CareerForge Backend - AI-powered CV parsing and ATS optimization",
   "main": "src/server.js",
   "_moduleAliases": {
     "@core": "src/core",

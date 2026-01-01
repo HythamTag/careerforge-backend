@@ -1,4 +1,4 @@
-# CV Enhancer - API Documentation
+# CareerForge - API Documentation
 
 Welcome to the API documentation for CV Enhancer. This documentation is automatically synchronized with the backend implementation.
 

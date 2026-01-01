@@ -1,4 +1,4 @@
-# CV Enhancer Frontend
+# CareerForge Frontend
 
 Modern React frontend for the CV Enhancer application, built with Vite and Tailwind CSS.
 

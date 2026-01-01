@@ -1,4 +1,4 @@
-# CV Enhancer - API Reference
+# CareerForge - API Reference
 
 **Base URL**: `/v1`
 
