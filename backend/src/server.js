@@ -116,6 +116,18 @@ async function startServer() {
       // Don't exit - server can still run without Redis
     }
 
+    // DEBUG: Temporary endpoint to inspect indexes
+    app.get('/debug/indexes', async (req, res) => {
+      try {
+        const mongoose = require('mongoose');
+        const collection = mongoose.connection.db.collection('users');
+        const indexes = await collection.indexes();
+        res.json({ indexes });
+      } catch (e) {
+        res.status(500).json({ error: e.message });
+      }
+    });
+
     // Start the server
     server = app.listen(PORT, () => {
       logger.info(`🚀 Server running on port ${PORT}`);
