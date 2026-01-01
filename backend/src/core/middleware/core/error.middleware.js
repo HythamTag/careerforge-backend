@@ -26,7 +26,11 @@ const errorMiddleware = (err, req, res, next) => {
   } else if (err.name === 'CastError') {
     error = new AppError('Resource not found', HTTP_STATUS.NOT_FOUND, ERROR_CODES.NOT_FOUND);
   } else if (err.code === DATABASE?.MONGODB_DUPLICATE_KEY_ERROR || err.code === 11000) {
-    error = new AppError('Duplicate field value entered', HTTP_STATUS.BAD_REQUEST, ERROR_CODES.DB_DUPLICATE_KEY);
+    const key = Object.keys(err.keyValue || {})[0];
+    const value = err.keyValue ? err.keyValue[key] : '';
+    error = new AppError(`Duplicate field value entered: ${key} = ${value}`, HTTP_STATUS.BAD_REQUEST, ERROR_CODES.DB_DUPLICATE_KEY);
+    // Add debug info to error object
+    error.duplicateKey = { key, value };
   } else if (err.name === 'ValidationError') {
     const message = Object.values(err.errors).map((val) => val.message).join(', ');
     error = new AppError(message, HTTP_STATUS.BAD_REQUEST, ERROR_CODES.VALIDATION_ERROR);
@@ -45,6 +49,7 @@ const errorMiddleware = (err, req, res, next) => {
     error: {
       code: error.code ? error.code : ERROR_CODES.UNKNOWN_ERROR,
       message: error.message,
+      duplicateKey: error.duplicateKey,
     },
   };
 
