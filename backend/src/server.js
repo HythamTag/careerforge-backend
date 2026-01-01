@@ -85,6 +85,25 @@ async function startServer() {
     await connectDatabase();
     logger.info('✅ MongoDB connected successfully');
 
+    // FIX: Drop contaminated index on startup to resolve referral code duplicate errors
+    try {
+      const mongoose = require('mongoose');
+      // We need to access the collection directly as the model might not be registered yet
+      const collection = mongoose.connection.db.collection('users');
+      // Check if index exists before trying to drop it
+      const indexes = await collection.indexes();
+      const referralIndex = indexes.find(idx => idx.name === 'referral.referralCode_1');
+
+      if (referralIndex) {
+        logger.info('🔧 Dropping legacy unique index "referral.referralCode_1" to fix duplicate key errors...');
+        await collection.dropIndex('referral.referralCode_1');
+        logger.info('✅ Index "referral.referralCode_1" dropped successfully');
+      }
+    } catch (err) {
+      // Log warning but don't fail startup
+      logger.warn('⚠️  Index cleanup check failed (this is expected if collection does not exist):', { error: err.message });
+    }
+
     // Connect to Redis (optional - background jobs may not work without it)
     try {
       logger.info('📦 Connecting to Redis...');
