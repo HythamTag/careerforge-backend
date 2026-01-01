@@ -108,14 +108,16 @@ temp/
 ehthumbs.db
 Thumbs.db
 
-# Test files and temporary scripts
+# Test files and temporary scripts (in tests directory or manual test scripts)
 *_test.js
-*test*.js
+tests/**/*.test.js
 manual_*.js
 analyze_*.js
 simple_*.js
 *_raw.txt
 *_response.json
+# Keep constants files that happen to have 'test' in name
+!**/constants/**/test.constants.js
 
 # Uploads (in production, these should be in cloud storage)
 uploads/
