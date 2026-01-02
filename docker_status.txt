@@ -1,0 +1,9 @@
+CONTAINER ID   IMAGE                                  COMMAND                   CREATED         STATUS                     PORTS                                             NAMES
+98591480924c   mongo:latest                           "bash -euc '\n  sleep…"   3 minutes ago   Exited (1) 3 minutes ago                                                     cv-enhancer-mongodb-setup
+b81d28662b9c   browserless/chrome:latest              "./start.sh"              3 minutes ago   Up 3 minutes (healthy)     0.0.0.0:3000->3000/tcp, [::]:3000->3000/tcp       cv-enhancer-puppeteer
+6faf08f48625   ollama/ollama:latest                   "/bin/ollama serve"       3 minutes ago   Up 3 minutes (healthy)     0.0.0.0:11435->11434/tcp, [::]:11435->11434/tcp   ollama-optimizer
+d136c0a2f503   redis:7-alpine                         "docker-entrypoint.s…"    3 minutes ago   Up 3 minutes (healthy)     0.0.0.0:6379->6379/tcp, [::]:6379->6379/tcp       cv-enhancer-redis
+9c7a59f781d7   mongo:latest                           "bash -euc '\n  mkdir…"   3 minutes ago   Up 3 minutes (healthy)     0.0.0.0:27017->27017/tcp, [::]:27017->27017/tcp   cv-enhancer-mongodb
+67a7d83a6749   ollama/ollama:latest                   "/bin/ollama serve"       3 minutes ago   Up 3 minutes (healthy)     0.0.0.0:11436->11434/tcp, [::]:11436->11434/tcp   ollama-ats
+0cfe8729d8af   ollama/ollama:latest                   "/bin/ollama serve"       3 minutes ago   Up 3 minutes (healthy)     0.0.0.0:11434->11434/tcp, [::]:11434->11434/tcp   ollama-parser
+08f012cab7de   ghcr.io/open-webui/open-webui:latest   "bash start.sh"           3 minutes ago   Up 3 minutes (healthy)     0.0.0.0:8080->8080/tcp, [::]:8080->8080/tcp       cv-enhancer-webui

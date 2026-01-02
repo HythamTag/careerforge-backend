@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // In development, use relative URLs to go through Vite proxy
 // In production, use the configured API URL
-const API_BASE_URL = import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL : (import.meta.env.DEV ? '' : 'http://localhost:5000');
+const API_BASE_URL = import.meta.env.VITE_API_URL || '';
 
 const TOKEN_KEY = 'cv_enhancer_token';
 const REFRESH_TOKEN_KEY = 'cv_enhancer_refresh_token';
@@ -151,6 +151,22 @@ export const cvApi = {
     return response.data;
   },
 
+  /**
+   * Get all versions of a CV
+   */
+  getCVVersions: async (cvId) => {
+    const response = await api.get(`/v1/cvs/${cvId}/versions`);
+    return response.data?.data || response.data;
+  },
+
+  /**
+   * Activate a specific version of a CV
+   */
+  activateVersion: async (cvId, versionId) => {
+    const response = await api.post(`/v1/cvs/${cvId}/versions/${versionId}/activate`);
+    return response.data;
+  },
+
 
   getCVStatus: async (cvId) => {
     try {
@@ -161,8 +177,8 @@ export const cvApi = {
       // Map backend parsingStatus to frontend status
       // Backend parsingStatus: 'pending', 'processing', 'parsed', 'failed'
       let currentStatus = 'processing';
-      if (cvData.parsingStatus === 'parsed' || cvData.isParsed === true) {
-        currentStatus = 'parsed';
+      if (cvData.parsingStatus === 'parsed' || cvData.parsingStatus === 'optimized' || cvData.isParsed === true) {
+        currentStatus = cvData.parsingStatus === 'optimized' ? 'optimized' : 'parsed';
       } else if (cvData.parsingStatus === 'failed') {
         currentStatus = 'failed';
       } else if (cvData.parsingStatus === 'pending') {

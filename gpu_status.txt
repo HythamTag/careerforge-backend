@@ -1,0 +1,47 @@
+Fri Jan  2 02:09:28 2026       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 581.57                 Driver Version: 581.57         CUDA Version: 13.0     |
++-----------------------------------------+------------------------+----------------------+
+| GPU  Name                  Driver-Model | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  NVIDIA GeForce RTX 3090      WDDM  |   00000000:01:00.0  On |                  N/A |
+|  0%   27C    P8             20W /  370W |    5788MiB /  24576MiB |      0%      Default |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|    0   N/A  N/A            4832    C+G   ...Chrome\Application\chrome.exe      N/A      |
+|    0   N/A  N/A            5848    C+G   ...ntrolPanel\SystemSettings.exe      N/A      |
+|    0   N/A  N/A            9460    C+G   ...em32\ApplicationFrameHost.exe      N/A      |
+|    0   N/A  N/A           14552    C+G   C:\Windows\explorer.exe               N/A      |
+|    0   N/A  N/A           14728    C+G   ...8bbwe\PhoneExperienceHost.exe      N/A      |
+|    0   N/A  N/A           15244    C+G   ...2txyewy\CrossDeviceResume.exe      N/A      |
+|    0   N/A  N/A           16184    C+G   ...IA App\CEF\NVIDIA Overlay.exe      N/A      |
+|    0   N/A  N/A           16584    C+G   ..._cw5n1h2txyewy\SearchHost.exe      N/A      |
+|    0   N/A  N/A           16600    C+G   ...y\StartMenuExperienceHost.exe      N/A      |
+|    0   N/A  N/A           17376    C+G   ...IA App\CEF\NVIDIA Overlay.exe      N/A      |
+|    0   N/A  N/A           18304    C+G   ...mba6cd70vzyy\ArmouryCrate.exe      N/A      |
+|    0   N/A  N/A           18492    C+G   ....0.3650.96\msedgewebview2.exe      N/A      |
+|    0   N/A  N/A           20512    C+G   ...s\Antigravity\Antigravity.exe      N/A      |
+|    0   N/A  N/A           22832    C+G   ...ool\mathpix-snipping-tool.exe      N/A      |
+|    0   N/A  N/A           23016    C+G   ...4__8wekyb3d8bbwe\Video.UI.exe      N/A      |
+|    0   N/A  N/A           24036    C+G   ...t\Edge\Application\msedge.exe      N/A      |
+|    0   N/A  N/A           25620    C+G   ...86)\AudioRelay\AudioRelay.exe      N/A      |
+|    0   N/A  N/A           26372    C+G   ...t\Edge\Application\msedge.exe      N/A      |
+|    0   N/A  N/A           27676    C+G   ....0.3650.96\msedgewebview2.exe      N/A      |
+|    0   N/A  N/A           28760    C+G   ...\app-0.4.82\Postman Agent.exe      N/A      |
+|    0   N/A  N/A           29628    C+G   ...1g1gvanyjgm\WhatsApp.Root.exe      N/A      |
+|    0   N/A  N/A           31832    C+G   ...r\frontend\Docker Desktop.exe      N/A      |
+|    0   N/A  N/A           31844    C+G   ...aken\app-11.7.0\gitkraken.exe      N/A      |
+|    0   N/A  N/A           34760    C+G   ...app-1.48.2\MongoDBCompass.exe      N/A      |
+|    0   N/A  N/A           35632    C+G   ...4__echhpq9pdbte8\Notepads.exe      N/A      |
+|    0   N/A  N/A           37168    C+G   ...indows\System32\ShellHost.exe      N/A      |
+|    0   N/A  N/A           40444    C+G   ...xyewy\ShellExperienceHost.exe      N/A      |
+|    0   N/A  N/A           40800    C+G   ...s\Antigravity\Antigravity.exe      N/A      |
++-----------------------------------------------------------------------------------------+

@@ -1,8 +1,8 @@
 import { useState, useRef } from 'react';
-import { Sparkles, Loader, CheckCircle, AlertCircle, Target, FileText } from 'lucide-react';
+import { Sparkles, Loader, CheckCircle, AlertCircle, Target, FileText, ChevronRight } from 'lucide-react';
 import { cvApi } from '../services/api';
 
-function OptimizeCV({ cvId }) {
+function OptimizeCV({ cvId, onOptimizationComplete }) {
   const [targetRole, setTargetRole] = useState('');
   const [jobDescription, setJobDescription] = useState('');
   const [loading, setLoading] = useState(false);
@@ -117,11 +117,20 @@ function OptimizeCV({ cvId }) {
             <div className="p-2 bg-green-100 rounded-full">
               <CheckCircle className="w-5 h-5 text-green-600" />
             </div>
-            <div>
+            <div className="flex-1">
               <h4 className="font-semibold text-green-800">Optimization Complete!</h4>
               <p className="text-sm text-green-700 mt-1">
-                Your CV has been tailored successfully. You can now view the optimized version or download it as a PDF.
+                Your CV has been tailored successfully. A new version has been created in your version history.
               </p>
+              {onOptimizationComplete && (
+                <button
+                  onClick={onOptimizationComplete}
+                  className="mt-3 inline-flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium"
+                >
+                  <span>View Versions</span>
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              )}
             </div>
           </div>
         </div>

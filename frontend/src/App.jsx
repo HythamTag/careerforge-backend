@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useParams, Navigate, useNavigate } from 'react-router-dom';
-import { FileText, CheckCircle, Sparkles, BarChart3, Home as HomeIcon, ArrowLeft, Upload, LogOut, FolderOpen } from 'lucide-react';
+import { FileText, CheckCircle, Sparkles, BarChart3, Home as HomeIcon, ArrowLeft, Upload, LogOut, FolderOpen, History } from 'lucide-react';
 import { cvApi } from './services/api';
 import { authService } from './services/auth';
 import ErrorBoundary from './components/ErrorBoundary';
@@ -11,6 +11,7 @@ import OptimizeCV from './components/OptimizeCV';
 import ATSScore from './components/ATSScore';
 import Login from './components/Login';
 import MyCVs from './components/MyCVs';
+import CVVersions from './components/CVVersions';
 
 function Home() {
   const navigate = useNavigate();
@@ -110,6 +111,7 @@ function CVDetail() {
   const tabs = [
     { id: 'status', label: 'Status', icon: CheckCircle, color: 'indigo' },
     { id: 'view', label: 'View CV', icon: FileText, color: 'blue' },
+    { id: 'versions', label: 'Versions', icon: History, color: 'purple' },
     { id: 'optimize', label: 'Optimize', icon: Sparkles, color: 'purple' },
     { id: 'ats', label: 'ATS Score', icon: BarChart3, color: 'green' },
   ];
@@ -166,7 +168,8 @@ function CVDetail() {
           <div className="p-6 md:p-8">
             {activeTab === 'status' && <CVStatus cvId={id} />}
             {activeTab === 'view' && <CVView cvId={id} />}
-            {activeTab === 'optimize' && <OptimizeCV cvId={id} />}
+            {activeTab === 'versions' && <CVVersions cvId={id} onVersionActivated={() => setActiveTab('view')} />}
+            {activeTab === 'optimize' && <OptimizeCV cvId={id} onOptimizationComplete={() => setActiveTab('versions')} />}
             {activeTab === 'ats' && <ATSScore cvId={id} />}
           </div>
         </div>

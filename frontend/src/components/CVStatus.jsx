@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { CheckCircle, AlertCircle, Loader, Clock, RefreshCw, Info } from 'lucide-react';
+import { Clock, Loader, CheckCircle, XCircle, FileText, Download, Sparkles, RefreshCw, AlertCircle, Info } from 'lucide-react';
 import { cvApi } from '../services/api';
 
 function CVStatus({ cvId }) {
@@ -57,7 +57,7 @@ function CVStatus({ cvId }) {
     return (
       <div className="bg-red-50 border border-red-200 rounded-xl p-6">
         <div className="flex items-start space-x-3">
-          <AlertCircle className="w-6 h-6 text-red-500 flex-shrink-0" />
+          <XCircle className="w-6 h-6 text-red-500 flex-shrink-0" />
           <div className="flex-1">
             <h3 className="text-lg font-semibold text-red-800">Error Loading Status</h3>
             <p className="text-red-600 mt-1">{error}</p>
@@ -94,31 +94,31 @@ function CVStatus({ cvId }) {
     parsed: {
       icon: CheckCircle,
       color: 'text-green-600',
-      bg: 'bg-gradient-to-br from-green-50 to-emerald-50',
+      bg: 'bg-green-50',
       border: 'border-green-200',
-      label: 'Parsed Successfully',
-      description: 'Your CV has been analyzed. View your data or optimize it for ATS.'
+      label: 'Parsing Complete',
+      description: 'Your CV has been successfully parsed and is ready.'
     },
     optimized: {
-      icon: CheckCircle,
+      icon: Sparkles,
       color: 'text-purple-600',
-      bg: 'bg-gradient-to-br from-purple-50 to-pink-50',
+      bg: 'bg-purple-50',
       border: 'border-purple-200',
-      label: 'Optimized',
-      description: 'Your CV has been optimized for ATS compatibility.'
+      label: 'Optimization Complete',
+      description: 'Your CV has been tailored for the specified job.'
     },
     failed: {
-      icon: AlertCircle,
+      icon: XCircle,
       color: 'text-red-600',
-      bg: 'bg-gradient-to-br from-red-50 to-orange-50',
+      bg: 'bg-red-50',
       border: 'border-red-200',
-      label: 'Processing Failed',
-      description: 'There was an error processing your CV.'
+      label: 'Parsing Failed',
+      description: 'We encountered an error while parsing your CV.'
     },
     error: {
-      icon: AlertCircle,
+      icon: XCircle,
       color: 'text-red-600',
-      bg: 'bg-gradient-to-br from-red-50 to-orange-50',
+      bg: 'bg-red-50',
       border: 'border-red-200',
       label: 'Error',
       description: 'An error occurred during processing.'

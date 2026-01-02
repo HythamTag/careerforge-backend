@@ -158,16 +158,13 @@ const createLogger = () => {
       ],
     });
 
-    // Add console transport only in development
-    const config = getConfig();
-    if (!config.server.isProduction) {
-      winstonLogger.add(
-        new winston.transports.Console({
-          format: consoleFormat,
-          level: initializeLogLevel(),
-        }),
-      );
-    }
+    // Add console transport for all environments (Standard for Docker/Cloud/Railway)
+    winstonLogger.add(
+      new winston.transports.Console({
+        format: consoleFormat,
+        level: initializeLogLevel(),
+      }),
+    );
   }
   return winstonLogger;
 };

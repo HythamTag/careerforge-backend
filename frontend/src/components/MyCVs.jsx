@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { FileText, Trash2, Eye, Download, Clock, CheckCircle, XCircle, Loader, RefreshCw, AlertCircle } from 'lucide-react';
+import { FileText, Trash2, Eye, Download, Clock, CheckCircle, XCircle, Loader, RefreshCw, AlertCircle, Sparkles } from 'lucide-react';
 import { cvApi } from '../services/api';
 
 // Format date helper
@@ -19,6 +19,7 @@ const formatDate = (dateString) => {
 const StatusBadge = ({ status }) => {
     const statusConfig = {
         parsed: { icon: CheckCircle, color: '#10B981', bg: 'rgba(16, 185, 129, 0.1)', text: 'Parsed' },
+        optimized: { icon: Sparkles, color: '#8B5CF6', bg: 'rgba(139, 92, 246, 0.1)', text: 'Optimized' },
         processing: { icon: Loader, color: '#6366F1', bg: 'rgba(99, 102, 241, 0.1)', text: 'Processing' },
         pending: { icon: Clock, color: '#F59E0B', bg: 'rgba(245, 158, 11, 0.1)', text: 'Pending' },
         failed: { icon: XCircle, color: '#EF4444', bg: 'rgba(239, 68, 68, 0.1)', text: 'Failed' },
@@ -104,7 +105,7 @@ const CVCard = ({ cv, onView, onDelete, onDownload }) => {
                 >
                     <Eye size={16} />
                 </button>
-                {cv.parsingStatus === 'parsed' && (
+                {(cv.parsingStatus === 'parsed' || cv.parsingStatus === 'optimized') && (
                     <button
                         style={{ ...styles.actionBtn, ...styles.downloadBtn }}
                         onClick={(e) => { e.stopPropagation(); onDownload(cv); }}
