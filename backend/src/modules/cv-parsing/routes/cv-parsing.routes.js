@@ -80,12 +80,34 @@ router.get(
   controller.getParsingHistory.bind(controller)
 );
 
+/**
+ * @openapi
+ * /v1/parse/stats:
+ *   get:
+ *     tags:
+ *       - CVs
+ *     summary: Get parsing statistics
+ *     responses:
+ *       200:
+ *         description: Parsing statistics returned
+ */
 router.get(
   '/stats',
   authMiddleware,
   controller.getParsingStats.bind(controller)
 );
 
+/**
+ * @openapi
+ * /v1/parse/formats:
+ *   get:
+ *     tags:
+ *       - CVs
+ *     summary: Get supported CV formats
+ *     responses:
+ *       200:
+ *         description: List of supported formats
+ */
 router.get(
   '/formats',
   authMiddleware,
@@ -132,12 +154,44 @@ router.get(
   controller.getJobResult.bind(controller)
 );
 
+/**
+ * @openapi
+ * /v1/parse/{jobId}/cancel:
+ *   post:
+ *     tags:
+ *       - CVs
+ *     summary: Cancel parsing job
+ *     parameters:
+ *       - in: path
+ *         name: jobId
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       200:
+ *         description: Job cancelled
+ */
 router.post(
   '/:jobId/cancel',
   authMiddleware,
   controller.cancelJob.bind(controller)
 );
 
+/**
+ * @openapi
+ * /v1/parse/{jobId}/retry:
+ *   post:
+ *     tags:
+ *       - CVs
+ *     summary: Retry parsing job
+ *     parameters:
+ *       - in: path
+ *         name: jobId
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       200:
+ *         description: Job retry started
+ */
 router.post(
   '/:jobId/retry',
   authMiddleware,

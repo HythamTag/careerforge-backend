@@ -158,10 +158,98 @@ router.post('/login', validateLoginMiddleware, authController.login.bind(authCon
  */
 router.post('/refresh', validateRefreshTokenMiddleware, authController.refresh.bind(authController));
 
+/**
+ * @openapi
+ * /v1/auth/logout:
+ *   post:
+ *     tags:
+ *       - Authentication
+ *     summary: Logout user
+ *     description: Invalidate the user's refresh token.
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Logged out successfully
+ */
 router.post('/logout', authMiddleware, authController.logout.bind(authController));
+/**
+ * @openapi
+ * /v1/auth/forgot-password:
+ *   post:
+ *     tags:
+ *       - Authentication
+ *     summary: Request password reset
+ *     description: Send a password reset link to the user's email.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [email]
+ *             properties:
+ *               email: { type: string, format: email }
+ *     responses:
+ *       200:
+ *         description: Password reset email sent (if email exists)
+ */
 router.post('/forgot-password', validateForgotPasswordMiddleware, authController.forgotPassword.bind(authController));
+/**
+ * @openapi
+ * /v1/auth/reset-password:
+ *   post:
+ *     tags:
+ *       - Authentication
+ *     summary: Reset password
+ *     description: Set a new password using a valid reset token.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [token, password]
+ *             properties:
+ *               token: { type: string }
+ *               password: { type: string, minLength: 8 }
+ *     responses:
+ *       200:
+ *         description: Password reset successfully
+ */
 router.post('/reset-password', validateResetPasswordMiddleware, authController.resetPassword.bind(authController));
+/**
+ * @openapi
+ * /v1/auth/verify-email/{token}:
+ *   get:
+ *     tags:
+ *       - Authentication
+ *     summary: Verify email address
+ *     description: Verify user's email using the token sent via email.
+ *     parameters:
+ *       - in: path
+ *         name: token
+ *         required: true
+ *         schema: { type: string }
+ *         description: Verification token
+ *     responses:
+ *       200:
+ *         description: Email verified successfully
+ */
 router.get('/verify-email/:token', validateVerifyEmailParamsMiddleware, authController.verifyEmail.bind(authController));
+/**
+ * @openapi
+ * /v1/auth/resend-verification:
+ *   post:
+ *     tags:
+ *       - Authentication
+ *     summary: Resend verification email
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Verification email sent
+ */
 router.post('/resend-verification', authMiddleware, authController.resendVerification.bind(authController));
 
 /**

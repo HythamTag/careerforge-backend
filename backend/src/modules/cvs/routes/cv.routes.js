@@ -115,8 +115,54 @@ router.post('/', validateCreateCVMiddleware, cvController.createCV.bind(cvContro
  */
 router.get('/', validateGetUserCVsQueryMiddleware, cvController.getUserCVs.bind(cvController));
 
+/**
+ * @openapi
+ * /v1/cvs/search:
+ *   get:
+ *     tags:
+ *       - CVs
+ *     summary: Search CVs
+ *     description: Search CVs by title, skills, or content.
+ *     responses:
+ *       200:
+ *         description: Search results returned
+ */
 router.get('/search', validateSearchCVsQueryMiddleware, cvController.searchCVs.bind(cvController));
+/**
+ * @openapi
+ * /v1/cvs/stats:
+ *   get:
+ *     tags:
+ *       - CVs
+ *     summary: Get CV statistics
+ *     description: Get counts of CVs by status and other metrics.
+ *     responses:
+ *       200:
+ *         description: Stats returned successfully
+ */
 router.get('/stats', cvController.getCVStats.bind(cvController));
+/**
+ * @openapi
+ * /v1/cvs/bulk:
+ *   post:
+ *     tags:
+ *       - CVs
+ *     summary: Bulk CV operations
+ *     description: Perform operations on multiple CVs at once (delete, archive).
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [action, cvIds]
+ *             properties:
+ *               action: { type: string, enum: [delete, archive] }
+ *               cvIds: { type: array, items: { type: string } }
+ *     responses:
+ *       200:
+ *         description: Bulk operation completed
+ */
 router.post('/bulk', validateBulkOperationBodyMiddleware, cvController.bulkOperation.bind(cvController));
 
 /**
@@ -171,6 +217,23 @@ router.get('/:id', validateCVIdParamsMiddleware, cvController.getCV.bind(cvContr
  */
 router.get('/:id/status', validateCVIdParamsMiddleware, cvController.getCVStatus.bind(cvController));
 
+/**
+ * @openapi
+ * /v1/cvs/{id}:
+ *   put:
+ *     tags:
+ *       - CVs
+ *     summary: Update CV
+ *     description: Update specific fields of a CV manually.
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       200:
+ *         description: CV updated successfully
+ */
 router.put('/:id', validateCVIdParamsMiddleware, validateUpdateCVMiddleware, cvController.updateCV.bind(cvController));
 
 /**
@@ -195,8 +258,58 @@ router.delete('/:id', validateCVIdParamsMiddleware, cvController.deleteCV.bind(c
 /**
  * CV Management Operations
  */
+/**
+ * @openapi
+ * /v1/cvs/{id}/duplicate:
+ *   post:
+ *     tags:
+ *       - CVs
+ *     summary: Duplicate a CV
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       201:
+ *         description: CV duplicated successfully
+ */
 router.post('/:id/duplicate', validateCVIdParamsMiddleware, validateDuplicateCVBodyMiddleware, cvController.duplicateCV.bind(cvController));
+
+/**
+ * @openapi
+ * /v1/cvs/{id}/archive:
+ *   post:
+ *     tags:
+ *       - CVs
+ *     summary: Archive a CV
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       200:
+ *         description: CV archived successfully
+ */
 router.post('/:id/archive', validateCVIdParamsMiddleware, cvController.archiveCV.bind(cvController));
+
+/**
+ * @openapi
+ * /v1/cvs/{id}/publish:
+ *   post:
+ *     tags:
+ *       - CVs
+ *     summary: Toggle publish status
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       200:
+ *         description: Publish status updated
+ */
 router.post('/:id/publish', validateCVIdParamsMiddleware, cvController.publishCV.bind(cvController));
 
 /**

@@ -63,6 +63,17 @@ router.post(
 );
 
 // Specific routes MUST be defined BEFORE wildcard /:jobId
+/**
+ * @openapi
+ * /v1/generation/history:
+ *   get:
+ *     tags:
+ *       - Generation
+ *     summary: Get generation history
+ *     responses:
+ *       200:
+ *         description: History returned
+ */
 router.get(
   '/history',
   authMiddleware,
@@ -70,6 +81,17 @@ router.get(
   generationController.getGenerationHistory.bind(generationController)
 );
 
+/**
+ * @openapi
+ * /v1/generation/stats:
+ *   get:
+ *     tags:
+ *       - Generation
+ *     summary: Get generation statistics
+ *     responses:
+ *       200:
+ *         description: Stats returned
+ */
 router.get(
   '/stats',
   authMiddleware,
@@ -124,6 +146,22 @@ router.get(
   generationController.downloadGeneration.bind(generationController)
 );
 
+/**
+ * @openapi
+ * /v1/generation/{jobId}/cancel:
+ *   post:
+ *     tags:
+ *       - Generation
+ *     summary: Cancel generation job
+ *     parameters:
+ *       - in: path
+ *         name: jobId
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       200:
+ *         description: Job cancelled
+ */
 router.post(
   '/:jobId/cancel',
   authMiddleware,

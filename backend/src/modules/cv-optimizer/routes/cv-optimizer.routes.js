@@ -81,6 +81,18 @@ router.post('/sections', validateOptimizeSectionsMiddleware, cvOptimizerControll
  */
 router.post('/tailor', validateTailorForJobMiddleware, cvOptimizerController.tailorForJob.bind(cvOptimizerController));
 
+/**
+ * @openapi
+ * /v1/optimize/capabilities:
+ *   get:
+ *     tags:
+ *       - CVs
+ *     summary: Get optimization capabilities
+ *     description: Returns a list of supported optimization features and models.
+ *     responses:
+ *       200:
+ *         description: Capabilities returned
+ */
 router.get('/capabilities', validateCapabilitiesQueryMiddleware, cvOptimizerController.getCapabilities.bind(cvOptimizerController));
 
 module.exports = router;
