@@ -102,18 +102,18 @@ const options = {
                         completedAt: { type: 'string', format: 'date-time' }
                     }
                 },
-                Webhook: {
+                CVVersion: {
                     type: 'object',
                     properties: {
-                        _id: { type: 'string', example: '75842f77bcf86cd799439013' },
-                        url: { type: 'string', format: 'uri', example: 'https://api.example.com/webhooks' },
-                        events: {
-                            type: 'array',
-                            items: { type: 'string' },
-                            example: ['cv.parsed', 'job.completed']
-                        },
+                        _id: { type: 'string', example: '65842f77bcf86cd799439015' },
+                        cvId: { type: 'string', example: '507f1f77bcf86cd799439011' },
+                        versionNumber: { type: 'integer', example: 1 },
+                        name: { type: 'string', example: 'Initial Upload' },
+                        description: { type: 'string', example: 'Original version from parsing' },
+                        content: { type: 'object', description: 'Complete CV data snapshot' },
+                        changeType: { type: 'string', enum: ['manual', 'optimization', 'parsing', 'import'], example: 'parsing' },
                         isActive: { type: 'boolean', example: true },
-                        secret: { type: 'string', description: 'Used for signature verification' }
+                        createdAt: { type: 'string', format: 'date-time' }
                     }
                 },
                 AtsAnalysis: {
