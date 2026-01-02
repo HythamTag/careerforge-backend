@@ -21,6 +21,7 @@ const CvAtsController = require('../controllers/cv-ats.controller');
 const cvAtsController = new CvAtsController(CvAtsService);
 
 // Start ATS analysis job
+// Start ATS analysis job
 /**
  * @openapi
  * /v1/cv-ats:
@@ -29,6 +30,7 @@ const cvAtsController = new CvAtsController(CvAtsService);
  *       - CV ATS
  *     summary: Start CV ATS analysis
  *     description: Starts a new ATS analysis job for a CV against a specific job description.
+ *     operationId: startAtsAnalysis
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -56,6 +58,12 @@ const cvAtsController = new CvAtsController(CvAtsService);
  *                   type: object
  *                   properties:
  *                     jobId: { type: 'string' }
+ *       400:
+ *         description: Invalid input
+ *         $ref: '#/components/schemas/Error'
+ *       404:
+ *         description: CV not found
+ *         $ref: '#/components/schemas/Error'
  */
 router.post('/', authMiddleware, validateStartCvAtsAnalysisMiddleware, cvAtsController.startAnalysis.bind(cvAtsController));
 
@@ -68,11 +76,15 @@ router.post('/', authMiddleware, validateStartCvAtsAnalysisMiddleware, cvAtsCont
  *     tags:
  *       - CV ATS
  *     summary: Get ATS analysis history
+ *     operationId: getAtsAnalysisHistory
  *     security:
  *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: History retrieved successfully
+ *       401:
+ *         description: Unauthorized
+ *         $ref: '#/components/schemas/Error'
  */
 router.get('/history', authMiddleware, validateHistoryQueryMiddleware, cvAtsController.getAnalysisHistory.bind(cvAtsController));
 
@@ -83,6 +95,15 @@ router.get('/history', authMiddleware, validateHistoryQueryMiddleware, cvAtsCont
  *     tags:
  *       - CV ATS
  *     summary: Get overall ATS statistics
+ *     operationId: getAtsAnalysisStats
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Statistics returned
+ *       401:
+ *         description: Unauthorized
+ *         $ref: '#/components/schemas/Error'
  */
 router.get('/stats', authMiddleware, cvAtsController.getAnalysisStats.bind(cvAtsController));
 
@@ -93,6 +114,15 @@ router.get('/stats', authMiddleware, cvAtsController.getAnalysisStats.bind(cvAts
  *     tags:
  *       - CV ATS
  *     summary: Get ATS scoring trends
+ *     operationId: getAtsAnalysisTrends
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Trends returned
+ *       401:
+ *         description: Unauthorized
+ *         $ref: '#/components/schemas/Error'
  */
 router.get('/trends', authMiddleware, validateTrendsQueryMiddleware, cvAtsController.getAnalysisTrends.bind(cvAtsController));
 
@@ -103,6 +133,15 @@ router.get('/trends', authMiddleware, validateTrendsQueryMiddleware, cvAtsContro
  *     tags:
  *       - CV ATS
  *     summary: Get recent ATS scores
+ *     operationId: getRecentAtsScores
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Recent scores returned
+ *       401:
+ *         description: Unauthorized
+ *         $ref: '#/components/schemas/Error'
  */
 router.get('/recent-scores', authMiddleware, cvAtsController.getRecentAnalysesWithScores.bind(cvAtsController));
 
@@ -114,11 +153,18 @@ router.get('/recent-scores', authMiddleware, cvAtsController.getRecentAnalysesWi
  *     tags:
  *       - CV ATS
  *     summary: Get analysis job status
+ *     operationId: getAtsAnalysisStatus
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
  *         schema: { type: 'string' }
+ *     responses:
+ *       200:
+ *         description: Job status returned
+ *       404:
+ *         description: Job not found
+ *         $ref: '#/components/schemas/Error'
  */
 router.get('/:id', authMiddleware, validateJobIdParamsMiddleware, cvAtsController.getAnalysisStatus.bind(cvAtsController));
 
@@ -130,6 +176,7 @@ router.get('/:id', authMiddleware, validateJobIdParamsMiddleware, cvAtsControlle
  *     tags:
  *       - CV ATS
  *     summary: Get analysis result
+ *     operationId: getAtsAnalysisResult
  *     parameters:
  *       - in: path
  *         name: id
@@ -145,6 +192,9 @@ router.get('/:id', authMiddleware, validateJobIdParamsMiddleware, cvAtsControlle
  *               properties:
  *                 success: { type: 'boolean' }
  *                 data: { $ref: '#/components/schemas/AtsAnalysis' }
+ *       404:
+ *         description: Result or Job not found
+ *         $ref: '#/components/schemas/Error'
  */
 router.get('/:id/result', authMiddleware, validateJobIdParamsMiddleware, cvAtsController.getAnalysisResult.bind(cvAtsController));
 
@@ -156,6 +206,18 @@ router.get('/:id/result', authMiddleware, validateJobIdParamsMiddleware, cvAtsCo
  *     tags:
  *       - CV ATS
  *     summary: Cancel analysis job
+ *     operationId: cancelAtsAnalysis
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: 'string' }
+ *     responses:
+ *       200:
+ *         description: Job cancelled
+ *       404:
+ *         description: Job not found
+ *         $ref: '#/components/schemas/Error'
  */
 router.post('/:id/cancel', authMiddleware, validateJobIdParamsMiddleware, cvAtsController.cancelAnalysis.bind(cvAtsController));
 

@@ -35,6 +35,8 @@ router.use(authMiddleware);
  * CV CRUD Operations
  */
 
+// CV CRUD Operations
+
 /**
  * @openapi
  * /v1/cvs/upload:
@@ -43,6 +45,7 @@ router.use(authMiddleware);
  *       - CVs
  *     summary: Upload a CV file
  *     description: Upload a PDF file to be parsed and managed by the system.
+ *     operationId: uploadCV
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -72,6 +75,13 @@ router.use(authMiddleware);
  *                 data:
  *                   $ref: '#/components/schemas/CV'
  *       400:
+ *         description: Invalid file format or missing file
+ *         $ref: '#/components/schemas/Error'
+ *       401:
+ *         description: Unauthorized
+ *         $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: Server error
  *         $ref: '#/components/schemas/Error'
  */
 router.post('/upload', uploadMiddleware.single('file'), cvController.uploadCV.bind(cvController));
@@ -84,9 +94,26 @@ router.post('/upload', uploadMiddleware.single('file'), cvController.uploadCV.bi
  *       - CVs
  *     summary: Create CV manually
  *     description: Create a CV entry by providing JSON data directly.
+ *     operationId: createCV
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/CV'
  *     responses:
  *       201:
  *         description: CV created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success: { type: boolean, example: true }
+ *                 data: { $ref: '#/components/schemas/CV' }
+ *       400:
+ *         description: Validation error
+ *         $ref: '#/components/schemas/Error'
  */
 router.post('/', validateCreateCVMiddleware, cvController.createCV.bind(cvController));
 
@@ -98,20 +125,29 @@ router.post('/', validateCreateCVMiddleware, cvController.createCV.bind(cvContro
  *       - CVs
  *     summary: Get user CVs
  *     description: Returns a list of all CVs belonging to the authenticated user.
+ *     operationId: listCVs
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema: { type: integer, default: 1 }
+ *         description: Page number
+ *       - in: query
+ *         name: limit
+ *         schema: { type: integer, default: 20 }
+ *         description: Items per page
  *     responses:
  *       200:
- *         description: List of CVs
+ *         description: List of CVs returned successfully
  *         content:
  *           application/json:
  *             schema:
  *               type: object
  *               properties:
- *                 success:
- *                   type: boolean
+ *                 success: { type: boolean }
  *                 data:
  *                   type: array
- *                   items:
- *                     $ref: '#/components/schemas/CV'
+ *                   items: { $ref: '#/components/schemas/CV' }
+ *                 pagination: { $ref: '#/components/schemas/Pagination' }
  */
 router.get('/', validateGetUserCVsQueryMiddleware, cvController.getUserCVs.bind(cvController));
 
@@ -123,11 +159,27 @@ router.get('/', validateGetUserCVsQueryMiddleware, cvController.getUserCVs.bind(
  *       - CVs
  *     summary: Search CVs
  *     description: Search CVs by title, skills, or content.
+ *     operationId: searchCVs
+ *     parameters:
+ *       - in: query
+ *         name: q
+ *         schema: { type: string }
+ *         description: Search query
  *     responses:
  *       200:
  *         description: Search results returned
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success: { type: boolean }
+ *                 data:
+ *                   type: array
+ *                   items: { $ref: '#/components/schemas/CV' }
  */
 router.get('/search', validateSearchCVsQueryMiddleware, cvController.searchCVs.bind(cvController));
+
 /**
  * @openapi
  * /v1/cvs/stats:
@@ -136,11 +188,20 @@ router.get('/search', validateSearchCVsQueryMiddleware, cvController.searchCVs.b
  *       - CVs
  *     summary: Get CV statistics
  *     description: Get counts of CVs by status and other metrics.
+ *     operationId: getCVStats
  *     responses:
  *       200:
  *         description: Stats returned successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success: { type: boolean }
+ *                 data: { type: object }
  */
 router.get('/stats', cvController.getCVStats.bind(cvController));
+
 /**
  * @openapi
  * /v1/cvs/bulk:
@@ -149,6 +210,7 @@ router.get('/stats', cvController.getCVStats.bind(cvController));
  *       - CVs
  *     summary: Bulk CV operations
  *     description: Perform operations on multiple CVs at once (delete, archive).
+ *     operationId: bulkCVOperation
  *     requestBody:
  *       required: true
  *       content:
@@ -162,6 +224,9 @@ router.get('/stats', cvController.getCVStats.bind(cvController));
  *     responses:
  *       200:
  *         description: Bulk operation completed
+ *       400:
+ *         description: Invalid action or IDs
+ *         $ref: '#/components/schemas/Error'
  */
 router.post('/bulk', validateBulkOperationBodyMiddleware, cvController.bulkOperation.bind(cvController));
 
@@ -176,12 +241,13 @@ router.post('/bulk', validateBulkOperationBodyMiddleware, cvController.bulkOpera
  *     tags:
  *       - CVs
  *     summary: Get CV details
+ *     operationId: getCV
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
- *         schema:
- *           type: string
+ *         schema: { type: string }
+ *         description: CV ID
  *     responses:
  *       200:
  *         description: CV details found
@@ -190,10 +256,11 @@ router.post('/bulk', validateBulkOperationBodyMiddleware, cvController.bulkOpera
  *             schema:
  *               type: object
  *               properties:
- *                 success:
- *                   type: boolean
- *                 data:
- *                   $ref: '#/components/schemas/CV'
+ *                 success: { type: boolean }
+ *                 data: { $ref: '#/components/schemas/CV' }
+ *       404:
+ *         description: CV not found
+ *         $ref: '#/components/schemas/Error'
  */
 router.get('/:id', validateCVIdParamsMiddleware, cvController.getCV.bind(cvController));
 
@@ -205,15 +272,18 @@ router.get('/:id', validateCVIdParamsMiddleware, cvController.getCV.bind(cvContr
  *       - CVs
  *     summary: Get CV parsing status
  *     description: Returns the current status and progress of CV parsing.
+ *     operationId: getCVStatus
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
- *         schema:
- *           type: string
+ *         schema: { type: string }
  *     responses:
  *       200:
  *         description: Status returned successfully
+ *       404:
+ *         description: CV not found
+ *         $ref: '#/components/schemas/Error'
  */
 router.get('/:id/status', validateCVIdParamsMiddleware, cvController.getCVStatus.bind(cvController));
 
@@ -225,14 +295,26 @@ router.get('/:id/status', validateCVIdParamsMiddleware, cvController.getCVStatus
  *       - CVs
  *     summary: Update CV
  *     description: Update specific fields of a CV manually.
+ *     operationId: updateCV
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
  *         schema: { type: string }
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema: { $ref: '#/components/schemas/CV' }
  *     responses:
  *       200:
  *         description: CV updated successfully
+ *       400:
+ *         description: Validation error
+ *         $ref: '#/components/schemas/Error'
+ *       404:
+ *         description: CV not found
+ *         $ref: '#/components/schemas/Error'
  */
 router.put('/:id', validateCVIdParamsMiddleware, validateUpdateCVMiddleware, cvController.updateCV.bind(cvController));
 
@@ -243,15 +325,18 @@ router.put('/:id', validateCVIdParamsMiddleware, validateUpdateCVMiddleware, cvC
  *     tags:
  *       - CVs
  *     summary: Delete a CV
+ *     operationId: deleteCV
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
- *         schema:
- *           type: string
+ *         schema: { type: string }
  *     responses:
  *       200:
  *         description: CV deleted successfully
+ *       404:
+ *         description: CV not found
+ *         $ref: '#/components/schemas/Error'
  */
 router.delete('/:id', validateCVIdParamsMiddleware, cvController.deleteCV.bind(cvController));
 
@@ -265,6 +350,7 @@ router.delete('/:id', validateCVIdParamsMiddleware, cvController.deleteCV.bind(c
  *     tags:
  *       - CVs
  *     summary: Duplicate a CV
+ *     operationId: duplicateCV
  *     parameters:
  *       - in: path
  *         name: id
@@ -273,6 +359,9 @@ router.delete('/:id', validateCVIdParamsMiddleware, cvController.deleteCV.bind(c
  *     responses:
  *       201:
  *         description: CV duplicated successfully
+ *       404:
+ *         description: CV not found
+ *         $ref: '#/components/schemas/Error'
  */
 router.post('/:id/duplicate', validateCVIdParamsMiddleware, validateDuplicateCVBodyMiddleware, cvController.duplicateCV.bind(cvController));
 
@@ -283,6 +372,7 @@ router.post('/:id/duplicate', validateCVIdParamsMiddleware, validateDuplicateCVB
  *     tags:
  *       - CVs
  *     summary: Archive a CV
+ *     operationId: archiveCV
  *     parameters:
  *       - in: path
  *         name: id
@@ -291,6 +381,9 @@ router.post('/:id/duplicate', validateCVIdParamsMiddleware, validateDuplicateCVB
  *     responses:
  *       200:
  *         description: CV archived successfully
+ *       404:
+ *         description: CV not found
+ *         $ref: '#/components/schemas/Error'
  */
 router.post('/:id/archive', validateCVIdParamsMiddleware, cvController.archiveCV.bind(cvController));
 
@@ -301,6 +394,7 @@ router.post('/:id/archive', validateCVIdParamsMiddleware, cvController.archiveCV
  *     tags:
  *       - CVs
  *     summary: Toggle publish status
+ *     operationId: publishCV
  *     parameters:
  *       - in: path
  *         name: id
@@ -309,6 +403,9 @@ router.post('/:id/archive', validateCVIdParamsMiddleware, cvController.archiveCV
  *     responses:
  *       200:
  *         description: Publish status updated
+ *       404:
+ *         description: CV not found
+ *         $ref: '#/components/schemas/Error'
  */
 router.post('/:id/publish', validateCVIdParamsMiddleware, cvController.publishCV.bind(cvController));
 

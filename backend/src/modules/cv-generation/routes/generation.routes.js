@@ -32,6 +32,7 @@ const generationController = new GenerationController(generationService);
  *       - Generation
  *     summary: Start CV PDF generation
  *     description: Triggers the process of generating a PDF file for a specific CV version.
+ *     operationId: startGenerationjob
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -54,6 +55,19 @@ const generationController = new GenerationController(generationService);
  *     responses:
  *       202:
  *         description: Generation job started
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success: { type: boolean, example: true }
+ *                 data: { $ref: '#/components/schemas/Job' }
+ *       400:
+ *         description: Invalid input or missing template
+ *         $ref: '#/components/schemas/Error'
+ *       404:
+ *         description: CV or Version not found
+ *         $ref: '#/components/schemas/Error'
  */
 router.post(
   '/',
@@ -70,9 +84,27 @@ router.post(
  *     tags:
  *       - Generation
  *     summary: Get generation history
+ *     operationId: getGenerationHistory
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema: { type: integer, default: 1 }
+ *       - in: query
+ *         name: limit
+ *         schema: { type: integer, default: 20 }
  *     responses:
  *       200:
  *         description: History returned
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success: { type: boolean }
+ *                 data:
+ *                   type: array
+ *                   items: { $ref: '#/components/schemas/Job' }
+ *                 pagination: { $ref: '#/components/schemas/Pagination' }
  */
 router.get(
   '/history',
@@ -88,9 +120,17 @@ router.get(
  *     tags:
  *       - Generation
  *     summary: Get generation statistics
+ *     operationId: getGenerationStats
  *     responses:
  *       200:
  *         description: Stats returned
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success: { type: boolean }
+ *                 data: { type: object }
  */
 router.get(
   '/stats',
@@ -105,9 +145,13 @@ router.get(
  *     tags:
  *       - Generation
  *     summary: Generate CV preview (HTML)
+ *     operationId: generatePreview
  *     responses:
  *       200:
  *         description: Preview HTML returned successfully
+ *       400:
+ *         description: Validation error
+ *         $ref: '#/components/schemas/Error'
  */
 router.post(
   '/preview',
@@ -123,6 +167,25 @@ router.post(
  *     tags:
  *       - Generation
  *     summary: Get generation job status
+ *     operationId: getGenerationJobStatus
+ *     parameters:
+ *       - in: path
+ *         name: jobId
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       200:
+ *         description: Job status returned
+ *         content:
+ *           application/json:
+ *             schema: 
+ *               type: object
+ *               properties:
+ *                 success: { type: boolean }
+ *                 data: { $ref: '#/components/schemas/Job' }
+ *       404:
+ *         description: Job not found
+ *         $ref: '#/components/schemas/Error'
  */
 router.get(
   '/:jobId',
@@ -138,6 +201,23 @@ router.get(
  *     tags:
  *       - Generation
  *     summary: Download generated PDF
+ *     operationId: downloadGeneratedPDF
+ *     parameters:
+ *       - in: path
+ *         name: jobId
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       200:
+ *         description: PDF file stream
+ *         content:
+ *           application/pdf:
+ *             schema:
+ *               type: string
+ *               format: binary
+ *       404:
+ *         description: File or Job not found
+ *         $ref: '#/components/schemas/Error'
  */
 router.get(
   '/:jobId/download',
@@ -153,6 +233,7 @@ router.get(
  *     tags:
  *       - Generation
  *     summary: Cancel generation job
+ *     operationId: cancelGenerationJob
  *     parameters:
  *       - in: path
  *         name: jobId
@@ -161,6 +242,9 @@ router.get(
  *     responses:
  *       200:
  *         description: Job cancelled
+ *       404:
+ *         description: Job not found
+ *         $ref: '#/components/schemas/Error'
  */
 router.post(
   '/:jobId/cancel',

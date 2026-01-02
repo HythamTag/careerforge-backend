@@ -29,6 +29,7 @@ const jobController = new JobController(jobService);
  *       - Jobs
  *     summary: List background jobs
  *     description: Returns a list of background jobs for the authenticated user, filtered by status or type.
+ *     operationId: listUserJobs
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -41,6 +42,9 @@ const jobController = new JobController(jobService);
  *     responses:
  *       200:
  *         description: List of jobs retrieved successfully
+ *       401:
+ *         description: Unauthorized
+ *         $ref: '#/components/schemas/Error'
  */
 router.get('/', authMiddleware, validateGetUserJobsQueryMiddleware, jobController.getUserJobs.bind(jobController));
 
@@ -52,6 +56,9 @@ router.get('/', authMiddleware, validateGetUserJobsQueryMiddleware, jobControlle
  *       - Jobs
  *     summary: Get overall job statistics
  *     description: Returns detailed statistics including status breakdown, type distribution, success rate, and 7-day timeline.
+ *     operationId: getBackgroundJobStats
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Statistics retrieved successfully
@@ -82,6 +89,9 @@ router.get('/', authMiddleware, validateGetUserJobsQueryMiddleware, jobControlle
  *                         properties:
  *                           date: { type: 'string' }
  *                           count: { type: 'integer' }
+ *       401:
+ *         description: Unauthorized
+ *         $ref: '#/components/schemas/Error'
  */
 router.get('/stats', authMiddleware, jobController.getJobStats.bind(jobController));
 
@@ -93,6 +103,9 @@ router.get('/stats', authMiddleware, jobController.getJobStats.bind(jobControlle
  *     tags:
  *       - Jobs
  *     summary: Get job details
+ *     operationId: getBackgroundJobDetails
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -108,6 +121,9 @@ router.get('/stats', authMiddleware, jobController.getJobStats.bind(jobControlle
  *               properties:
  *                 success: { type: 'boolean' }
  *                 data: { $ref: '#/components/schemas/Job' }
+ *       404:
+ *         description: Job not found
+ *         $ref: '#/components/schemas/Error'
  */
 router.get('/:id', authMiddleware, validateJobIdParamsMiddleware, jobController.getJob.bind(jobController));
 
@@ -118,6 +134,20 @@ router.get('/:id', authMiddleware, validateJobIdParamsMiddleware, jobController.
  *     tags:
  *       - Jobs
  *     summary: Get job execution logs
+ *     operationId: getBackgroundJobLogs
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: 'string' }
+ *     responses:
+ *       200:
+ *         description: Logs retrieved
+ *       404:
+ *         description: Job not found
+ *         $ref: '#/components/schemas/Error'
  */
 router.get('/:id/logs', authMiddleware, validateJobIdParamsMiddleware, validateGetJobLogsQueryMiddleware, jobController.getJobLogs.bind(jobController));
 
@@ -128,6 +158,20 @@ router.get('/:id/logs', authMiddleware, validateJobIdParamsMiddleware, validateG
  *     tags:
  *       - Jobs
  *     summary: Cancel a pending/processing job
+ *     operationId: cancelBackgroundJob
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: 'string' }
+ *     responses:
+ *       200:
+ *         description: Job cancelled
+ *       404:
+ *         description: Job not found
+ *         $ref: '#/components/schemas/Error'
  */
 router.delete('/:id', authMiddleware, validateJobIdParamsMiddleware, jobController.cancelJob.bind(jobController));
 
@@ -138,6 +182,20 @@ router.delete('/:id', authMiddleware, validateJobIdParamsMiddleware, jobControll
  *     tags:
  *       - Jobs
  *     summary: Retry a failed job
+ *     operationId: retryBackgroundJob
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: 'string' }
+ *     responses:
+ *       200:
+ *         description: Job queued for retry
+ *       404:
+ *         description: Job not found
+ *         $ref: '#/components/schemas/Error'
  */
 router.post('/:id/retry', authMiddleware, validateJobIdParamsMiddleware, jobController.retryJob.bind(jobController));
 

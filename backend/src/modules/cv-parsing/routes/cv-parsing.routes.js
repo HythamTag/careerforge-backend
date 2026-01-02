@@ -23,6 +23,7 @@ const controller = resolve('cvParsingController');
  *       - CVs
  *     summary: Start a CV parsing job
  *     description: Triggers the AI parsing process for a previously uploaded CV.
+ *     operationId: startParsingJob
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -52,6 +53,12 @@ const controller = resolve('cvParsingController');
  *                   properties:
  *                     jobId:
  *                       type: string
+ *       400:
+ *         description: Invalid input or file
+ *         $ref: '#/components/schemas/Error'
+ *       404:
+ *         description: CV not found
+ *         $ref: '#/components/schemas/Error'
  */
 router.post(
   '/',
@@ -67,11 +74,15 @@ router.post(
  *     tags:
  *       - CVs
  *     summary: Get user's parsing job history
+ *     operationId: getParsingHistory
  *     security:
  *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: History returned successfully
+ *       401:
+ *         description: Unauthorized
+ *         $ref: '#/components/schemas/Error'
  */
 router.get(
   '/history',
@@ -87,9 +98,13 @@ router.get(
  *     tags:
  *       - CVs
  *     summary: Get parsing statistics
+ *     operationId: getParsingStats
  *     responses:
  *       200:
  *         description: Parsing statistics returned
+ *       401:
+ *         description: Unauthorized
+ *         $ref: '#/components/schemas/Error'
  */
 router.get(
   '/stats',
@@ -104,9 +119,13 @@ router.get(
  *     tags:
  *       - CVs
  *     summary: Get supported CV formats
+ *     operationId: getSupportedFormats
  *     responses:
  *       200:
  *         description: List of supported formats
+ *       401:
+ *         description: Unauthorized
+ *         $ref: '#/components/schemas/Error'
  */
 router.get(
   '/formats',
@@ -121,6 +140,7 @@ router.get(
  *     tags:
  *       - CVs
  *     summary: Get parsing job status
+ *     operationId: getParsingJobStatus
  *     parameters:
  *       - in: path
  *         name: jobId
@@ -130,6 +150,9 @@ router.get(
  *     responses:
  *       200:
  *         description: job status returned successfully
+ *       404:
+ *         description: Job not found
+ *         $ref: '#/components/schemas/Error'
  */
 router.get(
   '/:jobId',
@@ -144,9 +167,18 @@ router.get(
  *     tags:
  *       - CVs
  *     summary: Get parsing job result
+ *     operationId: getParsingJobResult
+ *     parameters:
+ *       - in: path
+ *         name: jobId
+ *         required: true
+ *         schema: { type: string }
  *     responses:
  *       200:
  *         description: Job result returned
+ *       404:
+ *         description: Job or Result not found
+ *         $ref: '#/components/schemas/Error'
  */
 router.get(
   '/:jobId/result',
@@ -161,6 +193,7 @@ router.get(
  *     tags:
  *       - CVs
  *     summary: Cancel parsing job
+ *     operationId: cancelParsingJob
  *     parameters:
  *       - in: path
  *         name: jobId
@@ -169,6 +202,9 @@ router.get(
  *     responses:
  *       200:
  *         description: Job cancelled
+ *       404:
+ *         description: Job not found
+ *         $ref: '#/components/schemas/Error'
  */
 router.post(
   '/:jobId/cancel',
@@ -183,6 +219,7 @@ router.post(
  *     tags:
  *       - CVs
  *     summary: Retry parsing job
+ *     operationId: retryParsingJob
  *     parameters:
  *       - in: path
  *         name: jobId
@@ -191,6 +228,9 @@ router.post(
  *     responses:
  *       200:
  *         description: Job retry started
+ *       404:
+ *         description: Job not found
+ *         $ref: '#/components/schemas/Error'
  */
 router.post(
   '/:jobId/retry',

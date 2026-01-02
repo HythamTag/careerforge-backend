@@ -111,3 +111,137 @@ router.post('/:versionId/activate', validateVersionIdParamsMiddleware, validateA
 
 module.exports = router;
 
+/**
+ * @openapi
+ * /v1/cvs/{id}/versions:
+ *   get:
+ *     tags:
+ *       - CV Versions
+ *     summary: Get all versions of a CV
+ *     operationId: listCVVersions
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *         description: CV ID
+ *     responses:
+ *       200:
+ *         description: List of CV versions
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success: { type: boolean }
+ *                 data:
+ *                   type: array
+ *                   items: { $ref: '#/components/schemas/CVVersion' }
+ *       404:
+ *         description: CV not found
+ *         $ref: '#/components/schemas/Error'
+ */
+router.get('/', validateGetCVVersionsQueryMiddleware, cvVersionController.getCVVersions.bind(cvVersionController));
+
+/**
+ * @openapi
+ * /v1/cvs/{id}/versions:
+ *   post:
+ *     tags:
+ *       - CV Versions
+ *     summary: Create a new version
+ *     description: Create a snapshot of the current CV state.
+ *     operationId: createCVVersion
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [name]
+ *             properties:
+ *               name: { type: string }
+ *               description: { type: string }
+ *     responses:
+ *       201:
+ *         description: Version created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success: { type: boolean }
+ *                 data: { $ref: '#/components/schemas/CVVersion' }
+ *       404:
+ *         description: CV not found
+ *         $ref: '#/components/schemas/Error'
+ */
+router.post('/', validateCreateVersionBodyMiddleware, cvVersionController.createVersion.bind(cvVersionController));
+
+/**
+ * @openapi
+ * /v1/cvs/{id}/versions/{versionId}:
+ *   get:
+ *     tags:
+ *       - CV Versions
+ *     summary: Get specific version details
+ *     operationId: getCVVersionDetails
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *       - in: path
+ *         name: versionId
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       200:
+ *         description: Version details returned
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success: { type: boolean }
+ *                 data: { $ref: '#/components/schemas/CVVersion' }
+ *       404:
+ *         description: Version not found
+ *         $ref: '#/components/schemas/Error'
+ */
+router.get('/:versionId', validateVersionIdParamsMiddleware, cvVersionController.getCVVersion.bind(cvVersionController));
+
+/**
+ * @openapi
+ * /v1/cvs/{id}/versions/{versionId}/activate:
+ *   post:
+ *     tags:
+ *       - CV Versions
+ *     summary: Activate a specific version
+ *     description: Restore the main CV to the state of this version.
+ *     operationId: activateCVVersion
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *       - in: path
+ *         name: versionId
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       200:
+ *         description: Version activated successfully
+ *       404:
+ *         description: Version not found
+ *         $ref: '#/components/schemas/Error'
+ */
+router.post('/:versionId/activate', validateVersionIdParamsMiddleware, validateActivateVersionBodyMiddleware, cvVersionController.activateVersion.bind(cvVersionController));
+
+module.exports = router;
+

@@ -32,6 +32,7 @@ const authController = new AuthController(authService);
  *       - Authentication
  *     summary: Register a new user
  *     description: Create a new user account and receive authentication tokens.
+ *     operationId: registerUser
  *     requestBody:
  *       required: true
  *       content:
@@ -79,6 +80,13 @@ const authController = new AuthController(authService);
  *                     refreshToken:
  *                       type: string
  *       400:
+ *         description: Validation error
+ *         $ref: '#/components/schemas/Error'
+ *       409:
+ *         description: Email or username already exists
+ *         $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: Server error
  *         $ref: '#/components/schemas/Error'
  */
 router.post('/register', validateRegisterMiddleware, authController.register.bind(authController));
@@ -91,6 +99,7 @@ router.post('/register', validateRegisterMiddleware, authController.register.bin
  *       - Authentication
  *     summary: Login user
  *     description: Authenticate user and receive access and refresh tokens.
+ *     operationId: loginUser
  *     requestBody:
  *       required: true
  *       content:
@@ -126,7 +135,14 @@ router.post('/register', validateRegisterMiddleware, authController.register.bin
  *                       type: string
  *                     refreshToken:
  *                       type: string
+ *       400:
+ *         description: Missing credentials
+ *         $ref: '#/components/schemas/Error'
  *       401:
+ *         description: Invalid credentials
+ *         $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: Server error
  *         $ref: '#/components/schemas/Error'
  */
 router.post('/login', validateLoginMiddleware, authController.login.bind(authController));
@@ -139,6 +155,7 @@ router.post('/login', validateLoginMiddleware, authController.login.bind(authCon
  *       - Authentication
  *     summary: Refresh access token
  *     description: Get a new access token using a valid refresh token.
+ *     operationId: refreshToken
  *     requestBody:
  *       required: true
  *       content:
@@ -153,7 +170,11 @@ router.post('/login', validateLoginMiddleware, authController.login.bind(authCon
  *     responses:
  *       200:
  *         description: Token refreshed successfully
+ *       400:
+ *         description: Missing refresh token
+ *         $ref: '#/components/schemas/Error'
  *       401:
+ *         description: Invalid or expired refresh token
  *         $ref: '#/components/schemas/Error'
  */
 router.post('/refresh', validateRefreshTokenMiddleware, authController.refresh.bind(authController));
@@ -166,13 +187,18 @@ router.post('/refresh', validateRefreshTokenMiddleware, authController.refresh.b
  *       - Authentication
  *     summary: Logout user
  *     description: Invalidate the user's refresh token.
+ *     operationId: logoutUser
  *     security:
  *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Logged out successfully
+ *       401:
+ *         description: Unauthorized
+ *         $ref: '#/components/schemas/Error'
  */
 router.post('/logout', authMiddleware, authController.logout.bind(authController));
+
 /**
  * @openapi
  * /v1/auth/forgot-password:
@@ -181,6 +207,7 @@ router.post('/logout', authMiddleware, authController.logout.bind(authController
  *       - Authentication
  *     summary: Request password reset
  *     description: Send a password reset link to the user's email.
+ *     operationId: forgotPassword
  *     requestBody:
  *       required: true
  *       content:
@@ -193,8 +220,12 @@ router.post('/logout', authMiddleware, authController.logout.bind(authController
  *     responses:
  *       200:
  *         description: Password reset email sent (if email exists)
+ *       400:
+ *         description: Invalid email format
+ *         $ref: '#/components/schemas/Error'
  */
 router.post('/forgot-password', validateForgotPasswordMiddleware, authController.forgotPassword.bind(authController));
+
 /**
  * @openapi
  * /v1/auth/reset-password:
@@ -203,6 +234,7 @@ router.post('/forgot-password', validateForgotPasswordMiddleware, authController
  *       - Authentication
  *     summary: Reset password
  *     description: Set a new password using a valid reset token.
+ *     operationId: resetPassword
  *     requestBody:
  *       required: true
  *       content:
@@ -216,8 +248,12 @@ router.post('/forgot-password', validateForgotPasswordMiddleware, authController
  *     responses:
  *       200:
  *         description: Password reset successfully
+ *       400:
+ *         description: Invalid token or password format
+ *         $ref: '#/components/schemas/Error'
  */
 router.post('/reset-password', validateResetPasswordMiddleware, authController.resetPassword.bind(authController));
+
 /**
  * @openapi
  * /v1/auth/verify-email/{token}:
@@ -226,6 +262,7 @@ router.post('/reset-password', validateResetPasswordMiddleware, authController.r
  *       - Authentication
  *     summary: Verify email address
  *     description: Verify user's email using the token sent via email.
+ *     operationId: verifyEmail
  *     parameters:
  *       - in: path
  *         name: token
@@ -235,8 +272,12 @@ router.post('/reset-password', validateResetPasswordMiddleware, authController.r
  *     responses:
  *       200:
  *         description: Email verified successfully
+ *       400:
+ *         description: Invalid or expired token
+ *         $ref: '#/components/schemas/Error'
  */
 router.get('/verify-email/:token', validateVerifyEmailParamsMiddleware, authController.verifyEmail.bind(authController));
+
 /**
  * @openapi
  * /v1/auth/resend-verification:
@@ -244,11 +285,18 @@ router.get('/verify-email/:token', validateVerifyEmailParamsMiddleware, authCont
  *     tags:
  *       - Authentication
  *     summary: Resend verification email
+ *     operationId: resendVerification
  *     security:
  *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Verification email sent
+ *       401:
+ *         description: Unauthorized
+ *         $ref: '#/components/schemas/Error'
+ *       429:
+ *         description: Too many requests
+ *         $ref: '#/components/schemas/Error'
  */
 router.post('/resend-verification', authMiddleware, authController.resendVerification.bind(authController));
 
@@ -260,6 +308,7 @@ router.post('/resend-verification', authMiddleware, authController.resendVerific
  *       - Authentication
  *     summary: Get current user profile
  *     description: Returns the profile of the currently authenticated user.
+ *     operationId: getCurrentUser
  *     security:
  *       - bearerAuth: []
  *     responses:
@@ -276,6 +325,7 @@ router.post('/resend-verification', authMiddleware, authController.resendVerific
  *                 data:
  *                   $ref: '#/components/schemas/User'
  *       401:
+ *         description: Unauthorized - Invalid or missing token
  *         $ref: '#/components/schemas/Error'
  */
 router.get('/me', authMiddleware, authController.getMe.bind(authController));
