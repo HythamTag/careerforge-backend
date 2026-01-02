@@ -151,6 +151,9 @@ router.patch('/me/password', authMiddleware, validateChangePasswordMiddleware, u
  *       401:
  *         description: Unauthorized
  *         $ref: '#/components/schemas/Error'
+ *       413:
+ *         description: File too large
+ *         $ref: '#/components/schemas/Error'
  */
 router.post('/me/avatar', authMiddleware, avatarUploadMiddleware.single('avatar'), userController.uploadAvatar.bind(userController));
 
@@ -239,6 +242,9 @@ router.get('/me/subscription', authMiddleware, userController.getSubscription.bi
  *         $ref: '#/components/schemas/Error'
  *       401:
  *         description: Unauthorized
+ *         $ref: '#/components/schemas/Error'
+ *       402:
+ *         description: Payment required for plan upgrade
  *         $ref: '#/components/schemas/Error'
  */
 router.patch('/me/subscription', authMiddleware, validateUpdateSubscriptionMiddleware, userController.updateSubscription.bind(userController));

@@ -80,6 +80,12 @@ router.use(authMiddleware);
  *       401:
  *         description: Unauthorized
  *         $ref: '#/components/schemas/Error'
+ *       413:
+ *         description: File too large (max 10MB)
+ *         $ref: '#/components/schemas/Error'
+ *       415:
+ *         description: Unsupported file type (PDF only)
+ *         $ref: '#/components/schemas/Error'
  *       500:
  *         description: Server error
  *         $ref: '#/components/schemas/Error'

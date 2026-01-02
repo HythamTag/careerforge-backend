@@ -1,7 +1,6 @@
 @echo off
 cd /d "%~dp0"
 cd ..
-setlocal
 title CareerForge - WebUI Tunnel
 
 REM Ngrok authtoken for WebUI
@@ -14,8 +13,21 @@ echo.
 echo Launching Ngrok tunnel for WebUI (Port 8080)...
 echo.
 
-start "Ngrok - WebUI" cmd /k "ngrok http 8080 --authtoken %NGROK_TOKEN%"
+set /p BG="Run in background (headless)? (y/n) [y]: "
+if /i "%BG%"=="n" goto :foreground
+goto :background
 
+:foreground
+echo Launching in new window...
+start "Ngrok - WebUI" ngrok http 8080 --authtoken %NGROK_TOKEN%
+goto :done
+
+:background
+echo Launching headless (no window)...
+powershell -Command "Start-Process -FilePath 'ngrok' -ArgumentList 'http 8080 --authtoken %NGROK_TOKEN%' -WindowStyle Hidden"
+goto :done
+
+:done
 timeout /t 3 /nobreak >nul
 
 echo.
@@ -25,7 +37,9 @@ echo ========================================================
 echo.
 echo Dashboard: http://127.0.0.1:4040
 echo.
-echo Copy the HTTPS URL from the ngrok window and open it
+echo Copy the HTTPS URL from the ngrok dashboard and open it
 echo on your mobile browser to access Ollama WebUI remotely.
+echo.
+echo To stop the tunnel, run: scripts\kill-tunnels.bat
 echo.
 pause

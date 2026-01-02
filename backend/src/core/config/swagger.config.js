@@ -59,6 +59,7 @@ const options = {
                 },
                 Pagination: {
                     type: 'object',
+                    required: ['page', 'limit', 'total', 'totalPages'],
                     properties: {
                         page: { type: 'integer', minimum: 1, default: 1 },
                         limit: { type: 'integer', minimum: 1, maximum: 100, default: 20 },
@@ -66,6 +67,34 @@ const options = {
                         totalPages: { type: 'integer' },
                         hasNext: { type: 'boolean' },
                         hasPrev: { type: 'boolean' }
+                    }
+                },
+                SuccessResponse: {
+                    type: 'object',
+                    required: ['success'],
+                    properties: {
+                        success: { type: 'boolean', example: true },
+                        message: { type: 'string', example: 'Operation completed successfully' },
+                        data: { type: 'object', description: 'Response payload' }
+                    }
+                },
+                AuthTokens: {
+                    type: 'object',
+                    required: ['token', 'refreshToken'],
+                    properties: {
+                        token: { type: 'string', description: 'JWT access token' },
+                        refreshToken: { type: 'string', description: 'JWT refresh token' },
+                        expiresIn: { type: 'integer', example: 3600, description: 'Token expiry in seconds' }
+                    }
+                },
+                Subscription: {
+                    type: 'object',
+                    required: ['plan', 'status'],
+                    properties: {
+                        plan: { type: 'string', enum: ['free', 'pro', 'enterprise'], example: 'free' },
+                        status: { type: 'string', enum: ['active', 'canceled', 'expired', 'past_due'], example: 'active' },
+                        currentPeriodEnd: { type: 'string', format: 'date-time' },
+                        cancelAtPeriodEnd: { type: 'boolean', example: false }
                     }
                 },
                 User: {
@@ -214,8 +243,35 @@ const options = {
                         cvId: { type: 'string' },
                         jobDescription: { type: 'string' },
                         score: { type: 'number', example: 85.5 },
+                        matchedKeywords: { type: 'array', items: { type: 'string' }, example: ['JavaScript', 'React'] },
+                        missingKeywords: { type: 'array', items: { type: 'string' }, example: ['TypeScript', 'AWS'] },
                         feedback: { type: 'object', description: 'Detailed analysis feedback' },
-                        tailoringSuggestions: { type: 'array', items: { type: 'string' } }
+                        tailoringSuggestions: { type: 'array', items: { type: 'string' } },
+                        createdAt: { type: 'string', format: 'date-time' }
+                    }
+                },
+                CVProject: {
+                    type: 'object',
+                    required: ['name'],
+                    properties: {
+                        name: { type: 'string', example: 'E-commerce Platform' },
+                        description: { type: 'string', example: 'Built a full-stack e-commerce solution' },
+                        url: { type: 'string', format: 'uri' },
+                        technologies: { type: 'array', items: { type: 'string' }, example: ['React', 'Node.js'] },
+                        startDate: { type: 'string', format: 'date' },
+                        endDate: { type: 'string', format: 'date', nullable: true }
+                    }
+                },
+                CVCertification: {
+                    type: 'object',
+                    required: ['name', 'issuer'],
+                    properties: {
+                        name: { type: 'string', example: 'AWS Solutions Architect' },
+                        issuer: { type: 'string', example: 'Amazon Web Services' },
+                        issueDate: { type: 'string', format: 'date' },
+                        expiryDate: { type: 'string', format: 'date', nullable: true },
+                        credentialId: { type: 'string' },
+                        credentialUrl: { type: 'string', format: 'uri' }
                     }
                 }
             }
@@ -249,6 +305,14 @@ const options = {
             {
                 name: 'Health',
                 description: 'System health and monitoring'
+            },
+            {
+                name: 'Jobs',
+                description: 'Background job management and monitoring'
+            },
+            {
+                name: 'CV ATS',
+                description: 'ATS compatibility analysis and scoring'
             }
         ]
     },
