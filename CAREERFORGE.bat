@@ -1,9 +1,7 @@
 @echo off
-title CareerForge - Master Launcher
-cls
+cd /d "%~dp0"
 
 :MENU
-cls
 echo ========================================================
 echo              CAREERFORGE LAUNCHER
 echo ========================================================
@@ -31,15 +29,42 @@ echo.
 echo ========================================================
 set /p choice="Select an option (0-9): "
 
-if "%choice%"=="1" call scripts\start.bat
-if "%choice%"=="2" call scripts\stop.bat
-if "%choice%"=="3" call scripts\run-frontend.bat
-if "%choice%"=="4" call scripts\run-backend.bat
-if "%choice%"=="5" call scripts\tunnel-ai.bat
-if "%choice%"=="6" call scripts\tunnel-webui.bat
-if "%choice%"=="7" call scripts\setup.bat
-if "%choice%"=="8" call scripts\test.bat
-if "%choice%"=="9" call scripts\maintenance.bat
+if "%choice%"=="1" (
+    call "scripts\start.bat"
+    goto MENU
+)
+if "%choice%"=="2" (
+    call "scripts\stop.bat"
+    goto MENU
+)
+if "%choice%"=="3" (
+    call "scripts\run-frontend.bat"
+    goto MENU
+)
+if "%choice%"=="4" (
+    call "scripts\run-backend.bat"
+    goto MENU
+)
+if "%choice%"=="5" (
+    call "scripts\tunnel-ai.bat"
+    goto MENU
+)
+if "%choice%"=="6" (
+    call "scripts\tunnel-webui.bat"
+    goto MENU
+)
+if "%choice%"=="7" (
+    call "scripts\setup.bat"
+    goto MENU
+)
+if "%choice%"=="8" (
+    call "scripts\test.bat"
+    goto MENU
+)
+if "%choice%"=="9" (
+    call "scripts\maintenance.bat"
+    goto MENU
+)
 if "%choice%"=="0" exit
 
 echo.
