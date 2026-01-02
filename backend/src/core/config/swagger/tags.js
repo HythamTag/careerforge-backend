@@ -30,6 +30,10 @@ module.exports = [
         description: '📄 CV upload, parsing, and CRUD operations'
     },
     {
+        name: 'Parsing',
+        description: '🔍 AI-powered CV parsing and text extraction'
+    },
+    {
         name: 'Versions',
         description: '📚 CV version history and snapshots'
     },

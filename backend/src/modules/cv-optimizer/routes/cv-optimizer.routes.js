@@ -37,7 +37,7 @@ router.use(authMiddleware);
  * /v1/optimize:
  *   post:
  *     tags:
- *       - CVs
+ *       - Optimization
  *     summary: Optimize entire CV content
  *     description: Uses AI to enhance the entire content of a CV based on industry best practices.
  *     operationId: optimizeCVContent
@@ -80,7 +80,7 @@ router.post('/', validateOptimizeCvMiddleware, cvOptimizerController.optimizeCV.
  * /v1/optimize/sections:
  *   post:
  *     tags:
- *       - CVs
+ *       - Optimization
  *     summary: Optimize specific CV sections
  *     operationId: optimizeCVSections
  *     security:
@@ -109,7 +109,7 @@ router.post('/sections', validateOptimizeSectionsMiddleware, cvOptimizerControll
  * /v1/optimize/tailor:
  *   post:
  *     tags:
- *       - CVs
+ *       - Optimization
  *     summary: Tailor CV for specific job
  *     operationId: tailorCVForJob
  *     security:
@@ -138,7 +138,7 @@ router.post('/tailor', validateTailorForJobMiddleware, cvOptimizerController.tai
  * /v1/optimize/capabilities:
  *   get:
  *     tags:
- *       - CVs
+ *       - Optimization
  *     summary: Get optimization capabilities
  *     description: Returns a list of supported optimization features and models.
  *     operationId: getOptimizationCapabilities

@@ -20,7 +20,7 @@ const controller = resolve('cvParsingController');
  * /v1/parse:
  *   post:
  *     tags:
- *       - CVs
+ *       - Parsing
  *     summary: Start a CV parsing job
  *     description: Triggers the AI parsing process for a previously uploaded CV.
  *     operationId: startParsingJob
@@ -72,7 +72,7 @@ router.post(
  * /v1/parse/history:
  *   get:
  *     tags:
- *       - CVs
+ *       - Parsing
  *     summary: Get user's parsing job history
  *     operationId: getParsingHistory
  *     security:
@@ -96,7 +96,7 @@ router.get(
  * /v1/parse/stats:
  *   get:
  *     tags:
- *       - CVs
+ *       - Parsing
  *     summary: Get parsing statistics
  *     operationId: getParsingStats
  *     responses:
@@ -117,7 +117,7 @@ router.get(
  * /v1/parse/formats:
  *   get:
  *     tags:
- *       - CVs
+ *       - Parsing
  *     summary: Get supported CV formats
  *     operationId: getSupportedFormats
  *     responses:
@@ -138,7 +138,7 @@ router.get(
  * /v1/parse/{jobId}:
  *   get:
  *     tags:
- *       - CVs
+ *       - Parsing
  *     summary: Get parsing job status
  *     operationId: getParsingJobStatus
  *     parameters:
@@ -165,7 +165,7 @@ router.get(
  * /v1/parse/{jobId}/result:
  *   get:
  *     tags:
- *       - CVs
+ *       - Parsing
  *     summary: Get parsing job result
  *     operationId: getParsingJobResult
  *     parameters:
@@ -191,7 +191,7 @@ router.get(
  * /v1/parse/{jobId}/cancel:
  *   post:
  *     tags:
- *       - CVs
+ *       - Parsing
  *     summary: Cancel parsing job
  *     operationId: cancelParsingJob
  *     parameters:
@@ -217,7 +217,7 @@ router.post(
  * /v1/parse/{jobId}/retry:
  *   post:
  *     tags:
- *       - CVs
+ *       - Parsing
  *     summary: Retry parsing job
  *     operationId: retryParsingJob
  *     parameters:
