@@ -3,10 +3,9 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-# Copy backend package files
+# Copy backend package files directly to root
 COPY backend/package*.json ./
 
-# Install dependencies
 # Install dependencies
 RUN npm ci --omit=dev && npm cache clean --force
 
@@ -23,12 +22,12 @@ RUN apk add --no-cache \
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
     PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
 
-# Copy backend source (maintain structure for start-prod.js)
-COPY backend/src ./backend/src
-COPY backend/config ./backend/config
-COPY backend/scripts ./backend/scripts
+# Copy backend source to root (matches package.json aliases)
+COPY backend/src ./src
+COPY backend/config ./config
+COPY backend/scripts ./scripts
 
-# Create uploads directory with proper permissions BEFORE switching user
+# Create uploads and logs directories with proper permissions
 RUN mkdir -p /app/uploads /app/src/core/uploads /app/logs \
     && chmod -R 755 /app/uploads /app/src/core/uploads /app/logs
 
@@ -45,5 +44,5 @@ EXPOSE 5000
 HEALTHCHECK --interval=30s --timeout=3s --start-period=40s \
     CMD node -e "require('http').get('http://localhost:' + (process.env.PORT || 5000) + '/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
 
-# Start
-CMD ["node", "-r", "module-alias/register", "src/server.js"]
+# Start using the production launcher
+CMD ["node", "scripts/start-prod.js"]

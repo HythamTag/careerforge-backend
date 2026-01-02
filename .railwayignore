@@ -1,7 +1,7 @@
 # Don't upload these to Railway
 frontend/
 samples/
-scripts/
+/scripts/
 docs/
 *.bat
 *.ps1
