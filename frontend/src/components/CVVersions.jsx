@@ -14,8 +14,9 @@ function CVVersions({ cvId, onVersionActivated }) {
         try {
             const response = await cvApi.getCVVersions(cvId);
             // Backend returns { success: true, data: { versions: [], pagination: {} } }
-            const data = response.data || response;
-            setVersions(data.versions || []);
+            // Backend returns array of versions via api.js helper
+            const data = response;
+            setVersions(Array.isArray(data) ? data : data.versions || data.data || []);
         } catch (err) {
             console.error('Failed to fetch versions:', err);
             setError(err.message);
