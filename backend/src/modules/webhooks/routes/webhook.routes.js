@@ -27,7 +27,7 @@ const webhookController = new WebhookController(webhookService);
 
 // Webhook management
 /**
- * @openapi
+ * @internal // @openapi
  * /v1/webhooks:
  *   post:
  *     tags:
@@ -53,7 +53,7 @@ const webhookController = new WebhookController(webhookService);
 router.post('/', authMiddleware, validateCreateWebhookMiddleware, webhookController.createWebhook.bind(webhookController));
 
 /**
- * @openapi
+ * @internal // @openapi
  * /v1/webhooks:
  *   get:
  *     tags:
@@ -64,7 +64,7 @@ router.get('/', authMiddleware, validateGetWebhooksQueryMiddleware, webhookContr
 
 // Statistics (must come before parameterized routes)
 /**
- * @openapi
+ * @internal // @openapi
  * /v1/webhooks/stats:
  *   get:
  *     tags:
@@ -75,7 +75,7 @@ router.get('/stats', authMiddleware, webhookController.getWebhookStats.bind(webh
 
 // Admin operations (must come before parameterized routes)
 /**
- * @openapi
+ * @internal // @openapi
  * /v1/webhooks/cleanup:
  *   post:
  *     tags:
@@ -86,7 +86,7 @@ router.post('/cleanup', authMiddleware, validateCleanupDeliveriesMiddleware, web
 
 // Individual webhook operations
 /**
- * @openapi
+ * @internal // @openapi
  * /v1/webhooks/{id}:
  *   get:
  *     tags:
@@ -96,7 +96,7 @@ router.post('/cleanup', authMiddleware, validateCleanupDeliveriesMiddleware, web
 router.get('/:id', authMiddleware, validateWebhookIdParamsMiddleware, webhookController.getWebhook.bind(webhookController));
 
 /**
- * @openapi
+ * @internal // @openapi
  * /v1/webhooks/{id}:
  *   put:
  *     tags:
@@ -106,7 +106,7 @@ router.get('/:id', authMiddleware, validateWebhookIdParamsMiddleware, webhookCon
 router.put('/:id', authMiddleware, validateWebhookIdParamsMiddleware, validateUpdateWebhookMiddleware, webhookController.updateWebhook.bind(webhookController));
 
 /**
- * @openapi
+ * @internal // @openapi
  * /v1/webhooks/{id}:
  *   delete:
  *     tags:
@@ -117,7 +117,7 @@ router.delete('/:id', authMiddleware, validateWebhookIdParamsMiddleware, webhook
 
 // Webhook testing and management
 /**
- * @openapi
+ * @internal // @openapi
  * /v1/webhooks/{id}/test:
  *   post:
  *     tags:
@@ -127,7 +127,7 @@ router.delete('/:id', authMiddleware, validateWebhookIdParamsMiddleware, webhook
 router.post('/:id/test', authMiddleware, validateWebhookIdParamsMiddleware, webhookController.testWebhook.bind(webhookController));
 
 /**
- * @openapi
+ * @internal // @openapi
  * /v1/webhooks/{id}/suspend:
  *   post:
  *     tags:
@@ -137,7 +137,7 @@ router.post('/:id/test', authMiddleware, validateWebhookIdParamsMiddleware, webh
 router.post('/:id/suspend', authMiddleware, validateWebhookIdParamsMiddleware, webhookController.suspendWebhook.bind(webhookController));
 
 /**
- * @openapi
+ * @internal // @openapi
  * /v1/webhooks/{id}/activate:
  *   post:
  *     tags:
@@ -148,7 +148,7 @@ router.post('/:id/activate', authMiddleware, validateWebhookIdParamsMiddleware, 
 
 // Delivery management
 /**
- * @openapi
+ * @internal // @openapi
  * /v1/webhooks/{id}/deliveries:
  *   get:
  *     tags:
@@ -158,7 +158,7 @@ router.post('/:id/activate', authMiddleware, validateWebhookIdParamsMiddleware, 
 router.get('/:id/deliveries', authMiddleware, validateWebhookIdParamsMiddleware, validateDeliveriesQueryMiddleware, webhookController.getWebhookDeliveries.bind(webhookController));
 
 /**
- * @openapi
+ * @internal // @openapi
  * /v1/webhooks/{id}/deliveries/{deliveryId}:
  *   get:
  *     tags:
@@ -168,7 +168,7 @@ router.get('/:id/deliveries', authMiddleware, validateWebhookIdParamsMiddleware,
 router.get('/:id/deliveries/:deliveryId', authMiddleware, validateDeliveryIdParamsMiddleware, webhookController.getDeliveryDetails.bind(webhookController));
 
 /**
- * @openapi
+ * @internal // @openapi
  * /v1/webhooks/{id}/deliveries/{deliveryId}/retry:
  *   post:
  *     tags:
@@ -179,7 +179,7 @@ router.post('/:id/deliveries/:deliveryId/retry', authMiddleware, validateDeliver
 
 // Trends and analytics
 /**
- * @openapi
+ * @internal // @openapi
  * /v1/webhooks/{id}/trends:
  *   get:
  *     tags:

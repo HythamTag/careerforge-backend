@@ -280,7 +280,7 @@ export const cvApi = {
     // Poll for completion
     let status = result.status || 'pending';
     let attempts = 0;
-    const maxAttempts = 60;
+    const maxAttempts = 60; // 60 * 2s = 120s timeout
 
     while (status !== 'completed' && status !== 'failed' && attempts < maxAttempts) {
       await new Promise(resolve => setTimeout(resolve, 2000));
@@ -512,7 +512,7 @@ export const cvApi = {
     // Poll for completion
     let status = result.status || 'pending';
     let attempts = 0;
-    const maxAttempts = 60;
+    const maxAttempts = 60; // 60 * 2s = 120s timeout
     let lastError = null;
     let lastStatusData = null;
 
