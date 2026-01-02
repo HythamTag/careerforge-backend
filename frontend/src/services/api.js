@@ -280,7 +280,7 @@ export const cvApi = {
     // Poll for completion
     let status = result.status || 'pending';
     let attempts = 0;
-    const maxAttempts = 30;
+    const maxAttempts = 60;
 
     while (status !== 'completed' && status !== 'failed' && attempts < maxAttempts) {
       await new Promise(resolve => setTimeout(resolve, 2000));
