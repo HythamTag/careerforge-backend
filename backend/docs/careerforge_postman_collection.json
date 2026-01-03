@@ -219,7 +219,7 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n    \"fileName\": \"test-cv.pdf\",\n    \"parsedData\": {\n        \"personalInfo\": {\n            \"fullName\": \"John Doe\"\n        }\n    }\n}"
+                            "raw": "{\n    \"fileName\": \"John_Doe_Full_Stack.pdf\",\n    \"parsedData\": {\n        \"personalInfo\": {\n            \"fullName\": \"John Doe\",\n            \"email\": \"john.doe@example.com\",\n            \"phone\": \"+1234567890\",\n            \"location\": \"San Francisco, CA\",\n            \"linkedin\": \"linkedin.com/in/johndoe\",\n            \"github\": \"github.com/johndoe\"\n        },\n        \"professionalSummary\": \"Experienced Full Stack Developer with 5+ years in building scalable web applications.\",\n        \"experience\": [\n            {\n                \"title\": \"Senior Developer\",\n                \"company\": \"Tech Corp\",\n                \"startDate\": \"2020-01\",\n                \"endDate\": \"Present\",\n                \"description\": \"Led a team of 5 developers...\"\n            }\n        ],\n        \"education\": [\n            {\n                \"degree\": \"B.S. Computer Science\",\n                \"school\": \"University of Tech\",\n                \"year\": \"2019\"\n            }\n        ],\n        \"skills\": [\"JavaScript\", \"React\", \"Node.js\", \"MongoDB\", \"AWS\"]\n    }\n}"
                         },
                         "url": {
                             "raw": "{{baseUrl}}/v1/cvs",
@@ -604,7 +604,7 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n    \"cvId\": \"{{cvId}}\",\n    \"targetRole\": \"Senior Engineer\"\n}"
+                            "raw": "{\n    \"cvId\": \"{{cvId}}\",\n    \"jobDescription\": \"Senior Frontend Engineer needed. Must know React, TypeScript, and Node.js. Experience with AWS is a plus.\",\n    \"targetJobTitle\": \"Senior Frontend Engineer\"\n}"
                         },
                         "url": {
                             "raw": "{{baseUrl}}/v1/optimization-jobs",
@@ -635,7 +635,7 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n    \"cvId\": \"{{cvId}}\",\n    \"jobDescription\": \"We are looking for a Node.js expert...\"\n}"
+                            "raw": "{\n    \"cvId\": \"{{cvId}}\",\n    \"jobDescription\": \"We are looking for a backend developer with Python and Django experience.\"\n}"
                         },
                         "url": {
                             "raw": "{{baseUrl}}/v1/optimization-jobs/tailor",
@@ -760,7 +760,7 @@
     "variable": [
         {
             "key": "baseUrl",
-            "value": "http://localhost:5000",
+            "value": "https://propertied-geographically-scarlet.ngrok-free.dev",
             "type": "string"
         },
         {
