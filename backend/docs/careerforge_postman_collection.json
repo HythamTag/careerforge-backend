@@ -751,7 +751,7 @@
     "variable": [
         {
             "key": "baseUrl",
-            "value": "https://propertied-geographically-scarlet.ngrok-free.dev",
+            "value": "https://careerforge-backend-production.up.railway.app",
             "type": "string"
         },
         {
