@@ -2,12 +2,13 @@
     "info": {
         "_postman_id": "careerforge-api-v2-collection",
         "name": "CareerForge API v2",
-        "description": "Official API collection for CareerForge Backend. Includes all endpoints for CV Parsing, Optimization, ATS Analysis, and PDF Generation.",
+        "description": "# CareerForge API v2\n\nOfficial API collection for the CareerForge Backend. This API provides comprehensive capabilities for CV management, AI-powered parsing, intelligent optimization, ATS analysis, and PDF generation.\n\n## Getting Started\n\n1. **Environment Setup**: The collection uses the `baseUrl` variable. Ensure it is set to your target environment (e.g., `https://propertied-geographically-scarlet.ngrok-free.dev`).\n2. **Authentication**: Most endpoints require a Bearer Token. \n    - Use the **Register** or **Login** request in the `Authentication` folder.\n    - The collection is scripted to automatically save the returned `token` and `userId` to the collection variables upon successful login/registration.\n    - Subsequent requests will automatically use these stored variables.\n3. **Workflows**: Common workflows include:\n    - **Upload & Parse**: Upload a CV -> Check Parsing Status.\n    - **Optimize**: Get CV Details -> Start Full Optimization -> Check Job Status.\n    - **Generate**: Select Template -> Generate PDF -> Download.\n\n## Support\nFor issues or questions, contact the backend team.",
         "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
     },
     "item": [
         {
             "name": "1. Health & System",
+            "description": "Endpoints for checking system status, health, and readiness. Useful for monitoring and Kubernetes probes.",
             "item": [
                 {
                     "name": "Health Check",
@@ -23,7 +24,8 @@
                                 "v1",
                                 "health"
                             ]
-                        }
+                        },
+                        "description": "Returns the basic health status of the API, including uptime and timestamp."
                     },
                     "response": []
                 },
@@ -42,7 +44,8 @@
                                 "health",
                                 "ready"
                             ]
-                        }
+                        },
+                        "description": "Checks if the service is ready to accept traffic. Verifies database and Redis connections."
                     },
                     "response": []
                 }
@@ -50,6 +53,7 @@
         },
         {
             "name": "2. Authentication",
+            "description": "User authentication endpoints. includes registration, login, and profile management. **Note:** Successful login/register automatically sets the `token` variable.",
             "item": [
                 {
                     "name": "Register",
@@ -58,10 +62,15 @@
                             "listen": "test",
                             "script": {
                                 "exec": [
+                                    "pm.test(\"Status code is 201\", function () {",
+                                    "    pm.response.to.have.status(201);",
+                                    "});",
+                                    "",
                                     "if(pm.response.code === 201) {",
                                     "    var jsonData = pm.response.json();",
                                     "    pm.collectionVariables.set(\"token\", jsonData.data.token);",
                                     "    pm.collectionVariables.set(\"userId\", jsonData.data.user.id);",
+                                    "    console.log(\"Token and UserID saved to collection variables.\");",
                                     "}"
                                 ],
                                 "type": "text/javascript"
@@ -90,7 +99,8 @@
                                 "auth",
                                 "register"
                             ]
-                        }
+                        },
+                        "description": "Registers a new user. \n- **Required**: email, password, firstName, lastName.\n- **Auto-Script**: Saves `token` to variables."
                     },
                     "response": []
                 },
@@ -101,10 +111,15 @@
                             "listen": "test",
                             "script": {
                                 "exec": [
+                                    "pm.test(\"Status code is 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
                                     "if(pm.response.code === 200) {",
                                     "    var jsonData = pm.response.json();",
                                     "    pm.collectionVariables.set(\"token\", jsonData.data.token);",
                                     "    pm.collectionVariables.set(\"userId\", jsonData.data.user.id);",
+                                    "    console.log(\"Token and UserID saved to collection variables.\");",
                                     "}"
                                 ],
                                 "type": "text/javascript"
@@ -133,7 +148,8 @@
                                 "auth",
                                 "login"
                             ]
-                        }
+                        },
+                        "description": "Authenticates a user.\n- **Required**: email, password.\n- **Auto-Script**: Saves `token` to variables."
                     },
                     "response": []
                 },
@@ -157,7 +173,8 @@
                                 "users",
                                 "me"
                             ]
-                        }
+                        },
+                        "description": "Retrieves the currently authenticated user's profile."
                     },
                     "response": []
                 }
@@ -165,6 +182,7 @@
         },
         {
             "name": "3. CV Operations",
+            "description": "Core CRUD operations for CVs. Handles uploading, searching, and managing CV entities.",
             "item": [
                 {
                     "name": "List CVs",
@@ -185,7 +203,8 @@
                                 "v1",
                                 "cvs"
                             ]
-                        }
+                        },
+                        "description": "Lists all CVs belonging to the authenticated user. Supports pagination."
                     },
                     "response": []
                 },
@@ -196,9 +215,14 @@
                             "listen": "test",
                             "script": {
                                 "exec": [
+                                    "pm.test(\"Status code is 201\", function () {",
+                                    "    pm.response.to.have.status(201);",
+                                    "});",
+                                    "",
                                     "if(pm.response.code === 201) {",
                                     "    var jsonData = pm.response.json();",
-                                    "    pm.collectionVariables.set(\"cvId\", jsonData.data.id);",
+                                    "    pm.collectionVariables.set(\"cvId\", jsonData.data.id || jsonData.data.cv.id);",
+                                    "    console.log(\"CV ID saved: \" + pm.collectionVariables.get(\"cvId\"));",
                                     "}"
                                 ],
                                 "type": "text/javascript"
@@ -230,12 +254,33 @@
                                 "v1",
                                 "cvs"
                             ]
-                        }
+                        },
+                        "description": "Manually creates a CV record with JSON data. Useful for testing without file upload.\n- **Auto-Script**: Saves `cvId` to variables."
                     },
                     "response": []
                 },
                 {
                     "name": "Upload CV (File)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 201\", function () {",
+                                    "    pm.response.to.have.status(201);",
+                                    "});",
+                                    "",
+                                    "if(pm.response.code === 201) {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    var cvId = jsonData.data.cv ? jsonData.data.cv.id : jsonData.data.id;",
+                                    "    pm.collectionVariables.set(\"cvId\", cvId);",
+                                    "    console.log(\"CV ID saved from upload: \" + cvId);",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
                     "request": {
                         "method": "POST",
                         "header": [
@@ -264,7 +309,8 @@
                                 "cvs",
                                 "upload"
                             ]
-                        }
+                        },
+                        "description": "Uploads a PDF file to create a new CV. Initiates parsing automatically.\n- **Body**: multipart/form-data with `file` field.\n- **Auto-Script**: Saves `cvId` to variables."
                     },
                     "response": []
                 },
@@ -291,10 +337,12 @@
                             "query": [
                                 {
                                     "key": "q",
-                                    "value": "developer"
+                                    "value": "developer",
+                                    "description": "Search query term"
                                 }
                             ]
-                        }
+                        },
+                        "description": "Searches through CV content using keywords."
                     },
                     "response": []
                 },
@@ -318,81 +366,8 @@
                                 "cvs",
                                 "{{cvId}}"
                             ]
-                        }
-                    },
-                    "response": []
-                },
-                {
-                    "name": "Get CV Stats",
-                    "request": {
-                        "method": "GET",
-                        "header": [
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{token}}"
-                            }
-                        ],
-                        "url": {
-                            "raw": "{{baseUrl}}/v1/cvs/stats",
-                            "host": [
-                                "{{baseUrl}}"
-                            ],
-                            "path": [
-                                "v1",
-                                "cvs",
-                                "stats"
-                            ]
-                        }
-                    },
-                    "response": []
-                },
-                {
-                    "name": "Get CV Status",
-                    "request": {
-                        "method": "GET",
-                        "header": [
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{token}}"
-                            }
-                        ],
-                        "url": {
-                            "raw": "{{baseUrl}}/v1/cvs/{{cvId}}/status",
-                            "host": [
-                                "{{baseUrl}}"
-                            ],
-                            "path": [
-                                "v1",
-                                "cvs",
-                                "{{cvId}}",
-                                "status"
-                            ]
-                        }
-                    },
-                    "response": []
-                },
-                {
-                    "name": "Get CV Versions",
-                    "request": {
-                        "method": "GET",
-                        "header": [
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{token}}"
-                            }
-                        ],
-                        "url": {
-                            "raw": "{{baseUrl}}/v1/cvs/{{cvId}}/versions",
-                            "host": [
-                                "{{baseUrl}}"
-                            ],
-                            "path": [
-                                "v1",
-                                "cvs",
-                                "{{cvId}}",
-                                "versions"
-                            ]
-                        }
+                        },
+                        "description": "Gets full details of a specific CV by ID."
                     },
                     "response": []
                 },
@@ -425,12 +400,13 @@
                                 "{{cvId}}",
                                 "duplicate"
                             ]
-                        }
+                        },
+                        "description": "Creates a duplicate copy of an existing CV."
                     },
                     "response": []
                 },
                 {
-                    "name": "Update CV State (Publish/Archive)",
+                    "name": "Update CV State",
                     "request": {
                         "method": "PATCH",
                         "header": [
@@ -457,7 +433,8 @@
                                 "cvs",
                                 "{{cvId}}"
                             ]
-                        }
+                        },
+                        "description": "Updates metadata/state of a CV (e.g., publish, archive)."
                     },
                     "response": []
                 },
@@ -489,7 +466,8 @@
                                 "cvs",
                                 "bulk"
                             ]
-                        }
+                        },
+                        "description": "Performs actions on multiple CVs at once. Supported actions: `archive`, `delete`."
                     },
                     "response": []
                 },
@@ -513,7 +491,8 @@
                                 "cvs",
                                 "{{cvId}}"
                             ]
-                        }
+                        },
+                        "description": "Permanently deletes a CV."
                     },
                     "response": []
                 }
@@ -521,6 +500,7 @@
         },
         {
             "name": "4. Parsing Jobs",
+            "description": "Manage asynchronous parsing jobs. Used to track progress of CV text extraction.",
             "item": [
                 {
                     "name": "Start Parsing",
@@ -549,7 +529,8 @@
                                 "v1",
                                 "parsing-jobs"
                             ]
-                        }
+                        },
+                        "description": "Manually triggers a parsing job for a CV."
                     },
                     "response": []
                 },
@@ -579,7 +560,8 @@
                                     "value": "{{cvId}}"
                                 }
                             ]
-                        }
+                        },
+                        "description": "Gets history of parsing jobs for a specific CV."
                     },
                     "response": []
                 }
@@ -587,6 +569,7 @@
         },
         {
             "name": "5. Optimization Jobs",
+            "description": "AI-powered optimization endpoints. Improve CV content or tailor it to specific job descriptions.",
             "item": [
                 {
                     "name": "Start Full Optimization",
@@ -615,7 +598,8 @@
                                 "v1",
                                 "optimization-jobs"
                             ]
-                        }
+                        },
+                        "description": "Starts a comprehensive AI optimization job.\n- **Required**: `cvId`, `targetJobTitle`.\n- **Optional**: `jobDescription` (for tailoring)."
                     },
                     "response": []
                 },
@@ -647,7 +631,8 @@
                                 "optimization-jobs",
                                 "tailor"
                             ]
-                        }
+                        },
+                        "description": "Specific endpoint to tailor existing CV identifiers to a new job description."
                     },
                     "response": []
                 }
@@ -655,6 +640,7 @@
         },
         {
             "name": "6. ATS Analyses",
+            "description": "Endpoints to analyze CVs against Applicant Tracking Systems (ATS) criteria.",
             "item": [
                 {
                     "name": "Start ATS Analysis",
@@ -683,7 +669,8 @@
                                 "v1",
                                 "ats-analyses"
                             ]
-                        }
+                        },
+                        "description": "Starts an ATS analysis job to score the CV against a job description."
                     },
                     "response": []
                 }
@@ -691,6 +678,7 @@
         },
         {
             "name": "7. PDF Generation",
+            "description": "Endpoints to generate and download PDF versions of the optimized CVs.",
             "item": [
                 {
                     "name": "Generate PDF",
@@ -719,7 +707,8 @@
                                 "v1",
                                 "pdf-generations"
                             ]
-                        }
+                        },
+                        "description": "Starts a PDF generation job.\n- **Template Options**: `modern`, `classic`, `creative`."
                     },
                     "response": []
                 },
@@ -747,10 +736,12 @@
                             "variable": [
                                 {
                                     "key": "jobId",
-                                    "value": "JOB_ID_HERE"
+                                    "value": "JOB_ID_HERE",
+                                    "description": "ID of the completed PDF generation job"
                                 }
                             ]
-                        }
+                        },
+                        "description": "Downloads the generated PDF file. Requires `jobId` from the Generation response."
                     },
                     "response": []
                 }
