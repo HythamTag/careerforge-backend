@@ -24,13 +24,13 @@ module.exports = {
             },
             type: {
                 type: 'string',
-                enum: ['parsing', 'optimization', 'generation', 'ats-analysis'],
-                example: 'parsing',
+                enum: ['cv_parsing', 'cv_optimization', 'cv_generation', 'cv_enhancement', 'ats_analysis', 'webhook_delivery'],
+                example: 'cv_parsing',
                 description: 'Type of background job'
             },
             status: {
                 type: 'string',
-                enum: ['pending', 'processing', 'completed', 'failed', 'canceled'],
+                enum: ['pending', 'queued', 'processing', 'completed', 'failed', 'cancelled', 'retrying', 'timeout'],
                 example: 'completed',
                 description: 'Current job status'
             },

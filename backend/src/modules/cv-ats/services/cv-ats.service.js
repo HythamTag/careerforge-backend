@@ -163,9 +163,9 @@ class CvAtsService {
       queuedAt: analysis.queuedAt,
       estimatedTime: this.getEstimatedTimeForType(type),
       _links: {
-        self: `/v1/cv-ats/${job._id}`,
-        status: `/v1/cv-ats/${job._id}`,
-        cancel: `/v1/cv-ats/${job._id}/cancel`,
+        self: `/v1/ats-analyses/${job._id}`,
+        status: `/v1/ats-analyses/${job._id}`,
+        cancel: `/v1/ats-analyses/${job._id}/cancel`,
       },
     };
   }
@@ -212,9 +212,9 @@ class CvAtsService {
       retryCount: atsAnalysis.retryCount,
       jobStatus: job ? job.status : null,
       _links: {
-        self: `/v1/cv-ats/${jobId}`,
-        result: atsAnalysis.status === ATS_STATUS.COMPLETED ? `/v1/cv-ats/${jobId}/result` : null,
-        cancel: [ATS_STATUS.PENDING, ATS_STATUS.PROCESSING].includes(atsAnalysis.status) ? `/v1/cv-ats/${jobId}/cancel` : null,
+        self: `/v1/ats-analyses/${jobId}`,
+        result: atsAnalysis.status === ATS_STATUS.COMPLETED ? `/v1/ats-analyses/${jobId}/result` : null,
+        cancel: [ATS_STATUS.PENDING, ATS_STATUS.PROCESSING].includes(atsAnalysis.status) ? `/v1/ats-analyses/${jobId}/cancel` : null,
       },
     };
   }
@@ -251,8 +251,8 @@ class CvAtsService {
       aiModel: atsAnalysis.aiModel,
       completedAt: atsAnalysis.completedAt,
       _links: {
-        self: `/v1/cv-ats/${jobId}/result`,
-        analysis: `/v1/cv-ats/${jobId}`,
+        self: `/v1/ats-analyses/${jobId}/result`,
+        analysis: `/v1/ats-analyses/${jobId}`,
       },
     };
   }
@@ -304,13 +304,13 @@ class CvAtsService {
         status: analysis.cvId.status,
       } : null,
       _links: {
-        self: `/v1/cv-ats/${analysis.jobId}`,
-        result: analysis.status === ATS_STATUS.COMPLETED ? `/v1/cv-ats/${analysis.jobId}/result` : null,
+        self: `/v1/ats-analyses/${analysis.jobId}`,
+        result: analysis.status === ATS_STATUS.COMPLETED ? `/v1/ats-analyses/${analysis.jobId}/result` : null,
       },
     }));
 
     const paginationInfo = pagination.calculate(page, limit, total);
-    const baseUrl = '/v1/cv-ats/history';
+    const baseUrl = '/v1/ats-analyses/history';
 
     return {
       data: historyItems,
@@ -365,8 +365,8 @@ class CvAtsService {
       scoreDistribution,
       topSuggestions,
       _links: {
-        self: '/v1/cv-ats/stats',
-        history: '/v1/cv-ats/history',
+        self: '/v1/ats-analyses/stats',
+        history: '/v1/ats-analyses/history',
       },
     };
   }

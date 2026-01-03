@@ -11,6 +11,7 @@ const fs = require('fs');
 const path = require('path');
 const logger = require('@utils/logger');
 const config = require('@config');
+const CVProcessingLogger = require('@messaging/workers/processors/CVProcessingLogger');
 
 class CVOptimizerService {
   /**
@@ -64,6 +65,127 @@ class CVOptimizerService {
     fieldsToRemove.forEach(field => delete cleaned[field]);
 
     return cleaned;
+    return cleaned;
+  }
+
+  /**
+   * Verify identity and restore if hallucinated.
+   * Compares input name/email with output and restores input if mismatch found.
+   * @private
+   */
+  _verifyAndRestoreIdentity(inputCV, outputCV) {
+    if (!inputCV || !outputCV) return outputCV;
+
+    // Helper to get name
+    const getName = (cv) => {
+      // Handle normalized
+      if (cv.personalInfo && (cv.personalInfo.firstName || cv.personalInfo.lastName)) {
+        return `${cv.personalInfo.firstName || ''} ${cv.personalInfo.lastName || ''}`.trim();
+      }
+      // Handle flat structure (legacy/AI output)
+      if (cv.name) return cv.name.trim();
+      if (cv.personal && cv.personal.name) return cv.personal.name.trim();
+      return '';
+    };
+
+    const inputName = getName(inputCV);
+    const outputName = getName(outputCV);
+
+    // Safety Force: If input has personalInfo, overwrite output's personalInfo
+    // This guarantees the name/contact never hallucinates.
+    if (inputCV.personalInfo && outputName && inputName && inputName.toLowerCase() !== outputName.toLowerCase()) {
+      logger.warn('Hallucination detected in identity! Restoring original identity.', {
+        inputName,
+        outputName
+      });
+
+      // Restore Personal Info block from input
+      if (outputCV.personalInfo && inputCV.personalInfo) {
+        // Keep output structure but force critical fields
+        outputCV.personalInfo = {
+          ...outputCV.personalInfo,
+          firstName: inputCV.personalInfo.firstName,
+          lastName: inputCV.personalInfo.lastName,
+          email: inputCV.personalInfo.email,
+          phone: inputCV.personalInfo.phone,
+          links: inputCV.personalInfo.links || outputCV.personalInfo.links // Keep original links just in case
+        };
+        // Or just blunt force overwrite to be safe
+        outputCV.personalInfo = inputCV.personalInfo;
+      }
+      // If flat structure
+      else {
+        outputCV.name = inputName;
+      }
+    }
+
+    return outputCV;
+  }
+
+  /**
+   * Verify identity and restore if hallucinated.
+   * Compares input name/email with output and restores input if mismatch found.
+   * @private
+   */
+  _verifyAndRestoreIdentity(inputCV, outputCV) {
+    if (!inputCV || !outputCV) return outputCV;
+
+    // Helper to get name
+    const getName = (cv) => {
+      // Handle normalized
+      if (cv.personalInfo && (cv.personalInfo.firstName || cv.personalInfo.lastName)) {
+        return `${cv.personalInfo.firstName || ''} ${cv.personalInfo.lastName || ''}`.trim();
+      }
+      // Handle flat structure (legacy/AI output)
+      if (cv.name) return cv.name.trim();
+      if (cv.personal && cv.personal.name) return cv.personal.name.trim();
+      return '';
+    };
+
+    const inputName = getName(inputCV);
+    const outputName = getName(outputCV);
+
+    // If we have an input name and output name matches "Hyunwoo Kim" (hallucination) or completely differs...
+    // Actually, let's just restore Personal Info from input if we have it.
+    // Optimization shouldn't really change Personal Info anyway (except formatting).
+
+    // Safety Force: If input has personalInfo, overwrite output's personalInfo
+    // This guarantees the name/contact never hallucinates.
+    if (inputCV.personalInfo && outputName && inputName && inputName.toLowerCase() !== outputName.toLowerCase()) {
+      logger.warn('Hallucination detected in identity! Restoring original identity.', {
+        inputName,
+        outputName
+      });
+
+      // We want to keep the "Optimized" parts of personal info if possible (e.g. formatted links), 
+      // but NOT the name.
+      // safest bet: Restore name, email, phone. Keep links if they look new?
+      // No, safest is to restore the whole Personal Info block.
+
+      // But verify structure first
+      if (outputCV.personalInfo) {
+        outputCV.personalInfo.firstName = inputCV.personalInfo.firstName;
+        outputCV.personalInfo.lastName = inputCV.personalInfo.lastName;
+        outputCV.personalInfo.email = inputCV.personalInfo.email;
+        outputCV.personalInfo.phone = inputCV.personalInfo.phone;
+        // We keep the "headline" or "summary" if it was optimized elsewhere
+        // But Personal Info is mostly static.
+      } else {
+        // Output might be flat
+        outputCV.name = inputName;
+        // ...
+      }
+
+      // Actually, if using CVDataTransformer structure:
+      if (outputCV.personalInfo && inputCV.personalInfo) {
+        outputCV.personalInfo = { ...outputCV.personalInfo, ...inputCV.personalInfo };
+        // Force overwrite basic details, keep any extras added by AI? 
+        // Actually input should be source of truth for PII.
+        outputCV.personalInfo = inputCV.personalInfo;
+      }
+    }
+
+    return outputCV;
   }
 
   /**
@@ -75,6 +197,17 @@ class CVOptimizerService {
      */
   async optimizeContent(cvData, options = {}) {
     const cleanedData = this._cleanCVData(cvData);
+
+    // DEBUG: Log the data being sent to the optimizer
+    logger.info('Optimizer Service - Input Data Check', {
+      originalKeys: Object.keys(cvData),
+      cleanedKeys: Object.keys(cleanedData),
+      hasExperience: !!cleanedData.workExperience?.length,
+      hasEducation: !!cleanedData.education?.length,
+      hasProjects: !!cleanedData.projects?.length,
+      sampleExperience: cleanedData.workExperience?.[0]?.company
+    });
+
     const prompt = this.prompts.optimizer.replace('{{PARSED_CV_JSON}}', JSON.stringify(cleanedData, null, 2));
     const messages = [{ role: 'user', content: prompt }];
 
@@ -85,7 +218,33 @@ class CVOptimizerService {
       model: options.model,
     });
 
-    return await this.aiService.parseJSONResponse(response);
+    const optimizedCV = await this.aiService.parseJSONResponse(response);
+
+    // CRITICAL: Verify identity hasn't been hallucinated
+    const verifiedCV = this._verifyAndRestoreIdentity(cvData, optimizedCV);
+
+    // Initialize logger for this optimization job
+    const cvTitle = cvData.title || cvData.metadata?.originalName || 'Optimized CV';
+    const jobId = options.jobId || `opt_${Date.now()}`;
+    const cvUniqueId = cvData._id || cvData.id || `temp_${Date.now()}`;
+
+    // Create logger with robust error handling
+    try {
+      const processingLogger = new CVProcessingLogger(cvUniqueId, cvTitle, jobId);
+      await processingLogger.init({
+        fileName: 'optimized_content',
+        mimeType: 'application/json',
+        action: 'optimization'
+      });
+      await processingLogger.saveAIResponse(response);
+      await processingLogger.saveOptimizedContent(verifiedCV);
+      await processingLogger.finalizeSuccess({ optimizedSections: Object.keys(verifiedCV) });
+      logger.info('Optimization logs saved successfully');
+    } catch (logErr) {
+      logger.warn('Failed to save optimization logs', { error: logErr.message });
+    }
+
+    return verifiedCV;
   }
 
   /**
@@ -142,12 +301,44 @@ Return ONLY valid JSON with optimized content.`;
     logger.info('Starting CV tailoring with COT strategy');
 
     // Step 1: Analyze alignment (Strategic Analysis)
+    logger.info('TailorForJob - Starting Analysis', {
+      jobTitle: jobData.title,
+      cvId: cvData._id || cvData.id
+    });
     const analysis = await this._analyzeAlignment(cvData, jobData, options);
 
     // Step 2: Rewrite content based on analysis
+    // Step 2: Rewrite content based on analysis
     const tailoredCV = await this._rewriteContent(cvData, jobData, analysis, options);
 
-    return tailoredCV;
+    // CRITICAL: Verify identity hasn't been hallucinated
+    const verifiedCV = this._verifyAndRestoreIdentity(cvData, tailoredCV);
+
+    // Initialize logger for this tailoring job
+    const cvTitle = cvData.title || cvData.metadata?.originalName || 'Tailored CV';
+    const jobId = options.jobId || `tailor_${Date.now()}`;
+    const cvUniqueId = cvData._id || cvData.id || `temp_${Date.now()}`;
+
+    const processingLogger = new CVProcessingLogger(cvUniqueId, cvTitle, jobId);
+
+    try {
+      await processingLogger.init({
+        fileName: 'tailored_content',
+        mimeType: 'application/json',
+        action: 'tailoring',
+        jobTitle: jobData.title
+      });
+
+      // Save analysis as separate file
+      await processingLogger.saveFile('analysis.json', analysis);
+      await processingLogger.saveOptimizedContent(verifiedCV);
+      await processingLogger.finalizeSuccess({ tailoredSections: Object.keys(verifiedCV) });
+      logger.info('Tailoring logs saved successfully');
+    } catch (logErr) {
+      logger.warn('Failed to save tailoring logs', { error: logErr.message });
+    }
+
+    return verifiedCV;
   }
 
   /**
@@ -197,6 +388,12 @@ Return ONLY valid JSON with optimized content.`;
     if (!prompt) return cvData;
 
     const cleanedData = this._cleanCVData(cvData);
+
+    // DEBUG: Log tailoring input
+    logger.info('TailorForJob - Rewriting Content', {
+      analysisKeys: Object.keys(analysis || {}),
+      hasCVData: !!cleanedData.workExperience
+    });
 
     const jobRequirements = jobData.requirements
       ? jobData.requirements.join(', ')

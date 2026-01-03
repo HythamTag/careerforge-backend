@@ -105,7 +105,10 @@ class CVService {
           },
         };
 
-        return await this.cvRepository.createCV(cvData, { session });
+        // Create CV record without initial version
+        // First version will be created after parsing completes with actual content
+        const createdCV = await this.cvRepository.createCV(cvData, { session });
+        return createdCV;
       });
 
       // 3. Start parsing job (Background operation)
@@ -163,6 +166,34 @@ class CVService {
 
       // Validate updates
       this._validateCVUpdates(updates);
+
+      // Handle Published state transition
+      if (updates.published !== undefined) {
+        if (updates.published) {
+          const publicUrl = this._generatePublicUrl(cvId);
+          updates['metadata.isPublic'] = true;
+          updates['metadata.publicUrl'] = publicUrl;
+        } else {
+          updates['metadata.isPublic'] = false;
+          updates['metadata.publicUrl'] = null;
+        }
+        delete updates.published;
+      }
+
+      // Handle Archived state transition
+      if (updates.archived !== undefined) {
+        updates.status = updates.archived ? CV_ENTITY_STATUS.ARCHIVED : CV_ENTITY_STATUS.DRAFT;
+        delete updates.archived;
+      }
+
+      // Handle partial parsedData update (parsedData -> content)
+      if (updates.parsedData) {
+        updates.content = {
+          ...(currentCV.content || {}),
+          ...updates.parsedData
+        };
+        delete updates.parsedData;
+      }
 
       // Create version before updating (if content changed)
       if (updates.content && this._hasValidContent(currentCV.content)) {
@@ -440,6 +471,7 @@ class CVService {
     const allowedFields = [
       'title', 'description', 'tags', 'content', 'status',
       'metadata', 'settings', 'template',
+      'published', 'archived', 'parsedData',
     ];
 
     const updateFields = Object.keys(updates);
@@ -528,8 +560,29 @@ class CVService {
     return await this.cvRepository.searchCVs(userId, searchOptions);
   }
 
-  async getCVById(cvId, userId) {
-    return await this.cvRepository.getCVById(cvId, userId);
+  async getCVById(cvId, userId, options = {}) {
+    const cv = await this.cvRepository.getCVById(cvId, userId);
+    if (!cv) return null;
+
+    // Include active version info if requested
+    if (options.includeActiveVersion && this.cvVersionRepository) {
+      try {
+        const activeVersion = await this.cvVersionRepository.getActiveVersion(cvId);
+        if (activeVersion) {
+          cv._doc.activeVersion = {
+            id: activeVersion.id,
+            versionNumber: activeVersion.versionNumber,
+            name: activeVersion.name,
+            changeType: activeVersion.changeType,
+            createdAt: activeVersion.createdAt,
+          };
+        }
+      } catch (err) {
+        logger.warn('Failed to get active version for CV', { cvId, error: err.message });
+      }
+    }
+
+    return cv;
   }
 
   async getCVStats(userId) {

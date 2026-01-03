@@ -20,7 +20,7 @@ class CvAtsController {
 
   /**
    * Start a new ATS analysis job
-   * POST /v1/cv-ats
+   * POST /v1/ats-analyses
    */
   async startAnalysis(req, res, next) {
     try {
@@ -90,7 +90,7 @@ class CvAtsController {
 
   /**
      * Get ATS analysis job status
-     * GET /v1/cv-ats/:jobId
+     * GET /v1/ats-analyses/:id
      */
   async getAnalysisStatus(req, res, next) {
     try {
@@ -107,7 +107,7 @@ class CvAtsController {
 
   /**
      * Get ATS analysis result
-     * GET /v1/cv-ats/:jobId/result
+     * GET /v1/ats-analyses/:id/result
      */
   async getAnalysisResult(req, res, next) {
     try {
@@ -124,7 +124,7 @@ class CvAtsController {
 
   /**
      * Cancel ATS analysis job
-     * POST /v1/cv-ats/:jobId/cancel
+     * POST /v1/ats-analyses/:id/cancel
      */
   async cancelAnalysis(req, res, next) {
     try {
@@ -141,7 +141,7 @@ class CvAtsController {
 
   /**
      * Get user's ATS analysis history
-     * GET /v1/analysis/history
+     * GET /v1/ats-analyses/history
      */
   async getAnalysisHistory(req, res, next) {
     try {
@@ -172,7 +172,7 @@ class CvAtsController {
 
   /**
      * Get ATS analysis statistics
-     * GET /v1/analysis/stats
+     * GET /v1/ats-analyses/stats
      */
   async getAnalysisStats(req, res, next) {
     try {
@@ -191,7 +191,7 @@ class CvAtsController {
 
   /**
      * Get ATS analysis trends
-     * GET /v1/analysis/trends
+     * GET /v1/ats-analyses/trends
      */
   async getAnalysisTrends(req, res, next) {
     try {
@@ -209,7 +209,7 @@ class CvAtsController {
 
   /**
      * Get recent analyses with scores
-     * GET /v1/analysis/recent-scores
+     * GET /v1/ats-analyses/recent-scores
      */
   async getRecentAnalysesWithScores(req, res, next) {
     try {

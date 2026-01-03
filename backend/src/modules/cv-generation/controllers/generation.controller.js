@@ -19,7 +19,7 @@ class GenerationController {
 
   /**
    * Start a new CV generation job
-   * POST /v1/generation
+   * POST /v1/pdf-generations
    */
   async startGeneration(req, res, next) {
     try {
@@ -39,7 +39,7 @@ class GenerationController {
 
   /**
    * Get generation job status
-   * GET /v1/generation/:jobId
+   * GET /v1/pdf-generations/:jobId
    */
   async getGenerationStatus(req, res, next) {
     try {
@@ -55,7 +55,7 @@ class GenerationController {
 
   /**
    * Download generated CV
-   * GET /v1/generation/:jobId/download
+   * GET /v1/pdf-generations/:jobId/download
    */
   async downloadGeneration(req, res, next) {
     try {
@@ -75,7 +75,7 @@ class GenerationController {
 
   /**
    * Cancel generation job
-   * POST /v1/generation/:jobId/cancel
+   * POST /v1/pdf-generations/:jobId/cancel
    */
   async cancelGeneration(req, res, next) {
     try {
@@ -91,7 +91,7 @@ class GenerationController {
 
   /**
    * Get user's generation history
-   * GET /v1/generation/history
+   * GET /v1/pdf-generations/history
    */
   async getGenerationHistory(req, res, next) {
     try {
@@ -112,7 +112,7 @@ class GenerationController {
 
   /**
    * Get generation statistics
-   * GET /v1/generation/stats
+   * GET /v1/pdf-generations/stats
    */
   async getGenerationStats(req, res, next) {
     try {
@@ -127,7 +127,7 @@ class GenerationController {
 
   /**
    * Preview generation
-   * POST /v1/generation/preview
+   * POST /v1/pdf-generations/preview
    */
   async previewGeneration(req, res, next) {
     try {

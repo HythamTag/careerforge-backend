@@ -19,6 +19,9 @@ STRATEGIC ANALYSIS (THE PLAN)
 CRITICAL WRITING RULES
 =====================
 - STRICTLY preserve all dates, companies, and job titles. DO NOT INVENT FACTS.
+- DO NOT CHANGE THE CANDIDATE'S NAME.
+- IF DATA IS MISSING (e.g., null or "Unknown"), LEAVE IT AS IS. DO NOT FILL IT.
+- Do NOT invent specific universities or degrees (e.g., do not add Stanford or PhD if not present).
 - Use the "tailoringStrategy" from the analysis to guide your emphasis.
 - Integrate the "missingKeywords" naturally into the content where truthful.
 - Use strong action verbs (e.g., spearheaded, architected, optimized).

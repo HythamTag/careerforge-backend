@@ -69,8 +69,11 @@ class CVDataTransformer {
 
     logger.debug('Cleaning AI output for consistency', { operation: 'CVDataTransformer.cleanAIOutput' });
 
-    // 1. Recursively convert empty strings to null or remove them
+    // 1. Recursively convert empty strings and "Invalid Date" to null
     let cleaned = this._normalizeEmptyStringsRecursive(cv);
+
+    // Specific fix for "Invalid Date" string which causes AI hallucinations
+    cleaned = this._sanitizeInvalidValuesRecursive(cleaned);
 
     // 2. Filter invalid experience entries (must have company and title/role)
     if (Array.isArray(cleaned.workExperience || cleaned.experience)) {
@@ -358,6 +361,31 @@ class CVDataTransformer {
       const normalized = {};
       for (const key in obj) {
         normalized[key] = this._normalizeEmptyStringsRecursive(obj[key]);
+      }
+      return normalized;
+    }
+
+    return obj;
+  }
+
+  /**
+   * Recursively clean "Invalid Date" and other bad values.
+   * @private
+   */
+  static _sanitizeInvalidValuesRecursive(obj) {
+    if (typeof obj === 'string') {
+      if (obj === 'Invalid Date' || obj === 'Invalid date') return null;
+      return obj;
+    }
+
+    if (Array.isArray(obj)) {
+      return obj.map(item => this._sanitizeInvalidValuesRecursive(item));
+    }
+
+    if (typeof obj === 'object' && obj !== null) {
+      const normalized = {};
+      for (const key in obj) {
+        normalized[key] = this._sanitizeInvalidValuesRecursive(obj[key]);
       }
       return normalized;
     }

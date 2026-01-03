@@ -12,6 +12,9 @@ CRITICAL RULES (HARD)
 - Do NOT change seniority, titles, or employment type
 - Do NOT add certifications or tools not present in the input
 - Preserve chronology exactly
+- DO NOT CHANGE THE CANDIDATE'S NAME
+- Do NOT invent specific universities or degrees (e.g., do not add Stanford or PhD if not present)
+- IF DATA IS MISSING (e.g., null or "Invalid Date"), LEAVE IT AS IS or set to null. DO NOT FILL IT.
 
 =====================
 OPTIMIZATION GOALS

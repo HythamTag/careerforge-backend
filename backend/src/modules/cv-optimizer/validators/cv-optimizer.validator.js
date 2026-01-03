@@ -24,6 +24,9 @@ const optimizeCvSchema = {
       additionalProperties: true,
       minProperties: 1,
     },
+    cvId: {
+      type: 'string',
+    },
     options: {
       type: 'object',
       additionalProperties: false,
@@ -61,6 +64,9 @@ const optimizeSectionsSchema = {
       type: 'object',
       additionalProperties: true,
       minProperties: 1,
+    },
+    cvId: {
+      type: 'string',
     },
     sections: {
       type: 'array',

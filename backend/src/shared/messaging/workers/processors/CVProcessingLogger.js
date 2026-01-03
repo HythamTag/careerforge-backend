@@ -95,8 +95,8 @@ class CVProcessingLogger {
   }
 
   /**
-     * Save parsed content
-     */
+   * Save parsed content
+   */
   async saveParsedContent(parsedContent) {
     if (!this.initialized) { return; }
 
@@ -107,6 +107,22 @@ class CVProcessingLogger {
       });
     } catch (error) {
       this.log('ERROR', 'Failed to save parsed content', { error: error.message });
+    }
+  }
+
+  /**
+   * Save optimized content
+   */
+  async saveOptimizedContent(optimizedContent) {
+    if (!this.initialized) { return; }
+
+    try {
+      await this.saveFile('optimized_cv.json', optimizedContent);
+      this.log('INFO', 'Optimized content saved', {
+        sections: Object.keys(optimizedContent || {}).length,
+      });
+    } catch (error) {
+      this.log('ERROR', 'Failed to save optimized content', { error: error.message });
     }
   }
 

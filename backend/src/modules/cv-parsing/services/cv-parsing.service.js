@@ -11,6 +11,9 @@ const {
   JOB_LIMITS,
   CV_ENTITY_STATUS,
   CV_STATUS,
+  CV_VERSION_NAMES,
+  CV_VERSION_DESCRIPTIONS,
+  CV_VERSION_CHANGE_TYPE,
 } = require('@constants');
 const { requireOwnership } = require('@utils');
 const JobIdGenerator = require('@modules/jobs/services/job-id.generator');
@@ -34,7 +37,8 @@ class CVParsingService {
     cvRepository,
     fileService,
     aiContentParserService,
-    parserStrategyRegistry
+    parserStrategyRegistry,
+    cvVersionRepository
   ) {
     this.cvParsingRepository = cvParsingRepository;
     this.jobService = jobService;
@@ -42,6 +46,7 @@ class CVParsingService {
     this.fileService = fileService;
     this.aiContentParserService = aiContentParserService;
     this.parserStrategyRegistry = parserStrategyRegistry;
+    this.cvVersionRepository = cvVersionRepository;
     this.idGenerator = new JobIdGenerator();
   }
 
@@ -515,6 +520,32 @@ class CVParsingService {
           parsingStatus: updatedCV.parsingStatus,
           isParsed: updatedCV.isParsed,
         });
+
+        // Create the FIRST version with parsed content (marked as active)
+        if (this.cvVersionRepository && normalizedContent && Object.keys(normalizedContent).length > 0) {
+          try {
+            await this.cvVersionRepository.createVersion({
+              cvId: cv.id,
+              versionNumber: 1,
+              userId: parsingJob.userId,
+              name: CV_VERSION_NAMES.PARSED,
+              description: CV_VERSION_DESCRIPTIONS.PARSED,
+              content: normalizedContent,
+              changeType: CV_VERSION_CHANGE_TYPE.AI_PARSED,
+              isActive: true,
+              metadata: {
+                wordCount: result.wordCount || 0,
+                sectionCount: result.sectionsFound?.length || 0,
+              },
+            });
+            logger.info('Created initial version with parsed content', { cvId: cv.id, versionNumber: 1 });
+          } catch (versionError) {
+            logger.warn('Failed to create initial version after parsing', {
+              error: versionError.message,
+              cvId: cv.id,
+            });
+          }
+        }
       } catch (updateError) {
         logger.error('Failed to update CV record after parsing', {
           error: updateError.message,

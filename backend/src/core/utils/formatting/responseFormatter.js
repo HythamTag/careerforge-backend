@@ -150,10 +150,17 @@ class ResponseFormatter {
     // Add item-level links if provided
     let processedData = data;
     if (itemLinks && Array.isArray(data)) {
-      processedData = data.map((item, index) => ({
-        ...item,
-        _links: itemLinks(item, index),
-      }));
+      processedData = data.map((item, index) => {
+        // Convert Mongoose document to plain object with virtuals
+        const plainItem = item.toJSON ? item.toJSON() : item;
+        return {
+          ...plainItem,
+          _links: itemLinks(plainItem, index),
+        };
+      });
+    } else if (Array.isArray(data)) {
+      // Even without item links, ensure Mongoose documents are properly serialized
+      processedData = data.map(item => item.toJSON ? item.toJSON() : item);
     }
 
     const response = {
@@ -198,10 +205,15 @@ class ResponseFormatter {
 
     let processedItems = items;
     if (itemLinks && Array.isArray(items)) {
-      processedItems = items.map((item, index) => ({
-        ...item,
-        _links: itemLinks(item, index),
-      }));
+      processedItems = items.map((item, index) => {
+        const plainItem = item.toJSON ? item.toJSON() : item;
+        return {
+          ...plainItem,
+          _links: itemLinks(plainItem, index),
+        };
+      });
+    } else if (Array.isArray(items)) {
+      processedItems = items.map(item => item.toJSON ? item.toJSON() : item);
     }
 
     return this.success(processedItems, {

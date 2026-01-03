@@ -524,6 +524,18 @@ const updateCVBodySchema = {
         },
       },
     },
+    published: {
+      type: 'boolean',
+      description: 'Publish or unpublish the CV',
+    },
+    archived: {
+      type: 'boolean',
+      description: 'Archive or unarchive the CV',
+    },
+    parsedData: {
+      type: 'object',
+      description: 'Partially update parsed data',
+    },
   },
   minProperties: 1,
 };

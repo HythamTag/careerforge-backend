@@ -227,9 +227,30 @@ module.exports = {
             },
             status: {
                 type: 'string',
-                enum: ['pending', 'processing', 'completed', 'failed', 'optimized'],
-                example: 'completed',
-                description: 'Current processing status'
+                enum: ['draft', 'published', 'archived', 'processing', 'failed', 'deleted'],
+                example: 'published',
+                description: 'Current status of the CV record (Draft, Published, Archived, etc.)'
+            },
+            published: {
+                type: 'boolean',
+                example: true,
+                description: 'Whether the CV is publicly accessible via its public URL'
+            },
+            archived: {
+                type: 'boolean',
+                example: false,
+                description: 'Whether the CV has been archived'
+            },
+            isParsed: {
+                type: 'boolean',
+                example: true,
+                description: 'Whether the CV has been successfully parsed'
+            },
+            parsingStatus: {
+                type: 'string',
+                enum: ['pending', 'queued', 'processing', 'parsed', 'optimized', 'failed'],
+                example: 'parsed',
+                description: 'Detailed processing/parsing state'
             },
             parsingProgress: {
                 type: 'number',
@@ -328,8 +349,8 @@ module.exports = {
             },
             changeType: {
                 type: 'string',
-                enum: ['manual', 'optimization', 'parsing', 'import'],
-                example: 'parsing',
+                enum: ['manual', 'ai_optimized', 'parsing', 'import', 'system_generated'],
+                example: 'ai_optimized',
                 description: 'How this version was created'
             },
             isActive: {

@@ -14,7 +14,7 @@ class Hateoas {
     const links = {};
     const basePath = this.getBasePath(resourceType);
 
-    if (!basePath) {return links;}
+    if (!basePath) { return links; }
 
     // Self link
     links.self = `${basePath}/${resourceId}`;
@@ -55,7 +55,7 @@ class Hateoas {
     const links = {};
     const basePath = this.getBasePath(resourceType);
 
-    if (!basePath) {return links;}
+    if (!basePath) { return links; }
 
     // Collection link
     links.self = basePath;
@@ -120,15 +120,15 @@ class Hateoas {
 
       // Type-specific result links
       switch (jobType) {
-      case 'generation':
-        links.download = `/v1/generation/${jobId}/download`;
-        break;
-      case 'enhancement':
-        links.result = `/v1/enhancements/${jobId}/result`;
-        break;
-      case 'ats_analysis':
-        links.result = `/v1/analysis/${jobId}/result`;
-        break;
+        case 'generation':
+          links.download = `/v1/pdf-generations/${jobId}/download`;
+          break;
+        case 'enhancement':
+          links.result = `/v1/optimization-jobs/${jobId}/result`;
+          break;
+        case 'ats_analysis':
+          links.result = `/v1/ats-analyses/${jobId}/result`;
+          break;
       }
     }
 
@@ -142,36 +142,36 @@ class Hateoas {
     const links = {};
 
     switch (context) {
-    case 'profile':
-      links.self = '/v1/users/me';
-      links.update = {
-        href: '/v1/users/me',
-        method: 'PUT',
-      };
-      links.changePassword = {
-        href: '/v1/users/me/password',
-        method: 'PUT',
-      };
-      links.avatar = '/v1/users/me/avatar';
-      links.subscription = '/v1/users/me/subscription';
-      links.stats = '/v1/users/me/stats';
-      break;
+      case 'profile':
+        links.self = '/v1/users/me';
+        links.update = {
+          href: '/v1/users/me',
+          method: 'PUT',
+        };
+        links.changePassword = {
+          href: '/v1/users/me/password',
+          method: 'PUT',
+        };
+        links.avatar = '/v1/users/me/avatar';
+        links.subscription = '/v1/users/me/subscription';
+        links.stats = '/v1/users/me/stats';
+        break;
 
-    case 'admin':
-      links.self = `/v1/users/${userId}`;
-      links.update = {
-        href: `/v1/users/${userId}`,
-        method: 'PUT',
-      };
-      links.delete = {
-        href: `/v1/users/${userId}`,
-        method: 'DELETE',
-      };
-      links.suspend = {
-        href: `/v1/users/${userId}/suspend`,
-        method: 'POST',
-      };
-      break;
+      case 'admin':
+        links.self = `/v1/users/${userId}`;
+        links.update = {
+          href: `/v1/users/${userId}`,
+          method: 'PUT',
+        };
+        links.delete = {
+          href: `/v1/users/${userId}`,
+          method: 'DELETE',
+        };
+        links.suspend = {
+          href: `/v1/users/${userId}/suspend`,
+          method: 'POST',
+        };
+        break;
     }
 
     return links;
@@ -202,8 +202,9 @@ class Hateoas {
 
     if (actions.includes('parse')) {
       links.parse = {
-        href: `${basePath}/${cvId}/parse`,
+        href: `/v1/parsing-jobs`,
         method: 'POST',
+        body: { cvId: cvId }
       };
     }
 
@@ -262,53 +263,53 @@ class Hateoas {
     const links = {};
     const basePath = this.getBasePath(resourceType);
 
-    if (!basePath || !actions) {return links;}
+    if (!basePath || !actions) { return links; }
 
     actions.forEach(action => {
       switch (action) {
-      case 'analyze':
-        links.analyze = {
-          href: '/v1/analysis',
-          method: 'POST',
-          title: 'Analyze ATS compatibility',
-        };
-        break;
+        case 'analyze':
+          links.analyze = {
+            href: '/v1/ats-analyses',
+            method: 'POST',
+            title: 'Analyze ATS compatibility',
+          };
+          break;
 
-      case 'enhance':
-        links.enhance = {
-          href: '/v1/enhancements',
-          method: 'POST',
-          title: 'Enhance CV content',
-        };
-        break;
+        case 'enhance':
+          links.enhance = {
+            href: '/v1/optimization-jobs',
+            method: 'POST',
+            title: 'Enhance CV content',
+          };
+          break;
 
-      case 'generate':
-        links.generate = {
-          href: '/v1/generation',
-          method: 'POST',
-          title: 'Generate CV',
-        };
-        break;
+        case 'generate':
+          links.generate = {
+            href: '/v1/pdf-generations',
+            method: 'POST',
+            title: 'Generate CV',
+          };
+          break;
 
-      case 'duplicate':
-        links.duplicate = {
-          href: `${basePath}/${resourceId}/duplicate`,
-          method: 'POST',
-          title: 'Create duplicate',
-        };
-        break;
+        case 'duplicate':
+          links.duplicate = {
+            href: `${basePath}/${resourceId}/duplicate`,
+            method: 'POST',
+            title: 'Create duplicate',
+          };
+          break;
 
-      case 'export':
-        links.export = `${basePath}/${resourceId}/export`;
-        break;
+        case 'export':
+          links.export = `${basePath}/${resourceId}/export`;
+          break;
 
-      case 'share':
-        links.share = {
-          href: `${basePath}/${resourceId}/share`,
-          method: 'POST',
-          title: 'Share resource',
-        };
-        break;
+        case 'share':
+          links.share = {
+            href: `${basePath}/${resourceId}/share`,
+            method: 'POST',
+            title: 'Share resource',
+          };
+          break;
       }
     });
 
@@ -326,9 +327,9 @@ class Hateoas {
       jobs: '/v1/jobs',
       webhooks: '/v1/webhooks',
       templates: '/v1/templates',
-      generation: '/v1/generation',
-      enhancement: '/v1/enhancements',
-      ats: '/v1/analysis',
+      generation: '/v1/pdf-generations',
+      enhancement: '/v1/optimization-jobs',
+      ats: '/v1/ats-analyses',
       health: '/v1/health',
     };
 
@@ -343,26 +344,26 @@ class Hateoas {
 
     relationships.forEach(rel => {
       switch (rel) {
-      case 'author':
-      case 'owner':
-        links[rel] = `/v1/users/${resourceId}`;
-        break;
+        case 'author':
+        case 'owner':
+          links[rel] = `/v1/users/${resourceId}`;
+          break;
 
-      case 'versions':
-        links[rel] = `/v1/cvs/${resourceId}/versions`;
-        break;
+        case 'versions':
+          links[rel] = `/v1/cvs/${resourceId}/versions`;
+          break;
 
-      case 'jobs':
-        links[rel] = `/v1/jobs?resourceId=${resourceId}`;
-        break;
+        case 'jobs':
+          links[rel] = `/v1/jobs?resourceId=${resourceId}`;
+          break;
 
-      case 'webhooks':
-        links[rel] = `/v1/webhooks?userId=${resourceId}`;
-        break;
+        case 'webhooks':
+          links[rel] = `/v1/webhooks?userId=${resourceId}`;
+          break;
 
-      case 'resumes':
-        links[rel] = `/v1/cvs?userId=${resourceId}`;
-        break;
+        case 'resumes':
+          links[rel] = `/v1/cvs?userId=${resourceId}`;
+          break;
       }
     });
 
@@ -382,19 +383,19 @@ class Hateoas {
     // Add resource-specific navigation
     if (currentResource) {
       switch (currentResource) {
-      case 'resumes':
-        links.templates = '/v1/templates';
-        links.generation = '/v1/generation';
-        break;
+        case 'resumes':
+          links.templates = '/v1/templates';
+          links.generation = '/v1/pdf-generations';
+          break;
 
-      case 'generation':
-        links.cvs = '/v1/cvs';
-        links.templates = '/v1/templates';
-        break;
+        case 'generation':
+          links.cvs = '/v1/cvs';
+          links.templates = '/v1/templates';
+          break;
 
-      case 'webhooks':
-        links.deliveries = '/v1/webhooks/stats';
-        break;
+        case 'webhooks':
+          links.deliveries = '/v1/webhooks/stats';
+          break;
       }
     }
 

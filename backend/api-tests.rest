@@ -1,0 +1,350 @@
+###############################################################################
+# CareerForge API Test Suite - v2 (Industry Standards)
+# 
+# REST Client for VS Code Extension Required
+# Install: https://marketplace.visualstudio.com/items?itemName=humao.rest-client
+#
+# Instructions:
+# 1. Click "Send Request" above each URL
+# 2. Start with Health Check, then Register/Login
+# 3. Variables are automatically captured from responses
+###############################################################################
+
+###############################################################################
+# ENVIRONMENT CONFIGURATION
+###############################################################################
+
+@baseUrl = https://careerforge-backend-production.up.railway.app
+# @baseUrl = http://localhost:5000
+
+# Test credentials (change email to avoid conflicts)
+@testEmail = test-user-12345@example.com
+@testPassword = SecurePass123!
+
+# Dynamic variables (auto-captured from responses)
+@authToken = {{login.response.body.data.token}}
+@refreshToken = {{login.response.body.data.refreshToken}}
+@userId = {{login.response.body.data.user._id}}
+@cvId = {{createCV.response.body.data._id}}
+
+###############################################################################
+# PHASE 1: HEALTH & SYSTEM STATUS
+###############################################################################
+
+### 1.1 Basic Health Check
+GET {{baseUrl}}/v1/health
+Accept: application/json
+
+###
+
+### 1.2 Readiness Probe
+GET {{baseUrl}}/v1/health/ready
+Accept: application/json
+
+###############################################################################
+# PHASE 2: AUTHENTICATION
+###############################################################################
+
+### 2.1 Register New User
+# @name register
+POST {{baseUrl}}/v1/auth/register
+Content-Type: application/json
+
+{
+    "email": "{{testEmail}}",
+    "password": "{{testPassword}}",
+    "firstName": "Test",
+    "lastName": "User"
+}
+
+###
+
+### 2.2 Login
+# @name login
+POST {{baseUrl}}/v1/auth/login
+Content-Type: application/json
+
+{
+    "email": "{{testEmail}}",
+    "password": "{{testPassword}}"
+}
+
+###
+
+### 2.3 Get User Profile (UPDATED PATH)
+GET {{baseUrl}}/v1/users/me
+Authorization: Bearer {{authToken}}
+Accept: application/json
+
+###############################################################################
+# PHASE 3: CV OPERATIONS
+###############################################################################
+
+### 3.1 Create CV (Manual)
+# @name createCV
+POST {{baseUrl}}/v1/cvs
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+    "fileName": "test-cv.pdf",
+    "status": "completed",
+    "parsedData": {
+        "personalInfo": {
+            "fullName": "John Doe",
+            "email": "john@example.com"
+        }
+    }
+}
+
+###
+
+### 3.2 List All CVs
+GET {{baseUrl}}/v1/cvs
+Authorization: Bearer {{authToken}}
+Accept: application/json
+
+###
+
+### 3.3 Get Specific CV
+GET {{baseUrl}}/v1/cvs/{{cvId}}
+Authorization: Bearer {{authToken}}
+Accept: application/json
+
+###
+
+### 3.4 Publish CV (NEW - PATCH METHOD)
+PATCH {{baseUrl}}/v1/cvs/{{cvId}}
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+    "published": true
+}
+
+###
+
+### 3.5 Archive CV (NEW - PATCH METHOD)
+PATCH {{baseUrl}}/v1/cvs/{{cvId}}
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+    "archived": true
+}
+
+###
+
+### 3.6 Unpublish and Unarchive (Combined)
+PATCH {{baseUrl}}/v1/cvs/{{cvId}}
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+    "published": false,
+    "archived": false
+}
+
+###############################################################################
+# PHASE 4: PARSING JOBS (RENAMED FROM /parse)
+###############################################################################
+
+### 4.1 Start Parsing Job
+# @name startParsing
+POST {{baseUrl}}/v1/parsing-jobs
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+    "cvId": "{{cvId}}"
+}
+
+###
+
+### 4.2 Get Parsing Job Status
+GET {{baseUrl}}/v1/parsing-jobs/{{startParsing.response.body.data.jobId}}
+Authorization: Bearer {{authToken}}
+Accept: application/json
+
+###
+
+### 4.3 Get Parsing History (WITH FILTERS)
+GET {{baseUrl}}/v1/parsing-jobs/history?cvId={{cvId}}
+Authorization: Bearer {{authToken}}
+Accept: application/json
+
+###
+
+### 4.4 Get My Parsing Jobs
+GET {{baseUrl}}/v1/parsing-jobs/history?userId=me
+Authorization: Bearer {{authToken}}
+Accept: application/json
+
+###
+
+### 4.5 Get Parsing Stats
+GET {{baseUrl}}/v1/parsing-jobs/stats
+Authorization: Bearer {{authToken}}
+Accept: application/json
+
+###
+
+### 4.6 Get Supported Formats
+GET {{baseUrl}}/v1/parsing-jobs/formats
+Authorization: Bearer {{authToken}}
+Accept: application/json
+
+###############################################################################
+# PHASE 5: OPTIMIZATION JOBS (RENAMED FROM /optimize)
+###############################################################################
+
+### 5.1 Start Full Optimization
+# @name startOptimization
+POST {{baseUrl}}/v1/optimization-jobs
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+    "cvId": "{{cvId}}",
+    "targetRole": "Senior Developer"
+}
+
+###
+
+### 5.2 Optimize Specific Sections
+POST {{baseUrl}}/v1/optimization-jobs/sections
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+    "cvId": "{{cvId}}",
+    "sections": ["experience", "skills"]
+}
+
+###
+
+### 5.3 Tailor for Job
+POST {{baseUrl}}/v1/optimization-jobs/tailor
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+    "cvId": "{{cvId}}",
+    "jobDescription": "Looking for a senior developer with React and Node.js experience"
+}
+
+###
+
+### 5.4 Get Optimization Capabilities
+GET {{baseUrl}}/v1/optimization-jobs/capabilities
+Authorization: Bearer {{authToken}}
+Accept: application/json
+
+###############################################################################
+# PHASE 6: ATS ANALYSES (RENAMED FROM /cv-ats)
+###############################################################################
+
+### 6.1 Start ATS Analysis
+# @name atsAnalysis
+POST {{baseUrl}}/v1/ats-analyses
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+    "cvId": "{{cvId}}",
+    "jobDescription": "Senior Software Engineer position"
+}
+
+###
+
+### 6.2 Get ATS Analysis Result
+GET {{baseUrl}}/v1/ats-analyses/{{atsAnalysis.response.body.data.jobId}}
+Authorization: Bearer {{authToken}}
+Accept: application/json
+
+###
+
+### 6.3 Get ATS Analysis History (WITH FILTERS)
+GET {{baseUrl}}/v1/ats-analyses/history?cvId={{cvId}}
+Authorization: Bearer {{authToken}}
+Accept: application/json
+
+###
+
+### 6.4 Get ATS Statistics
+GET {{baseUrl}}/v1/ats-analyses/stats
+Authorization: Bearer {{authToken}}
+Accept: application/json
+
+###############################################################################
+# PHASE 7: PDF GENERATIONS (RENAMED FROM /generation)
+###############################################################################
+
+### 7.1 Start PDF Generation
+# @name generatePDF
+POST {{baseUrl}}/v1/pdf-generations
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+    "cvId": "{{cvId}}",
+    "template": "modern"
+}
+
+###
+
+### 7.2 Get Generation Status
+GET {{baseUrl}}/v1/pdf-generations/{{generatePDF.response.body.data.jobId}}
+Authorization: Bearer {{authToken}}
+Accept: application/json
+
+###
+
+### 7.3 Download Generated PDF
+GET {{baseUrl}}/v1/pdf-generations/{{generatePDF.response.body.data.jobId}}/download
+Authorization: Bearer {{authToken}}
+Accept: application/pdf
+
+###
+
+### 7.4 Get Generation Stats
+GET {{baseUrl}}/v1/pdf-generations/stats
+Authorization: Bearer {{authToken}}
+Accept: application/json
+
+###############################################################################
+# PHASE 8: BACKGROUND JOBS
+###############################################################################
+
+### 8.1 List All Jobs
+GET {{baseUrl}}/v1/jobs
+Authorization: Bearer {{authToken}}
+Accept: application/json
+
+###
+
+### 8.2 Get Job Statistics
+GET {{baseUrl}}/v1/jobs/stats
+Authorization: Bearer {{authToken}}
+Accept: application/json
+
+###############################################################################
+# PHASE 9: CLEANUP
+###############################################################################
+
+### 9.1 Delete Test CV
+DELETE {{baseUrl}}/v1/cvs/{{cvId}}
+Authorization: Bearer {{authToken}}
+
+###
+
+### 9.2 Logout
+POST {{baseUrl}}/v1/auth/logout
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{}
+
+###############################################################################
+# END OF TEST SUITE
+###############################################################################

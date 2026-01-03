@@ -105,7 +105,7 @@ class CVController {
       const cvId = req.params.id;
       const userId = req.userId;
 
-      const cv = await this.service.getCVById(cvId, userId);
+      const cv = await this.service.getCVById(cvId, userId, { includeActiveVersion: true });
       if (!cv) {
         throw ErrorFactory.cvNotFound(cvId);
       }
@@ -136,7 +136,7 @@ class CVController {
       const cvId = req.params.id;
       const userId = req.userId;
 
-      const cv = await this.service.getCVById(cvId, userId);
+      const cv = await this.service.getCVById(cvId, userId, { includeActiveVersion: true });
       if (!cv) {
         throw ErrorFactory.cvNotFound(cvId);
       }
@@ -234,53 +234,7 @@ class CVController {
     }
   }
 
-  /**
-   * Archive CV
-   */
-  async archiveCV(req, res, next) {
-    try {
-      const cvId = req.params.id;
-      const userId = req.userId;
 
-      const cv = await this.service.archiveCV(cvId, userId);
-
-      const { response, statusCode } = ResponseFormatter.resource(cv, {
-        message: 'CV archived successfully',
-      });
-
-      res.status(statusCode).json(response);
-    } catch (error) {
-      logger.logOperationError('Archive CV', error, { cvId: req.params.id, userId: req.userId });
-      next(error);
-    }
-  }
-
-  /**
-   * Publish CV (make public)
-   */
-  async publishCV(req, res, next) {
-    try {
-      const cvId = req.params.id;
-      const userId = req.userId;
-
-      const cv = await this.service.publishCV(cvId, userId);
-
-      const links = {};
-      if (cv.metadata && cv.metadata.publicUrl) {
-        links.public = cv.metadata.publicUrl;
-      }
-
-      const { response, statusCode } = ResponseFormatter.resource(cv, {
-        message: 'CV published successfully',
-        links,
-      });
-
-      res.status(statusCode).json(response);
-    } catch (error) {
-      logger.logOperationError('Publish CV', error, { cvId: req.params.id, userId: req.userId });
-      next(error);
-    }
-  }
 
   /**
    * Search CVs

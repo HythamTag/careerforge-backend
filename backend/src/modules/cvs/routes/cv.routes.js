@@ -327,6 +327,72 @@ router.put('/:id', validateCVIdParamsMiddleware, validateUpdateCVMiddleware, cvC
 /**
  * @openapi
  * /v1/cvs/{id}:
+ *   patch:
+ *     tags:
+ *       - CVs
+ *     summary: Partially update a CV or trigger state change
+ *     description: |
+ *       Update specific fields of a CV record. Use this for:
+ *       - State changes (publishing, archiving, unpublishing)
+ *       - Metadata updates (title)
+ *       - Partial content updates (parsedData)
+ *     operationId: patchCV
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *         description: CV ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               title: { type: string, example: "Updated Resume Title" }
+ *               published: { type: boolean, description: "Publish or unpublish the CV" }
+ *               archived: { type: boolean, description: "Archive or unarchive the CV" }
+ *               status: { type: string, enum: [draft, published, archived] }
+ *               parsedData: { $ref: '#/components/schemas/CV' }
+ *           examples:
+ *             publish:
+ *               summary: Publish CV
+ *               value: { "published": true, "status": "published" }
+ *             archive:
+ *               summary: Archive CV
+ *               value: { "archived": true, "status": "archived" }
+ *             rename:
+ *               summary: Rename CV
+ *               value: { "title": "My New CV Name" }
+ *     responses:
+ *       200:
+ *         description: CV updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success: { type: boolean, example: true }
+ *                 data: { $ref: '#/components/schemas/CV' }
+ *       400:
+ *         description: Validation error
+ *         $ref: '#/components/schemas/Error'
+ *       401:
+ *         description: Unauthorized
+ *         $ref: '#/components/schemas/Error'
+ *       404:
+ *         description: CV not found
+ *         $ref: '#/components/schemas/Error'
+ */
+router.patch('/:id', validateCVIdParamsMiddleware, validateUpdateCVMiddleware, cvController.updateCV.bind(cvController));
+
+
+/**
+ * @openapi
+ * /v1/cvs/{id}:
  *   delete:
  *     tags:
  *       - CVs
@@ -371,49 +437,9 @@ router.delete('/:id', validateCVIdParamsMiddleware, cvController.deleteCV.bind(c
  */
 router.post('/:id/duplicate', validateCVIdParamsMiddleware, validateDuplicateCVBodyMiddleware, cvController.duplicateCV.bind(cvController));
 
-/**
- * @openapi
- * /v1/cvs/{id}/archive:
- *   post:
- *     tags:
- *       - CVs
- *     summary: Archive a CV
- *     operationId: archiveCV
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema: { type: string }
- *     responses:
- *       200:
- *         description: CV archived successfully
- *       404:
- *         description: CV not found
- *         $ref: '#/components/schemas/Error'
- */
-router.post('/:id/archive', validateCVIdParamsMiddleware, cvController.archiveCV.bind(cvController));
 
-/**
- * @openapi
- * /v1/cvs/{id}/publish:
- *   post:
- *     tags:
- *       - CVs
- *     summary: Toggle publish status
- *     operationId: publishCV
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema: { type: string }
- *     responses:
- *       200:
- *         description: Publish status updated
- *       404:
- *         description: CV not found
- *         $ref: '#/components/schemas/Error'
- */
-router.post('/:id/publish', validateCVIdParamsMiddleware, cvController.publishCV.bind(cvController));
+
+
 
 /**
  * CV Versioning Routes

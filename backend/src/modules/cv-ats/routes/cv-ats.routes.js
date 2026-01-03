@@ -24,7 +24,7 @@ const cvAtsController = new CvAtsController(CvAtsService);
 // Start ATS analysis job
 /**
  * @openapi
- * /v1/cv-ats:
+ * /v1/ats-analyses:
  *   post:
  *     tags:
  *       - CV ATS
@@ -41,10 +41,14 @@ const cvAtsController = new CvAtsController(CvAtsService);
  *             type: object
  *             required:
  *               - cvId
- *               - jobDescription
  *             properties:
  *               cvId: { type: 'string' }
- *               jobDescription: { type: 'string' }
+ *               type: { type: 'string', enum: [compatibility, comprehensive] }
+ *               targetJob:
+ *                 type: object
+ *                 properties:
+ *                   description: { type: 'string' }
+ *                   title: { type: 'string' }
  *     responses:
  *       202:
  *         description: Analysis job started
@@ -54,10 +58,7 @@ const cvAtsController = new CvAtsController(CvAtsService);
  *               type: object
  *               properties:
  *                 success: { type: 'boolean' }
- *                 data:
- *                   type: object
- *                   properties:
- *                     jobId: { type: 'string' }
+ *                 data: { $ref: '#/components/schemas/Job' }
  *       400:
  *         description: Invalid input
  *         $ref: '#/components/schemas/Error'
@@ -71,7 +72,7 @@ router.post('/', authMiddleware, validateStartCvAtsAnalysisMiddleware, cvAtsCont
 // specific routes must come BEFORE generic /:jobId routes
 /**
  * @openapi
- * /v1/cv-ats/history:
+ * /v1/ats-analyses/history:
  *   get:
  *     tags:
  *       - CV ATS
@@ -82,6 +83,16 @@ router.post('/', authMiddleware, validateStartCvAtsAnalysisMiddleware, cvAtsCont
  *     responses:
  *       200:
  *         description: History retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success: { type: boolean }
+ *                 data:
+ *                   type: array
+ *                   items: { $ref: '#/components/schemas/AtsAnalysis' }
+ *                 pagination: { $ref: '#/components/schemas/Pagination' }
  *       401:
  *         description: Unauthorized
  *         $ref: '#/components/schemas/Error'
@@ -90,7 +101,7 @@ router.get('/history', authMiddleware, validateHistoryQueryMiddleware, cvAtsCont
 
 /**
  * @openapi
- * /v1/cv-ats/stats:
+ * /v1/ats-analyses/stats:
  *   get:
  *     tags:
  *       - CV ATS
@@ -109,7 +120,7 @@ router.get('/stats', authMiddleware, cvAtsController.getAnalysisStats.bind(cvAts
 
 /**
  * @openapi
- * /v1/cv-ats/trends:
+ * /v1/ats-analyses/trends:
  *   get:
  *     tags:
  *       - CV ATS
@@ -128,7 +139,7 @@ router.get('/trends', authMiddleware, validateTrendsQueryMiddleware, cvAtsContro
 
 /**
  * @openapi
- * /v1/cv-ats/recent-scores:
+ * /v1/ats-analyses/recent-scores:
  *   get:
  *     tags:
  *       - CV ATS
@@ -148,7 +159,7 @@ router.get('/recent-scores', authMiddleware, cvAtsController.getRecentAnalysesWi
 // Get ATS analysis job status
 /**
  * @openapi
- * /v1/cv-ats/{id}:
+ * /v1/ats-analyses/{id}:
  *   get:
  *     tags:
  *       - CV ATS
@@ -162,6 +173,13 @@ router.get('/recent-scores', authMiddleware, cvAtsController.getRecentAnalysesWi
  *     responses:
  *       200:
  *         description: Job status returned
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success: { type: boolean }
+ *                 data: { $ref: '#/components/schemas/Job' }
  *       404:
  *         description: Job not found
  *         $ref: '#/components/schemas/Error'
@@ -171,7 +189,7 @@ router.get('/:id', authMiddleware, validateJobIdParamsMiddleware, cvAtsControlle
 // Get ATS analysis result
 /**
  * @openapi
- * /v1/cv-ats/{id}/result:
+ * /v1/ats-analyses/{id}/result:
  *   get:
  *     tags:
  *       - CV ATS
@@ -201,7 +219,7 @@ router.get('/:id/result', authMiddleware, validateJobIdParamsMiddleware, cvAtsCo
 // Cancel ATS analysis job
 /**
  * @openapi
- * /v1/cv-ats/{id}/cancel:
+ * /v1/ats-analyses/{id}/cancel:
  *   post:
  *     tags:
  *       - CV ATS
@@ -222,4 +240,5 @@ router.get('/:id/result', authMiddleware, validateJobIdParamsMiddleware, cvAtsCo
 router.post('/:id/cancel', authMiddleware, validateJobIdParamsMiddleware, cvAtsController.cancelAnalysis.bind(cvAtsController));
 
 module.exports = router;
+
 

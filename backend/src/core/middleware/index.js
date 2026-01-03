@@ -14,6 +14,8 @@ const correlationMiddleware = require('./core/correlation.middleware');
 const requestLoggerMiddleware = require('./core/request-logger.middleware');
 const { versionMiddleware, requireMinVersion, createVersionedRouter } = require('./core/version.middleware');
 const { setupSwagger, swaggerSpec } = require('./core/docs.middleware');
+const { parseCvIdFilter, parseUserIdFilter, parseTypeFilter, parseExpandParameter } = require('./core/query.middleware');
+
 
 // Security Middleware
 const authMiddleware = require('./security/auth.middleware');
@@ -45,6 +47,10 @@ module.exports = {
   createVersionedRouter,
   setupSwagger,
   swaggerSpec,
+  parseCvIdFilter,
+  parseUserIdFilter,
+  parseTypeFilter,
+  parseExpandParameter,
 
   // Security
   authMiddleware,
@@ -56,3 +62,4 @@ module.exports = {
   uploadMiddleware,
   avatarUploadMiddleware,
 };
+

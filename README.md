@@ -107,11 +107,11 @@ This project demonstrates:
 | Module | Base Path | Key Endpoints |
 |--------|-----------|---------------|
 | **Auth** | `/v1/auth` | `POST /register`, `POST /login`, `POST /refresh` |
-| **CVs** | `/v1/cvs` | `POST /upload`, `GET /`, `GET /:id`, `PUT /:id` |
-| **Parsing** | `/v1/parse` | `POST /`, `GET /:jobId/result` |
-| **ATS** | `/v1/cv-ats` | `POST /`, `GET /:id/result` |
-| **Optimizer** | `/v1/optimize` | `POST /sections`, `POST /tailor` |
-| **Generation** | `/v1/generation` | `POST /`, `GET /:jobId/download` |
+| **CVs** | `/v1/cvs` | `POST /upload`, `GET /`, `GET /:id`, `PATCH /:id` |
+| **Parsing** | `/v1/parsing-jobs` | `POST /`, `GET /:jobId/result` |
+| **ATS** | `/v1/ats-analyses` | `POST /`, `GET /:id/result` |
+| **Optimizer** | `/v1/optimization-jobs` | `POST /sections`, `POST /tailor` |
+| **Generation** | `/v1/pdf-generations` | `POST /`, `GET /:jobId/download` |
 | **Jobs** | `/v1/jobs` | `GET /:id`, `POST /:id/retry` |
 
 Full API documentation available at `/api-docs` (Swagger UI).

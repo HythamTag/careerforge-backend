@@ -37,8 +37,8 @@ class CVParsingController {
       }, {
         message: RESPONSE_MESSAGES.CV_PARSING_STARTED,
         links: {
-          status: `/v1/parse/${job.jobId}`,
-          result: `/v1/parse/${job.jobId}/result`,
+          status: `/v1/parsing-jobs/${job.jobId}`,
+          result: `/v1/parsing-jobs/${job.jobId}/result`,
         },
         statusCode: HTTP_STATUS.ACCEPTED,
       });
@@ -76,7 +76,7 @@ class CVParsingController {
         updatedAt: job.updatedAt,
       }, {
         links: {
-          result: job.status === JOB_STATUS.COMPLETED ? `/v1/parse/${jobId}/result` : null,
+          result: job.status === JOB_STATUS.COMPLETED ? `/v1/parsing-jobs/${jobId}/result` : null,
         },
       });
 
@@ -251,7 +251,7 @@ class CVParsingController {
         message: 'Parsing job retry started',
         statusCode: HTTP_STATUS.ACCEPTED,
         links: {
-          status: `/v1/parse/${job.jobId}`,
+          status: `/v1/parsing-jobs/${job.jobId}`,
         },
       });
 

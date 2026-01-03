@@ -77,11 +77,22 @@ export const authService = {
    * Get current user
    */
   async getCurrentUser() {
-    const response = await api.get('/v1/auth/me');
+    const response = await api.get('/v1/users/me');
     const payload = response.data?.data || response.data;
 
     // The payload itself is the user object in getMe response
     if (payload && payload.email) {
+      this.setUser(payload);
+    }
+    return payload;
+  },
+  /**
+   * Update user profile
+   */
+  async updateProfile(userData) {
+    const response = await api.patch('/v1/users/profile', userData);
+    const payload = response.data?.data || response.data;
+    if (payload) {
       this.setUser(payload);
     }
     return payload;

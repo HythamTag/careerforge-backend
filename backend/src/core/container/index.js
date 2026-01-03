@@ -364,7 +364,8 @@ class Container {
         container.resolve('cvRepository'),
         container.resolve('fileService'),
         container.resolve('aiContentParserService'),
-        container.resolve('parserStrategyRegistry')
+        container.resolve('parserStrategyRegistry'),
+        container.resolve('cvVersionRepository')
       );
     });
 
@@ -459,7 +460,8 @@ class Container {
         container.resolve('fileService'),
         container.resolve('templateRenderer'),
         container.resolve('cvVersionRepository'),
-        container.resolve('pdfGenerator')
+        container.resolve('pdfGenerator'),
+        container.resolve('cvGeneratorService')
       );
     });
 

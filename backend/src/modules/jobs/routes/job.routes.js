@@ -42,6 +42,16 @@ const jobController = new JobController(jobService);
  *     responses:
  *       200:
  *         description: List of jobs retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success: { type: boolean }
+ *                 data:
+ *                   type: array
+ *                   items: { $ref: '#/components/schemas/Job' }
+ *                 pagination: { $ref: '#/components/schemas/Pagination' }
  *       401:
  *         description: Unauthorized
  *         $ref: '#/components/schemas/Error'

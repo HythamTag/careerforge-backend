@@ -90,6 +90,46 @@ api.interceptors.response.use(
  * CV API - Enterprise Modular Endpoints
  * Updated to match Backend v1 Routes
  */
+
+// ==========================================
+// 🔧 UTILITY HELPERS
+// ==========================================
+
+/**
+ * Extract data from API response with consistent handling.
+ * Backend wraps responses in { success: true, data: ... }
+ * 
+ * @param {Object} response - Axios response object
+ * @returns {any} - Extracted data
+ */
+const extractData = (response) => {
+  const result = response.data;
+  // Handle wrapped response: { success: true, data: ... }
+  if (result && typeof result === 'object' && 'success' in result && 'data' in result) {
+    return result.data;
+  }
+  // Handle direct response
+  return result;
+};
+
+/**
+ * Extract CV content from a CV resource object.
+ * Handles various shapes: { content }, { parsedContent }, or direct content
+ * 
+ * @param {Object} cvResource - CV object from API
+ * @returns {Object} - CV content for optimization/generation
+ */
+const extractCVContent = (cvResource) => {
+  if (!cvResource) return null;
+
+  // If it's already just content (no _id or id)
+  if (!cvResource._id && !cvResource.id) {
+    return cvResource;
+  }
+
+  // Extract from content or parsedContent field
+  return cvResource.content || cvResource.parsedContent || null;
+};
 export const cvApi = {
   // ==========================================
   // 🧠 CV & UPLOAD
@@ -132,7 +172,7 @@ export const cvApi = {
     if (status) params.status = status;
 
     const response = await api.get('/v1/cvs', { params });
-    return response.data?.data || response.data;
+    return extractData(response);
   },
 
   /**
@@ -144,7 +184,7 @@ export const cvApi = {
   },
 
   /**
-   * Update a CV by ID
+   * Update a CV by ID (Full)
    */
   updateCV: async (cvId, data) => {
     const response = await api.put(`/v1/cvs/${cvId}`, data);
@@ -152,11 +192,30 @@ export const cvApi = {
   },
 
   /**
+   * Partially update a CV (PATCH)
+   * Use for state changes like publishing or archiving
+   */
+  patchCV: async (cvId, data) => {
+    const response = await api.patch(`/v1/cvs/${cvId}`, data);
+    return response.data;
+  },
+
+  // Helper: Publish/Unpublish a CV
+  setCVPublishStatus: async (cvId, isPublished) => {
+    return cvApi.patchCV(cvId, { published: isPublished });
+  },
+
+  // Helper: Archive/Unarchive a CV
+  setCVArchiveStatus: async (cvId, isArchived) => {
+    return cvApi.patchCV(cvId, { archived: isArchived });
+  },
+
+  /**
    * Get all versions of a CV
    */
   getCVVersions: async (cvId) => {
     const response = await api.get(`/v1/cvs/${cvId}/versions`);
-    return response.data?.data || response.data;
+    return extractData(response);
   },
 
   /**
@@ -166,13 +225,33 @@ export const cvApi = {
     const response = await api.post(`/v1/cvs/${cvId}/versions/${versionId}/activate`);
     return response.data;
   },
+  // Search CVs
+  searchCVs: async (query) => {
+    const response = await api.get('/v1/cvs/search', { params: { q: query } });
+    return extractData(response);
+  },
+  // Get CV stats
+  getCVStats: async () => {
+    const response = await api.get('/v1/cvs/stats');
+    return extractData(response);
+  },
+  // Bulk operations
+  bulkOperation: async (action, cvIds) => {
+    const response = await api.post('/v1/cvs/bulk', { action, cvIds });
+    return response.data;
+  },
+  // Duplicate CV
+  duplicateCV: async (cvId) => {
+    const response = await api.post(`/v1/cvs/${cvId}/duplicate`);
+    return extractData(response);
+  },
 
 
   getCVStatus: async (cvId) => {
     try {
       // Use lightweight status endpoint for efficient polling
-      const cvResponse = await api.get(`/v1/cvs/${cvId}/status`);
-      const cvData = cvResponse.data?.data || cvResponse.data;
+      const response = await api.get(`/v1/cvs/${cvId}/status`);
+      const cvData = extractData(response);
 
       // Map backend parsingStatus to frontend status
       // Backend parsingStatus: 'pending', 'processing', 'parsed', 'failed'
@@ -211,6 +290,37 @@ export const cvApi = {
     const response = await api.get(`/v1/cvs/${cvId}`, {
       params: { _t: Date.now() }
     });
+    return extractData(response);
+  },
+  // ==========================================
+  // 🧠 PARSING MODULE
+  // ==========================================
+  getParsingHistory: async (options = {}) => {
+    const response = await api.get('/v1/parsing-jobs/history', { params: options });
+    return extractData(response);
+  },
+  getParsingStats: async () => {
+    const response = await api.get('/v1/parsing-jobs/stats');
+    return response.data?.data || response.data;
+  },
+  getSupportedFormats: async () => {
+    const response = await api.get('/v1/parsing-jobs/formats');
+    return response.data?.data || response.data;
+  },
+  getParsingJobStatus: async (jobId) => {
+    const response = await api.get(`/v1/parsing-jobs/${jobId}`);
+    return response.data?.data || response.data;
+  },
+  getParsingJobResult: async (jobId) => {
+    const response = await api.get(`/v1/parsing-jobs/${jobId}/result`);
+    return response.data?.data || response.data;
+  },
+  cancelParsingJob: async (jobId) => {
+    const response = await api.post(`/v1/parsing-jobs/${jobId}/cancel`);
+    return response.data;
+  },
+  retryParsingJob: async (jobId) => {
+    const response = await api.post(`/v1/parsing-jobs/${jobId}/retry`);
     return response.data;
   },
 
@@ -219,16 +329,13 @@ export const cvApi = {
   // ==========================================
 
   optimizeCV: async (cvId, { targetRole, jobDescription, versionId }) => {
-    const cvResponse = await api.get(`/v1/cvs/${cvId}`);
-    const cvResource = cvResponse.data?.data || cvResponse.data;
-    const cvData = cvResource.content || cvResource;
+    const response = await api.get(`/v1/cvs/${cvId}`);
+    const cvResource = extractData(response);
 
-    // Check for essential sections
-    const hasPersonal = cvData.personalInfo || cvData.personal;
-    const hasExperience = (cvData.workExperience && cvData.workExperience.length > 0) || (cvData.experience && cvData.experience.length > 0);
-    const hasEducation = (cvData.education && cvData.education.length > 0);
+    // Extract CV data with standardized helper
+    const cvData = extractCVContent(cvResource);
 
-    if (!cvData || (!hasPersonal && !hasExperience && !hasEducation)) {
+    if (!cvData || Object.keys(cvData).length === 0) {
       throw new Error('CV data not available. Please wait for parsing to complete.');
     }
 
@@ -245,8 +352,31 @@ export const cvApi = {
       payload.options = { versionId };
     }
 
-    const response = await api.post('/v1/optimize/tailor', payload);
-    return response.data;
+    const postResponse = await api.post('/v1/optimization-jobs/tailor', payload);
+    return extractData(postResponse);
+  },
+  optimizeSections: async (cvId, sections) => {
+    // Fetch CV first to get the data
+    const response = await api.get(`/v1/cvs/${cvId}`);
+    const cvResource = extractData(response);
+
+    // Extract CV data with standardized helper
+    const cvData = extractCVContent(cvResource);
+
+    if (!cvData || Object.keys(cvData).length === 0) {
+      throw new Error('CV data not available. Please wait for parsing to complete.');
+    }
+
+    const postResponse = await api.post('/v1/optimization-jobs/sections', {
+      cvId,
+      cvData,
+      sections
+    });
+    return extractData(postResponse);
+  },
+  getOptimizationCapabilities: async () => {
+    const response = await api.get('/v1/optimization-jobs/capabilities');
+    return extractData(response);
   },
 
   // ==========================================
@@ -270,8 +400,8 @@ export const cvApi = {
       payload.versionId = versionId;
     }
 
-    const response = await api.post('/v1/cv-ats', payload);
-    const result = response.data?.data || response.data;
+    const response = await api.post('/v1/ats-analyses', payload);
+    const result = extractData(response);
 
     if (!result.jobId) {
       throw new Error('Failed to start ATS analysis: No job ID returned');
@@ -285,13 +415,13 @@ export const cvApi = {
     while (status !== 'completed' && status !== 'failed' && attempts < maxAttempts) {
       await new Promise(resolve => setTimeout(resolve, 2000));
       try {
-        const statusResponse = await api.get(`/v1/cv-ats/${result.jobId}`);
-        const statusData = statusResponse.data?.data || statusResponse.data;
+        const statusResponse = await api.get(`/v1/ats-analyses/${result.jobId}`);
+        const statusData = extractData(statusResponse);
         status = statusData.status;
 
         if (status === 'completed') {
-          const resultResponse = await api.get(`/v1/cv-ats/${result.jobId}/result`);
-          const resultData = resultResponse.data?.data || resultResponse.data;
+          const resultResponse = await api.get(`/v1/ats-analyses/${result.jobId}/result`);
+          const resultData = extractData(resultResponse);
 
           return {
             success: true,
@@ -315,6 +445,22 @@ export const cvApi = {
 
     throw new Error(`ATS analysis timed out after ${maxAttempts * 2} seconds. Status: ${status}`);
   },
+  getAtsHistory: async (options = {}) => {
+    const response = await api.get('/v1/ats-analyses/history', { params: options });
+    return extractData(response);
+  },
+  getAtsStats: async () => {
+    const response = await api.get('/v1/ats-analyses/stats');
+    return extractData(response);
+  },
+  getAtsTrends: async (options = {}) => {
+    const response = await api.get('/v1/ats-analyses/trends', { params: options });
+    return extractData(response);
+  },
+  getRecentAtsScores: async () => {
+    const response = await api.get('/v1/ats-analyses/recent-scores');
+    return extractData(response);
+  },
 
   // ==========================================
   // 📄 GENERATION MODULE
@@ -328,7 +474,7 @@ export const cvApi = {
 
     // Step 1: Check if there's an existing completed generation matching these parameters
     try {
-      const historyResponse = await api.get('/v1/generation/history', {
+      const historyResponse = await api.get('/v1/pdf-generations/history', {
         params: {
           cvId,
           format: outputFormat,
@@ -337,8 +483,8 @@ export const cvApi = {
         },
       });
 
-      // ResponseFormatter.paginated returns { success: true, data: [...], pagination: {...} }
-      const historyData = historyResponse.data?.data || historyResponse.data?.items || [];
+      // Use extractData for consistent response handling (returns the data array)
+      const historyData = extractData(historyResponse) || [];
 
       console.log('[CV Generation] Checking history for existing completed generation', {
         totalHistoryItems: historyData.length,
@@ -374,7 +520,7 @@ export const cvApi = {
       if (existingJob && existingJob.jobId) {
         console.log(`[CV Generation] Found existing completed generation: ${existingJob.jobId}`);
         // Download the existing file directly
-        const downloadUrl = `${API_BASE_URL || ''}/v1/generation/${existingJob.jobId}/download`;
+        const downloadUrl = `${API_BASE_URL || ''}/v1/pdf-generations/${existingJob.jobId}/download`;
         const token = getToken();
 
         try {
@@ -408,7 +554,7 @@ export const cvApi = {
 
         // Check if there's a pending/processing job with the same parameters
         try {
-          const pendingHistoryResponse = await api.get('/v1/generation/history', {
+          const pendingHistoryResponse = await api.get('/v1/pdf-generations/history', {
             params: {
               cvId,
               format: outputFormat,
@@ -417,7 +563,7 @@ export const cvApi = {
             },
           });
 
-          const allPendingData = pendingHistoryResponse.data?.data || [];
+          const allPendingData = extractData(pendingHistoryResponse) || [];
           const pendingJob = allPendingData.find(job => {
             const jobCvId = job.cv?.id || job.cvId;
             const matchesCvId = jobCvId === cvId || jobCvId?.toString() === cvId?.toString();
@@ -467,8 +613,8 @@ export const cvApi = {
       }
 
       try {
-        const response = await api.post('/v1/generation', payload);
-        result = response.data?.data || response.data;
+        const response = await api.post('/v1/pdf-generations', payload);
+        result = extractData(response);
 
         if (!result.jobId) {
           throw new Error('Failed to start CV generation: No job ID returned');
@@ -481,14 +627,14 @@ export const cvApi = {
 
           // Try to get active jobs to show user what's pending
           try {
-            const activeHistoryResponse = await api.get('/v1/generation/history', {
+            const activeHistoryResponse = await api.get('/v1/pdf-generations/history', {
               params: {
                 status: 'pending',
                 limit: 10,
               },
             });
 
-            const activeJobs = activeHistoryResponse.data?.data || [];
+            const activeJobs = extractData(activeHistoryResponse) || [];
             const activeCount = activeJobs.length;
 
             throw new Error(
@@ -522,7 +668,7 @@ export const cvApi = {
       await new Promise(resolve => setTimeout(resolve, 2000));
 
       try {
-        const statusResponse = await api.get(`/v1/generation/${result.jobId}`);
+        const statusResponse = await api.get(`/v1/pdf-generations/${result.jobId}`);
 
         // Check if we got a valid response
         if (!statusResponse || !statusResponse.data) {
@@ -530,7 +676,7 @@ export const cvApi = {
           throw new Error('Invalid response from status endpoint');
         }
 
-        const statusData = statusResponse.data?.data || statusResponse.data;
+        const statusData = extractData(statusResponse);
         lastStatusData = statusData;
 
         // Log every status check for debugging
@@ -594,8 +740,8 @@ export const cvApi = {
     // Final status check - make one more attempt if we're at max attempts
     if (attempts >= maxAttempts && status !== 'completed' && status !== 'failed') {
       try {
-        const finalStatusResponse = await api.get(`/v1/generation/${result.jobId}`);
-        const finalStatusData = finalStatusResponse.data?.data || finalStatusResponse.data;
+        const finalStatusResponse = await api.get(`/v1/pdf-generations/${result.jobId}`);
+        const finalStatusData = extractData(finalStatusResponse);
         if (finalStatusData?.status) {
           status = finalStatusData.status;
           console.log(`[CV Generation] Final status check: ${status}`);
@@ -608,7 +754,7 @@ export const cvApi = {
     // Check final status
     if (status === 'completed') {
       // Use download endpoint - backend will serve file or redirect
-      const downloadUrl = `${API_BASE_URL || ''}/v1/generation/${result.jobId}/download`;
+      const downloadUrl = `${API_BASE_URL || ''}/v1/pdf-generations/${result.jobId}/download`;
       const token = getToken();
 
       try {
@@ -712,8 +858,18 @@ export const cvApi = {
       };
     }
 
-    const response = await api.post('/v1/generation/preview', payload);
-    return response.data?.data || response.data;
+    const response = await api.post('/v1/pdf-generations/preview', payload);
+    return extractData(response);
+  },
+
+  getGenerationHistory: async (options = {}) => {
+    const response = await api.get('/v1/pdf-generations/history', { params: options });
+    return extractData(response);
+  },
+
+  getGenerationStats: async () => {
+    const response = await api.get('/v1/pdf-generations/stats');
+    return extractData(response);
   },
 
   // ==========================================
@@ -722,7 +878,26 @@ export const cvApi = {
 
   checkHealth: async () => {
     const response = await api.get('/v1/health');
-    return response.data;
+    return extractData(response);
+  },
+  // ==========================================
+  // ⚙️ JOB MANAGEMENT
+  // ==========================================
+  getJobs: async (options = {}) => {
+    const response = await api.get('/v1/jobs', { params: options });
+    return extractData(response);
+  },
+  getJobDetail: async (jobId) => {
+    const response = await api.get(`/v1/jobs/${jobId}`);
+    return extractData(response);
+  },
+  cancelJob: async (jobId) => {
+    const response = await api.delete(`/v1/jobs/${jobId}`);
+    return extractData(response);
+  },
+  retryJob: async (jobId) => {
+    const response = await api.post(`/v1/jobs/${jobId}/retry`);
+    return extractData(response);
   },
 };
 

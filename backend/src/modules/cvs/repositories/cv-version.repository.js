@@ -113,6 +113,21 @@ class CVVersionRepository {
   }
 
   /**
+   * Get the active version for a CV
+   *
+   * @param {string} cvId - CV ID
+   * @returns {Promise<CVVersion|null>} Active version or null
+   */
+  async getActiveVersion(cvId) {
+    try {
+      return await CVVersion.findOne({ cvId, isActive: true }).populate('userId', 'email name');
+    } catch (error) {
+      logger.error('Failed to get active version', { error: error.message, cvId });
+      throw error;
+    }
+  }
+
+  /**
    * Deactivate all versions for a given CV.
    *
    * @param {string} cvId - The ID of the CV.

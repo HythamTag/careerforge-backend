@@ -8,6 +8,7 @@
  */
 
 const logger = require('@utils/logger');
+const v8 = require('v8');
 
 class HealthCheckService {
   /**
@@ -208,20 +209,33 @@ class HealthCheckService {
    */
   checkMemory() {
     const usage = process.memoryUsage();
+    const heapStats = v8.getHeapStatistics();
+
     const heapUsedMB = Math.round(usage.heapUsed / 1024 / 1024);
     const heapTotalMB = Math.round(usage.heapTotal / 1024 / 1024);
-    const heapPercent = Math.round((usage.heapUsed / usage.heapTotal) * 100);
+    const heapLimitMB = Math.round(heapStats.heap_size_limit / 1024 / 1024);
     const rssMB = Math.round(usage.rss / 1024 / 1024);
 
-    const healthy = heapPercent < 95; // Alert at 95% memory (8GB heap is large)
+    // Calculate percentage based on total available heap limit, not current allocation
+    const heapPercent = Math.round((usage.heapUsed / heapStats.heap_size_limit) * 100);
+
+    // Only alert if we're using more than 85% of the absolute limit
+    // OR if RSS is exceptionally high (> 2GB for a single worker)
+    const MEMORY_THRESHOLD_PERCENT = 85;
+    const RSS_THRESHOLD_MB = 2048;
+
+    const healthy = heapPercent < MEMORY_THRESHOLD_PERCENT && rssMB < RSS_THRESHOLD_MB;
 
     if (!healthy) {
       logger.warn('High memory usage detected', {
         operation: 'HealthCheck',
         heapPercent,
         heapUsedMB,
-        heapTotalMB,
+        heapLimitMB,
         rssMB,
+        message: heapPercent >= MEMORY_THRESHOLD_PERCENT ?
+          `Heap usage (${heapPercent}%) exceeded threshold (${MEMORY_THRESHOLD_PERCENT}%)` :
+          `RSS (${rssMB}MB) exceeded threshold (${RSS_THRESHOLD_MB}MB)`
       });
     }
 
@@ -229,9 +243,10 @@ class HealthCheckService {
       healthy,
       heapUsedMB,
       heapTotalMB,
+      heapLimitMB,
       heapPercent,
       rssMB,
-      threshold: 90,
+      threshold: MEMORY_THRESHOLD_PERCENT,
     };
   }
 

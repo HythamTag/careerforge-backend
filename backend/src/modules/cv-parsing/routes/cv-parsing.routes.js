@@ -9,7 +9,7 @@
 const express = require('express');
 const router = express.Router();
 const { resolve } = require('@core/container');
-const { authMiddleware } = require('@middleware');
+const { authMiddleware, parseCvIdFilter, parseUserIdFilter } = require('@middleware');
 const validator = require('../validators/cv-parsing.validator');
 
 // Resolve controller from container
@@ -17,7 +17,7 @@ const controller = resolve('cvParsingController');
 
 /**
  * @openapi
- * /v1/parse:
+ * /v1/parsing-jobs:
  *   post:
  *     tags:
  *       - Parsing
@@ -49,10 +49,7 @@ const controller = resolve('cvParsingController');
  *                 success:
  *                   type: boolean
  *                 data:
- *                   type: object
- *                   properties:
- *                     jobId:
- *                       type: string
+ *                   $ref: '#/components/schemas/Job'
  *       400:
  *         description: Invalid input or file
  *         $ref: '#/components/schemas/Error'
@@ -69,17 +66,37 @@ router.post(
 
 /**
  * @openapi
- * /v1/parse/history:
+ * /v1/parsing-jobs/history:
  *   get:
  *     tags:
  *       - Parsing
  *     summary: Get user's parsing job history
+ *     description: Filter by cvId (?cvId=123) or userId (?userId=me)
  *     operationId: getParsingHistory
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: cvId
+ *         schema: { type: string }
+ *         description: Filter by CV ID
+ *       - in: query
+ *         name: userId
+ *         schema: { type: string }
+ *         description: Filter by user (use 'me' for current user)
  *     responses:
  *       200:
  *         description: History returned successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success: { type: boolean }
+ *                 data:
+ *                   type: array
+ *                   items: { $ref: '#/components/schemas/Job' }
+ *                 pagination: { $ref: '#/components/schemas/Pagination' }
  *       401:
  *         description: Unauthorized
  *         $ref: '#/components/schemas/Error'
@@ -87,13 +104,15 @@ router.post(
 router.get(
   '/history',
   authMiddleware,
+  parseCvIdFilter,
+  parseUserIdFilter,
   validator.validateHistoryQuery,
   controller.getParsingHistory.bind(controller)
 );
 
 /**
  * @openapi
- * /v1/parse/stats:
+ * /v1/parsing-jobs/stats:
  *   get:
  *     tags:
  *       - Parsing
@@ -114,7 +133,7 @@ router.get(
 
 /**
  * @openapi
- * /v1/parse/formats:
+ * /v1/parsing-jobs/formats:
  *   get:
  *     tags:
  *       - Parsing
@@ -135,7 +154,7 @@ router.get(
 
 /**
  * @openapi
- * /v1/parse/{jobId}:
+ * /v1/parsing-jobs/{jobId}:
  *   get:
  *     tags:
  *       - Parsing
@@ -150,6 +169,13 @@ router.get(
  *     responses:
  *       200:
  *         description: job status returned successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success: { type: boolean }
+ *                 data: { $ref: '#/components/schemas/Job' }
  *       404:
  *         description: Job not found
  *         $ref: '#/components/schemas/Error'
@@ -162,7 +188,7 @@ router.get(
 
 /**
  * @openapi
- * /v1/parse/{jobId}/result:
+ * /v1/parsing-jobs/{jobId}/result:
  *   get:
  *     tags:
  *       - Parsing
@@ -176,6 +202,13 @@ router.get(
  *     responses:
  *       200:
  *         description: Job result returned
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success: { type: boolean }
+ *                 data: { type: object, description: "Parsed CV content" }
  *       404:
  *         description: Job or Result not found
  *         $ref: '#/components/schemas/Error'
@@ -188,7 +221,7 @@ router.get(
 
 /**
  * @openapi
- * /v1/parse/{jobId}/cancel:
+ * /v1/parsing-jobs/{jobId}/cancel:
  *   post:
  *     tags:
  *       - Parsing
@@ -214,7 +247,7 @@ router.post(
 
 /**
  * @openapi
- * /v1/parse/{jobId}/retry:
+ * /v1/parsing-jobs/{jobId}/retry:
  *   post:
  *     tags:
  *       - Parsing

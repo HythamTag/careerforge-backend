@@ -300,34 +300,4 @@ router.get('/verify-email/:token', validateVerifyEmailParamsMiddleware, authCont
  */
 router.post('/resend-verification', authMiddleware, authController.resendVerification.bind(authController));
 
-/**
- * @openapi
- * /v1/auth/me:
- *   get:
- *     tags:
- *       - Authentication
- *     summary: Get current user profile
- *     description: Returns the profile of the currently authenticated user.
- *     operationId: getCurrentUser
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: User profile returned successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 data:
- *                   $ref: '#/components/schemas/User'
- *       401:
- *         description: Unauthorized - Invalid or missing token
- *         $ref: '#/components/schemas/Error'
- */
-router.get('/me', authMiddleware, authController.getMe.bind(authController));
-
 module.exports = router;

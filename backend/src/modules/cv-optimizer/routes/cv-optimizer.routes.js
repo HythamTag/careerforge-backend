@@ -34,7 +34,7 @@ router.use(authMiddleware);
 
 /**
  * @openapi
- * /v1/optimize:
+ * /v1/optimization-jobs:
  *   post:
  *     tags:
  *       - Optimization
@@ -77,7 +77,7 @@ router.post('/', validateOptimizeCvMiddleware, cvOptimizerController.optimizeCV.
 
 /**
  * @openapi
- * /v1/optimize/sections:
+ * /v1/optimization-jobs/sections:
  *   post:
  *     tags:
  *       - Optimization
@@ -98,6 +98,13 @@ router.post('/', validateOptimizeCvMiddleware, cvOptimizerController.optimizeCV.
  *     responses:
  *       200:
  *         description: Optimization completed
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success: { type: boolean, example: true }
+ *                 data: { $ref: '#/components/schemas/CV' }
  *       400:
  *         description: Invalid sections or input
  *         $ref: '#/components/schemas/Error'
@@ -106,7 +113,7 @@ router.post('/sections', validateOptimizeSectionsMiddleware, cvOptimizerControll
 
 /**
  * @openapi
- * /v1/optimize/tailor:
+ * /v1/optimization-jobs/tailor:
  *   post:
  *     tags:
  *       - Optimization
@@ -120,13 +127,26 @@ router.post('/sections', validateOptimizeSectionsMiddleware, cvOptimizerControll
  *         application/json:
  *           schema:
  *             type: object
- *             required: [cvId, jobDescription]
+ *             required: [cvId, jobData]
  *             properties:
  *               cvId: { type: string }
- *               jobDescription: { type: string }
+ *               jobData:
+ *                 type: object
+ *                 required: [title]
+ *                 properties:
+ *                   title: { type: string }
+ *                   description: { type: string }
+ *                   company: { type: string }
  *     responses:
  *       200:
  *         description: Tailoring started/completed
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success: { type: boolean, example: true }
+ *                 data: { $ref: '#/components/schemas/CV' }
  *       400:
  *         description: Invalid input
  *         $ref: '#/components/schemas/Error'
@@ -135,7 +155,7 @@ router.post('/tailor', validateTailorForJobMiddleware, cvOptimizerController.tai
 
 /**
  * @openapi
- * /v1/optimize/capabilities:
+ * /v1/optimization-jobs/capabilities:
  *   get:
  *     tags:
  *       - Optimization
@@ -154,3 +174,4 @@ router.post('/tailor', validateTailorForJobMiddleware, cvOptimizerController.tai
 router.get('/capabilities', validateCapabilitiesQueryMiddleware, cvOptimizerController.getCapabilities.bind(cvOptimizerController));
 
 module.exports = router;
+

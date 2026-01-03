@@ -35,7 +35,8 @@ class GenerationService {
     fileService,
     templateRenderer,
     versionRepository,
-    pdfGenerator
+    pdfGenerator,
+    cvGeneratorService
   ) {
     this.generationRepository = generationRepository;
     this.jobService = jobService;
@@ -44,6 +45,7 @@ class GenerationService {
     this.templateRenderer = templateRenderer;
     this.versionRepository = versionRepository;
     this.pdfGenerator = pdfGenerator;
+    this.cvGeneratorService = cvGeneratorService;
   }
 
   /**
@@ -362,7 +364,7 @@ class GenerationService {
     ]);
 
     const historyItems = generations.map(gen => ({
-      jobId: gen.jobId,
+      jobId: gen.jobId._id || gen.jobId,
       generationId: gen._id,
       status: gen.status,
       type: gen.type,
@@ -382,13 +384,13 @@ class GenerationService {
         status: gen.cvId.status,
       } : null,
       _links: {
-        self: `/v1/generation/${gen.jobId}`,
-        download: gen.isCompleted() ? `/v1/generation/${gen.jobId}/download` : null,
+        self: `/v1/pdf-generations/${gen.jobId._id || gen.jobId}`,
+        download: gen.isCompleted() ? `/v1/pdf-generations/${gen.jobId._id || gen.jobId}/download` : null,
       },
     }));
 
     const paginationInfo = pagination.calculate(page, limit, total);
-    const baseUrl = '/v1/generation/history';
+    const baseUrl = '/v1/pdf-generations/history';
 
     return {
       data: historyItems,
@@ -465,8 +467,8 @@ class GenerationService {
       overview: stats[0],
       byFormat: formatStats,
       _links: {
-        self: '/v1/generation/stats',
-        history: '/v1/generation/history',
+        self: '/v1/pdf-generations/stats',
+        history: '/v1/pdf-generations/history',
       },
     };
   }
@@ -491,13 +493,13 @@ class GenerationService {
     const preview = {
       template: TEMPLATES[templateId] || TEMPLATES.modern,
       data: normalizedData,
-      previewUrl: `/v1/generation/preview/${Date.now()}`,
+      previewUrl: `/v1/pdf-generations/preview/${Date.now()}`,
     };
 
     return {
       preview,
       _links: {
-        self: '/v1/generation/preview',
+        self: '/v1/pdf-generations/preview',
       },
     };
   }
@@ -524,8 +526,8 @@ class GenerationService {
       }
     }
 
-    // 2. Mark as processing
-    await this.startProcessing(generationId);
+    // 2. Mark as processing and refresh local record to get 'startedAt'
+    generation = await this.startProcessing(generationId);
 
     // 3. Process in steps
     const steps = this.getGenerationSteps(generation.outputFormat);
@@ -549,7 +551,11 @@ class GenerationService {
           results.renderedContent = await this._renderContent(results.preparedData, generation.templateId, generation.parameters);
           break;
         case 'format':
-          results.formattedOutput = await this._formatOutput(results.renderedContent, generation.outputFormat, generation.parameters);
+          // Use rendered content for HTML/PDF, use raw data for DOCX/JSON
+          const dataToFormat = (generation.outputFormat === OUTPUT_FORMAT.DOCX || generation.outputFormat === OUTPUT_FORMAT.JSON)
+            ? results.preparedData
+            : results.renderedContent;
+          results.formattedOutput = await this._formatOutput(dataToFormat, generation.outputFormat, generation.parameters);
           break;
         case 'save':
           results.savedFile = await this._saveOutput(results.formattedOutput, generationId, generation.outputFormat);
@@ -560,10 +566,10 @@ class GenerationService {
       }
     }
 
-    // 4. Calculate stats
+    // 4. Calculate stats (with safety check for NaN)
     const stats = {
-      totalSections: Object.keys(results.preparedData).length,
-      processingTimeMs: new Date() - generation.startedAt,
+      totalSections: Object.keys(results.preparedData || {}).length,
+      processingTimeMs: generation.startedAt ? Math.max(0, new Date() - generation.startedAt) : 0,
       wordCount: this._calculateWordCount(results.formattedOutput),
       pageCount: this._estimatePageCount(results.formattedOutput, generation.outputFormat),
     };
@@ -682,10 +688,14 @@ class GenerationService {
         const pdfBuffer = await this.pdfGenerator.generateFromHtml(content, parameters || {});
         return { content: pdfBuffer, mimeType: 'application/pdf', format: 'pdf' };
       }
+      case OUTPUT_FORMAT.DOCX: {
+        const docxBuffer = await this.cvGeneratorService.generateDOCX(content);
+        return { content: docxBuffer, mimeType: this.getMimeType(OUTPUT_FORMAT.DOCX), format: 'docx' };
+      }
       case OUTPUT_FORMAT.HTML:
-        return { content, mimeType: 'text/html', format: 'html' };
+        return { content, mimeType: this.getMimeType(OUTPUT_FORMAT.HTML), format: 'html' };
       case OUTPUT_FORMAT.JSON:
-        return { content: JSON.stringify(content, null, 2), mimeType: 'application/json', format: 'json' };
+        return { content: JSON.stringify(content, null, 2), mimeType: this.getMimeType(OUTPUT_FORMAT.JSON), format: 'json' };
       default:
         throw new ValidationError(`Unsupported format: ${format}`, ERROR_CODES.GENERATION_INVALID_FORMAT);
     }
@@ -758,16 +768,16 @@ class GenerationService {
       queuedAt: generation.queuedAt,
       estimatedTime: this.getEstimatedTimeForFormat(data.outputFormat),
       _links: {
-        self: `/v1/generation/${job._id}`,
-        status: `/v1/generation/${job._id}`,
-        cancel: `/v1/generation/${job._id}/cancel`,
+        self: `/v1/pdf-generations/${job._id}`,
+        status: `/v1/pdf-generations/${job._id}`,
+        cancel: `/v1/pdf-generations/${job._id}/cancel`,
       },
     };
   }
 
   _mapToStatusResponse(generation, job) {
     return {
-      jobId: generation.jobId,
+      jobId: generation.jobId._id || generation.jobId,
       generationId: generation._id,
       status: generation.status,
       progress: generation.progress,
@@ -785,10 +795,10 @@ class GenerationService {
       retryCount: generation.retryCount,
       jobStatus: job?.status,
       _links: {
-        self: `/v1/generation/${generation.jobId}`,
-        result: generation.isCompleted() ? `/v1/generation/${generation.jobId}/result` : null,
-        download: generation.isCompleted() ? `/v1/generation/${generation.jobId}/download` : null,
-        cancel: generation.canBeCancelled() ? `/v1/generation/${generation.jobId}/cancel` : null,
+        self: `/v1/pdf-generations/${generation.jobId._id || generation.jobId}`,
+        result: generation.isCompleted() ? `/v1/pdf-generations/${generation.jobId._id || generation.jobId}/result` : null,
+        download: generation.isCompleted() ? `/v1/pdf-generations/${generation.jobId._id || generation.jobId}/download` : null,
+        cancel: generation.canBeCancelled() ? `/v1/pdf-generations/${generation.jobId._id || generation.jobId}/cancel` : null,
       },
     };
   }

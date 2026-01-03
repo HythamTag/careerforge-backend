@@ -123,7 +123,7 @@ function CVVersions({ cvId, onVersionActivated }) {
 
                         return (
                             <div
-                                key={version._id}
+                                key={version.id || version._id}
                                 className={`group relative bg-white border rounded-xl p-4 transition-all hover:shadow-md ${isActive ? 'border-indigo-500 ring-1 ring-indigo-500' : 'border-gray-200'
                                     }`}
                             >
@@ -169,11 +169,11 @@ function CVVersions({ cvId, onVersionActivated }) {
                                     <div className="flex items-center space-x-2">
                                         {!isActive && (
                                             <button
-                                                onClick={() => handleActivate(version._id)}
-                                                disabled={activatingId === version._id}
+                                                onClick={() => handleActivate(version.id || version._id)}
+                                                disabled={activatingId === (version.id || version._id)}
                                                 className="px-4 py-2 bg-indigo-50 text-indigo-700 text-sm font-semibold rounded-lg hover:bg-indigo-100 transition-colors disabled:opacity-50"
                                             >
-                                                {activatingId === version._id ? (
+                                                {activatingId === (version.id || version._id) ? (
                                                     <Loader className="w-4 h-4 animate-spin" />
                                                 ) : (
                                                     'Activate'

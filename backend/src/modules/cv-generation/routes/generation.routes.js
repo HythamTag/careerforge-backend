@@ -26,7 +26,7 @@ const generationController = new GenerationController(generationService);
 // Generation routes
 /**
  * @openapi
- * /v1/generation:
+ * /v1/pdf-generations:
  *   post:
  *     tags:
  *       - Generation
@@ -79,7 +79,7 @@ router.post(
 // Specific routes MUST be defined BEFORE wildcard /:jobId
 /**
  * @openapi
- * /v1/generation/history:
+ * /v1/pdf-generations/history:
  *   get:
  *     tags:
  *       - Generation
@@ -115,7 +115,7 @@ router.get(
 
 /**
  * @openapi
- * /v1/generation/stats:
+ * /v1/pdf-generations/stats:
  *   get:
  *     tags:
  *       - Generation
@@ -140,7 +140,7 @@ router.get(
 
 /**
  * @openapi
- * /v1/generation/preview:
+ * /v1/pdf-generations/preview:
  *   post:
  *     tags:
  *       - Generation
@@ -162,7 +162,7 @@ router.post(
 
 /**
  * @openapi
- * /v1/generation/{jobId}:
+ * /v1/pdf-generations/{jobId}:
  *   get:
  *     tags:
  *       - Generation
@@ -196,7 +196,7 @@ router.get(
 
 /**
  * @openapi
- * /v1/generation/{jobId}/download:
+ * /v1/pdf-generations/{jobId}/download:
  *   get:
  *     tags:
  *       - Generation
@@ -228,7 +228,7 @@ router.get(
 
 /**
  * @openapi
- * /v1/generation/{jobId}/cancel:
+ * /v1/pdf-generations/{jobId}/cancel:
  *   post:
  *     tags:
  *       - Generation
@@ -254,3 +254,4 @@ router.post(
 );
 
 module.exports = router;
+

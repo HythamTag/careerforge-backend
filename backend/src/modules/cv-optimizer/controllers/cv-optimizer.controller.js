@@ -26,7 +26,7 @@ class CVOptimizerController {
      */
   async optimizeCV(req, res, next) {
     try {
-      const { cvData, options = {} } = req.body;
+      const { cvData, cvId, options = {} } = req.body;
 
       if (!cvData) {
         throw new ValidationError('CV data is required', ERROR_CODES.VALIDATION_ERROR);
@@ -34,14 +34,53 @@ class CVOptimizerController {
 
       logger.info('Starting CV optimization', {
         userId: req.userId,
+        cvId,
         options: Object.keys(options),
       });
 
       const optimizedCV = await this.service.optimizeContent(cvData, options);
 
+      // If cvId is provided, save as a new version
+      let versionInfo = null;
+      if (cvId && this.cvVersionService) {
+        try {
+          const versionName = 'AI-Optimized CV';
+          const versionDesc = 'Full CV optimization for improved ATS compatibility and readability';
+
+          const version = await this.cvVersionService.createVersion(
+            cvId,
+            req.userId,
+            optimizedCV,
+            versionName,
+            versionDesc,
+            CV_VERSION_CHANGE_TYPE.AI_OPTIMIZED
+          );
+
+          versionInfo = {
+            id: version.id,
+            versionNumber: version.versionNumber
+          };
+
+          // Update main CV status to optimized
+          if (this.cvService) {
+            await this.cvService.updateCV(cvId, req.userId, {
+              status: CV_STATUS.OPTIMIZED,
+              parsingStatus: CV_STATUS.OPTIMIZED,
+              parsingProgress: 100
+            });
+          }
+        } catch (saveError) {
+          logger.warn('Failed to save optimized version', {
+            error: saveError.message,
+            cvId,
+            userId: req.userId
+          });
+        }
+      }
+
       const { response, statusCode } = ResponseFormatter.success({
-        original: cvData,
         optimized: optimizedCV,
+        version: versionInfo
       });
 
       res.status(statusCode).json(response);
@@ -57,7 +96,7 @@ class CVOptimizerController {
      */
   async optimizeSections(req, res, next) {
     try {
-      const { cvData, sections, options = {} } = req.body;
+      const { cvData, cvId, sections, options = {} } = req.body;
 
       if (!cvData || !sections || !Array.isArray(sections)) {
         throw new ValidationError('CV data and sections array are required', ERROR_CODES.VALIDATION_ERROR);
@@ -65,14 +104,54 @@ class CVOptimizerController {
 
       logger.info('Starting section optimization', {
         userId: req.userId,
+        cvId,
         sections: sections.length,
       });
 
       const optimizedCV = await this.service.optimizeSections(cvData, sections, options);
 
+      // If cvId is provided, save as a new version
+      let versionInfo = null;
+      if (cvId && this.cvVersionService) {
+        try {
+          const versionName = `Optimized Sections: ${sections.join(', ')}`;
+          const versionDesc = `AI-optimized specific sections for improved content quality`;
+
+          const version = await this.cvVersionService.createVersion(
+            cvId,
+            req.userId,
+            optimizedCV,
+            versionName,
+            versionDesc,
+            CV_VERSION_CHANGE_TYPE.AI_OPTIMIZED
+          );
+
+          versionInfo = {
+            id: version.id,
+            versionNumber: version.versionNumber
+          };
+
+          // Update main CV status to optimized
+          if (this.cvService) {
+            await this.cvService.updateCV(cvId, req.userId, {
+              status: CV_STATUS.OPTIMIZED,
+              parsingStatus: CV_STATUS.OPTIMIZED,
+              parsingProgress: 100
+            });
+          }
+        } catch (saveError) {
+          logger.warn('Failed to save optimized section version', {
+            error: saveError.message,
+            cvId,
+            userId: req.userId
+          });
+        }
+      }
+
       const { response, statusCode } = ResponseFormatter.success({
         sections: sections,
         optimized: optimizedCV,
+        version: versionInfo
       });
 
       res.status(statusCode).json(response);

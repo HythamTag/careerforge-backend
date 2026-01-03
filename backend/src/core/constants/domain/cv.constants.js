@@ -24,6 +24,7 @@ const CV_VERSION_CHANGE_TYPE = Object.freeze({
   AUTO_SAVE: 'auto_save',
   AI_GENERATED: 'ai_generated',
   AI_OPTIMIZED: 'ai_optimized',
+  AI_PARSED: 'ai_parsed',
   IMPORTED: 'imported',
 });
 
@@ -37,6 +38,7 @@ const CV_VERSION_NAMES = Object.freeze({
   DUPLICATED: 'Duplicated from another CV',
   BEFORE_RESTORE: 'Before version restore',
   MANUAL_CREATION: 'Manual version creation',
+  PARSED: 'Parsed content',
   RESTORED: (versionNumber) => `Restored from version ${versionNumber}`,
 });
 
@@ -49,6 +51,7 @@ const CV_VERSION_DESCRIPTIONS = Object.freeze({
   CONTENT_UPDATED: 'Content updated',
   DUPLICATED: 'Duplicated from another CV',
   BEFORE_RESTORE: (versionNumber) => `Content saved before restoring version ${versionNumber}`,
+  PARSED: 'CV content extracted from uploaded document',
   RESTORED: (versionNumber) => `Content restored from version ${versionNumber}`,
 });
 
