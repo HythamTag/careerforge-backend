@@ -145,6 +145,72 @@ Content-Type: application/json
     "archived": false
 }
 
+###
+
+### 3.7 Upload CV (File)
+# Note: REST Client file upload requires absolute path or relative to file
+# POST {{baseUrl}}/v1/cvs/upload
+# Authorization: Bearer {{authToken}}
+# Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+# 
+# ------WebKitFormBoundary7MA4YWxkTrZu0gW
+# Content-Disposition: form-data; name="file"; filename="test.pdf"
+# Content-Type: application/pdf
+# 
+# < ./test.pdf
+# ------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+###
+
+### 3.8 Search CVs
+GET {{baseUrl}}/v1/cvs/search?q=developer
+Authorization: Bearer {{authToken}}
+Accept: application/json
+
+###
+
+### 3.9 Get CV Stats
+GET {{baseUrl}}/v1/cvs/stats
+Authorization: Bearer {{authToken}}
+Accept: application/json
+
+###
+
+### 3.10 Duplicate CV
+POST {{baseUrl}}/v1/cvs/{{cvId}}/duplicate
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+    "title": "Copy of Test CV"
+}
+
+###
+
+### 3.11 Bulk Operations
+POST {{baseUrl}}/v1/cvs/bulk
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+    "action": "archive",
+    "cvIds": ["{{cvId}}"]
+}
+
+###
+
+### 3.12 Get CV Status
+GET {{baseUrl}}/v1/cvs/{{cvId}}/status
+Authorization: Bearer {{authToken}}
+Accept: application/json
+
+###
+
+### 3.13 Get CV Versions
+GET {{baseUrl}}/v1/cvs/{{cvId}}/versions
+Authorization: Bearer {{authToken}}
+Accept: application/json
+
 ###############################################################################
 # PHASE 4: PARSING JOBS (RENAMED FROM /parse)
 ###############################################################################
