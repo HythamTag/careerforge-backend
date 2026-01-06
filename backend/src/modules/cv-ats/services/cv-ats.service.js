@@ -10,7 +10,7 @@
 const { ATS_STATUS, ATS_TYPE, ATS_PRIORITY, JOB_PRIORITY, JOB_TYPE, ERROR_CODES, PAGINATION, CV_ATS } = require('@constants');
 const mongoose = require('mongoose'); // Add missing import
 const { NotFoundError, ValidationError, ErrorFactory } = require('@errors');
-const { pagination, requireOwnership } = require('@utils');
+const { pagination, requireOwnership, logger } = require('@utils');
 const TransactionManager = require('@infrastructure/transaction.manager');
 const config = require('@config');
 
@@ -29,6 +29,7 @@ class CvAtsService {
     this.cvRepository = cvRepository;
     this.cvAtsAnalysisService = cvAtsAnalysisService;
     this.versionRepository = versionRepository;
+    this.logger = logger;
   }
 
   /**

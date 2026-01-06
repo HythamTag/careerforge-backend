@@ -65,7 +65,6 @@ class CVOptimizerService {
     fieldsToRemove.forEach(field => delete cleaned[field]);
 
     return cleaned;
-    return cleaned;
   }
 
   /**
@@ -122,71 +121,7 @@ class CVOptimizerService {
     return outputCV;
   }
 
-  /**
-   * Verify identity and restore if hallucinated.
-   * Compares input name/email with output and restores input if mismatch found.
-   * @private
-   */
-  _verifyAndRestoreIdentity(inputCV, outputCV) {
-    if (!inputCV || !outputCV) return outputCV;
 
-    // Helper to get name
-    const getName = (cv) => {
-      // Handle normalized
-      if (cv.personalInfo && (cv.personalInfo.firstName || cv.personalInfo.lastName)) {
-        return `${cv.personalInfo.firstName || ''} ${cv.personalInfo.lastName || ''}`.trim();
-      }
-      // Handle flat structure (legacy/AI output)
-      if (cv.name) return cv.name.trim();
-      if (cv.personal && cv.personal.name) return cv.personal.name.trim();
-      return '';
-    };
-
-    const inputName = getName(inputCV);
-    const outputName = getName(outputCV);
-
-    // If we have an input name and output name matches "Hyunwoo Kim" (hallucination) or completely differs...
-    // Actually, let's just restore Personal Info from input if we have it.
-    // Optimization shouldn't really change Personal Info anyway (except formatting).
-
-    // Safety Force: If input has personalInfo, overwrite output's personalInfo
-    // This guarantees the name/contact never hallucinates.
-    if (inputCV.personalInfo && outputName && inputName && inputName.toLowerCase() !== outputName.toLowerCase()) {
-      logger.warn('Hallucination detected in identity! Restoring original identity.', {
-        inputName,
-        outputName
-      });
-
-      // We want to keep the "Optimized" parts of personal info if possible (e.g. formatted links), 
-      // but NOT the name.
-      // safest bet: Restore name, email, phone. Keep links if they look new?
-      // No, safest is to restore the whole Personal Info block.
-
-      // But verify structure first
-      if (outputCV.personalInfo) {
-        outputCV.personalInfo.firstName = inputCV.personalInfo.firstName;
-        outputCV.personalInfo.lastName = inputCV.personalInfo.lastName;
-        outputCV.personalInfo.email = inputCV.personalInfo.email;
-        outputCV.personalInfo.phone = inputCV.personalInfo.phone;
-        // We keep the "headline" or "summary" if it was optimized elsewhere
-        // But Personal Info is mostly static.
-      } else {
-        // Output might be flat
-        outputCV.name = inputName;
-        // ...
-      }
-
-      // Actually, if using CVDataTransformer structure:
-      if (outputCV.personalInfo && inputCV.personalInfo) {
-        outputCV.personalInfo = { ...outputCV.personalInfo, ...inputCV.personalInfo };
-        // Force overwrite basic details, keep any extras added by AI? 
-        // Actually input should be source of truth for PII.
-        outputCV.personalInfo = inputCV.personalInfo;
-      }
-    }
-
-    return outputCV;
-  }
 
   /**
      * Optimize CV content for better ATS compatibility and readability.
