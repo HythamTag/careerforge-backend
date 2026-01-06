@@ -24,8 +24,9 @@ class OllamaProvider extends BaseProvider {
     const model = options.model ? options.model : this.model;
     const temperature = options.temperature;
     const format = options.format; // e.g., 'json'
+    const useStreaming = config.ai.ollama.streaming !== false; // Default true for performance
 
-    logger.info?.('Ollama API call', { model, format, messagesCount: messages.length });
+    logger.info?.('Ollama API call', { model, format, streaming: useStreaming, messagesCount: messages.length });
 
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), this.timeout);
@@ -43,7 +44,7 @@ class OllamaProvider extends BaseProvider {
             // Note: num_predict (max tokens) is NOT set here
             // Ollama uses sensible defaults and hardware tuning comes from Docker
           },
-          stream: false,
+          stream: useStreaming,
         }),
         signal: controller.signal,
       });
@@ -61,8 +62,36 @@ class OllamaProvider extends BaseProvider {
         throw new AIError(`Ollama API error [${model} @ ${this.host}]: ${response.status} - ${errorBody || response.statusText}`, ERROR_CODES.AI_SERVICE_ERROR);
       }
 
-      const data = await response.json();
-      let content = data.message?.content || data.response || '';
+      let content = '';
+
+      if (useStreaming) {
+        // Collect streamed chunks into complete response (faster path)
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          const chunk = decoder.decode(value, { stream: true });
+          // Each line is a JSON object with a "message" field containing "content"
+          const lines = chunk.split('\n').filter(line => line.trim());
+          for (const line of lines) {
+            try {
+              const parsed = JSON.parse(line);
+              if (parsed.message?.content) {
+                content += parsed.message.content;
+              }
+            } catch {
+              // Ignore partial JSON lines
+            }
+          }
+        }
+      } else {
+        // Non-streaming mode (can be slower, but simpler)
+        const data = await response.json();
+        content = data.message?.content || data.response || '';
+      }
 
       // Clean markdown wrappers if present
       if (content) {

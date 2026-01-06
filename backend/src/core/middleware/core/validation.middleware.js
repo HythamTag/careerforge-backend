@@ -22,8 +22,6 @@ function validateRequest(schema, property = 'body') {
     try {
       let data = req[property];
 
-
-
       const { valid, errors, data: validatedData } = validateData(data, schema);
 
       if (!valid) {
@@ -32,15 +30,6 @@ function validateRequest(schema, property = 'body') {
           message: error.message,
           code: ERROR_CODES.VALIDATION_ERROR,
         }));
-
-        // Debug log to help identify validation issues
-        console.log('[Validation Error]', {
-          path: req.path,
-          method: req.method,
-          property,
-          data: JSON.stringify(data).substring(0, 200),
-          errors: errors.map(e => ({ path: e.instancePath, message: e.message, params: e.params })),
-        });
 
         throw new ValidationError(
           'Request validation failed',

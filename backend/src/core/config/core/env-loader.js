@@ -183,6 +183,7 @@ class EnvironmentLoader {
       OLLAMA_ATS_HOST: process.env.OLLAMA_ATS_HOST || 'http://localhost:11436',
       OLLAMA_TIMEOUT: this._parseNumber(process.env.OLLAMA_TIMEOUT, 120000),
       OLLAMA_DEFAULT_MODEL: process.env.OLLAMA_DEFAULT_MODEL || 'llama3.1:8b',
+      OLLAMA_STREAMING: this._parseBoolean(process.env.OLLAMA_STREAMING, true),
 
       // Parser-specific parameters (Llama 3.1 - precise)
       AI_TOP_P_PARSER: this._parseFloat(process.env.AI_TOP_P_PARSER, 0.1),

@@ -21,7 +21,10 @@ const clearAuth = () => {
 const api = axios.create({
   baseURL: API_BASE_URL,
   timeout: 600000,
-  headers: { 'Content-Type': 'application/json' },
+  headers: {
+    'Content-Type': 'application/json',
+    'ngrok-skip-browser-warning': 'true',
+  },
 });
 
 // Request interceptor - Add auth token to all requests

@@ -4,7 +4,7 @@ cd ..
 title CareerForge - AI API Tunnel
 
 REM Ngrok authtoken for AI API
-set NGROK_TOKEN=37fuQcfI32uu7kyANcPeytMjx6H_3Gfv3E4jbCGp6vekCxYab
+set NGROK_TOKEN=37fCnaS4roZlzV0BmSJgt7EhOWl_4FFPJfPYTgmg8ggYNu4ch
 
 echo ========================================================
 echo   CAREERFORGE - AI API TUNNEL

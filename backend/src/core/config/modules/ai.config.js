@@ -73,6 +73,8 @@ class AIConfig {
         },
         // Connection timeout
         timeout: env.OLLAMA_TIMEOUT,
+        // Enable streaming for faster response (default: true)
+        streaming: env.OLLAMA_STREAMING,
       },
     };
   }

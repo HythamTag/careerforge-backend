@@ -118,7 +118,6 @@ class JobRepository {
     }
 
     const result = await this.updateById(jobId, updateData, options);
-    console.log(`[JobRepository] Update result for ${jobId}: ${result ? result.status : 'null'}`);
     return result;
   }
 
