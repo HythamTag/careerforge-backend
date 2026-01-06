@@ -64,6 +64,11 @@ const corsOptions = {
 
     const allowedOrigins = config.security.cors.allowedOrigins;
 
+    // If wildcard '*' is in the list, allow all origins
+    if (allowedOrigins.includes('*')) {
+      return callback(null, true);
+    }
+
     // In development, allow all localhost origins
     if (config.server.isDevelopment) {
       if (origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:')) {
