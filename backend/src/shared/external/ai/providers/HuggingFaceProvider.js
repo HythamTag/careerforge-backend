@@ -17,21 +17,21 @@ class HuggingFaceProvider extends BaseProvider {
   async callAI(messages, options = {}) {
     const axios = require('axios');
     const { AIError } = require('@errors');
-    const { ERROR_CODES } = require('@constants');
-    
+    const { ERROR_CODES, AI_PROVIDER_URLS } = require('@constants');
+
     try {
       const prompt = messages.map(m => `${m.role}: ${m.content}`).join('\n');
       const response = await axios.post(
-        `https://api-inference.huggingface.co/models/${this.model}`,
+        `${AI_PROVIDER_URLS.HUGGINGFACE_BASE}/${this.model}`,
         { inputs: prompt, parameters: { max_new_tokens: options.maxTokens || config.ai.models.parser.maxTokens, temperature: options.temperature ?? config.ai.models.parser.temperature } },
         { headers: { 'Authorization': `Bearer ${this.apiKey}` } },
       );
-      
+
       const content = response.data[0]?.generated_text;
       if (!content) {
         throw new AIError('HuggingFace returned empty response', ERROR_CODES.AI_SERVICE_ERROR);
       }
-      
+
       return content;
     } catch (error) {
       if (error.isOperational) {

@@ -27,6 +27,7 @@ const WebhookConstants = require('./domain/webhook.constants');
 const UserConstants = require('./domain/user.constants');
 const TemplateConstants = require('./domain/template.constants');
 const FileConstants = require('./domain/file.constants');
+const AIConstants = require('./domain/ai.constants');
 
 // Config Constants
 const ServiceConstants = require('./config/service.constants');
@@ -160,4 +161,8 @@ module.exports = Object.freeze({
   CV_SORT_OPTIONS: CVConstants.CV_SORT_OPTIONS,
   RECOMMENDATIONS: CVConstants.RECOMMENDATIONS,
   OPTIMIZER_CONFIG: CVConstants.OPTIMIZER_CONFIG,
+
+  // AI
+  AI_PROVIDER_URLS: AIConstants.AI_PROVIDER_URLS,
+  AI_API_VERSIONS: AIConstants.AI_API_VERSIONS,
 });

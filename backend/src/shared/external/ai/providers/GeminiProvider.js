@@ -17,23 +17,23 @@ class GeminiProvider extends BaseProvider {
   async callAI(messages, options) {
     const axios = require('axios');
     const { AIError } = require('@errors');
-    const { ERROR_CODES } = require('@constants');
-    
+    const { ERROR_CODES, AI_PROVIDER_URLS } = require('@constants');
+
     try {
       const model = options.model ? options.model : this.model;
       const response = await axios.post(
-        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${this.apiKey}`,
+        `${AI_PROVIDER_URLS.GEMINI_BASE}/${model}:generateContent?key=${this.apiKey}`,
         {
           contents: messages.map(m => ({ role: m.role === 'user' ? 'user' : 'model', parts: [{ text: m.content }] })),
           generationConfig: { temperature: options.temperature },
         },
       );
-      
+
       const content = response.data.candidates[0]?.content?.parts[0]?.text;
       if (!content) {
         throw new AIError('Gemini returned empty response', ERROR_CODES.AI_SERVICE_ERROR);
       }
-      
+
       return content;
     } catch (error) {
       if (error.isOperational) {

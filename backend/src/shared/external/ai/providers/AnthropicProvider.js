@@ -17,20 +17,20 @@ class AnthropicProvider extends BaseProvider {
   async callAI(messages, options = {}) {
     const axios = require('axios');
     const { AIError } = require('@errors');
-    const { ERROR_CODES } = require('@constants');
-    
+    const { ERROR_CODES, AI_PROVIDER_URLS, AI_API_VERSIONS } = require('@constants');
+
     try {
-    const response = await axios.post('https://api.anthropic.com/v1/messages', {
-      model: options.model || this.model,
-      max_tokens: options.maxTokens || config.ai.models.parser.maxTokens,
-      messages,
-    }, { headers: { 'x-api-key': this.apiKey, 'anthropic-version': '2023-06-01' } });
-      
+      const response = await axios.post(AI_PROVIDER_URLS.ANTHROPIC, {
+        model: options.model || this.model,
+        max_tokens: options.maxTokens || config.ai.models.parser.maxTokens,
+        messages,
+      }, { headers: { 'x-api-key': this.apiKey, 'anthropic-version': AI_API_VERSIONS.ANTHROPIC } });
+
       const content = response.data.content[0]?.text;
       if (!content) {
         throw new AIError('Anthropic returned empty response', ERROR_CODES.AI_SERVICE_ERROR);
       }
-      
+
       return content;
     } catch (error) {
       if (error.isOperational) {
