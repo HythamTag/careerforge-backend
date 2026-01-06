@@ -100,6 +100,7 @@ class EnvironmentLoader {
       PORT: this._parseNumber(process.env.PORT, 5000),
       NODE_ENV: process.env.NODE_ENV || 'development',
       HOST: process.env.HOST || 'localhost',
+      BASE_URL: process.env.API_BASE_URL || 'http://localhost:5000',
 
       // ==========================================
       // DATABASE CONFIGURATION
@@ -203,6 +204,11 @@ class EnvironmentLoader {
       AI_MAX_TOKENS_ATS: this._parseNumber(process.env.AI_MAX_TOKENS_ATS, 3000),
 
       // ==========================================
+      // CV CONFIGURATION
+      // ==========================================
+      CV_PUBLIC_BASE_URL: process.env.CV_PUBLIC_BASE_URL || 'https://cv-enhancer.com/cv',
+
+      // ==========================================
       // STORAGE CONFIGURATION
       // ==========================================
       STORAGE_TYPE: process.env.STORAGE_TYPE || 'local',
@@ -251,6 +257,7 @@ class EnvironmentLoader {
       // ==========================================
       PUPPETEER_WS_ENDPOINT: process.env.PUPPETEER_WS_ENDPOINT || 'ws://localhost:3000/chrome',
       PUPPETEER_TIMEOUT: this._parseNumber(process.env.PUPPETEER_TIMEOUT, 30000),
+      PUPPETEER_EXECUTABLE_PATH: process.env.PUPPETEER_EXECUTABLE_PATH || undefined,
 
       // ==========================================
       // LOGGING CONFIGURATION

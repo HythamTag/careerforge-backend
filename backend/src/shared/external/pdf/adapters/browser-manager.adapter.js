@@ -16,6 +16,7 @@ class BrowserManagerAdapter {
     this.dockerEndpoint = config.dockerEndpoint;
     this.config = {
       timeout: config.timeout,
+      executablePath: config.executablePath,
     };
     this.browser = null;
   }
@@ -65,7 +66,7 @@ class BrowserManagerAdapter {
     try {
       logger.info('Launching local Puppeteer browser...');
       const browser = await puppeteer.launch({
-        executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined,
+        executablePath: this.config.executablePath,
         headless: 'new',
         args: [
           '--no-sandbox',

@@ -11,6 +11,7 @@
  */
 
 const { SERVICE_VERSION } = require('@constants');
+const config = require('@config');
 
 /**
  * Swagger/OpenAPI configuration options
@@ -56,8 +57,8 @@ JWT-based authentication required for most endpoints.
     },
     servers: [
       {
-        url: process.env.API_BASE_URL || 'http://localhost:5000',
-        description: process.env.NODE_ENV === 'production' ? 'Production server' : 'Development server',
+        url: config.server.baseUrl,
+        description: config.server.env === 'production' ? 'Production server' : 'Development server',
       },
     ],
     components: {

@@ -187,19 +187,6 @@ class Container {
     });
 
     // ========================================
-    // LEGACY CV PARSER SERVICE (Wrapper)
-    // ========================================
-    this.register('cvParserService', (container) => {
-      const aiContentParser = container.resolve('aiContentParserService');
-      return {
-        parse: async (text) => {
-          return await aiContentParser.parseContent(text);
-        },
-      };
-    });
-
-
-    // ========================================
     // FILE SERVICES
     // ========================================
     // ========================================

@@ -13,6 +13,8 @@ class AppConfig {
       server: {
         host: env.HOST,
         port: env.PORT,
+        baseUrl: env.BASE_URL,
+        env: env.NODE_ENV,
         nodeEnv: env.NODE_ENV,
         isProduction: env.NODE_ENV === 'production',
         isDevelopment: env.NODE_ENV === 'development',
@@ -24,6 +26,14 @@ class AppConfig {
       // ==========================================
       puppeteer: {
         wsEndpoint: env.PUPPETEER_WS_ENDPOINT,
+        executablePath: env.PUPPETEER_EXECUTABLE_PATH,
+      },
+
+      // ==========================================
+      // CV CONFIGURATION
+      // ==========================================
+      cv: {
+        publicBaseUrl: env.CV_PUBLIC_BASE_URL,
       },
 
       // ==========================================

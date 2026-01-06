@@ -232,6 +232,17 @@ const ALLOWED_MIME_TYPES = Object.freeze(
   Object.values(FILE_TYPES).map(type => type.mimeType),
 );
 
+/**
+ * Extension to MIME mapping
+ * Used for file type detection and strategy selection
+ */
+const EXTENSION_TO_MIME = Object.freeze({
+  pdf: FILE_TYPES.PDF.mimeType,
+  docx: FILE_TYPES.DOCX.mimeType,
+  doc: FILE_TYPES.DOC.mimeType,
+  txt: FILE_TYPES.TXT.mimeType,
+});
+
 module.exports = {
   FILE_TYPES,
   FILE_LIMITS,
@@ -241,4 +252,5 @@ module.exports = {
   TEXT_PROCESSING,
   ALLOWED_EXTENSIONS,
   ALLOWED_MIME_TYPES,
+  EXTENSION_TO_MIME,
 };

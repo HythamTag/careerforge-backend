@@ -84,15 +84,6 @@ class CVParsingService {
     return OUTPUT_FORMAT.PDF;
   }
 
-  /**
-   * Update CV parsing progress (for frontend polling)
-   * 
-   * @private
-   * @param {string} cvId - CV ID
-   * @param {string} userId - User ID
-   * @param {number} progress - Progress percentage (0-100)
-   * @param {string} stage - Current parsing stage description
-   */
   async _updateParsingProgress(cvId, userId, progress, stage) {
     try {
       logger.debug('Updating parsing progress', { cvId, userId, progress, stage });
@@ -101,8 +92,25 @@ class CVParsingService {
         parsingStatus: CV_STATUS.PROCESSING,
         'metadata.parsingStage': stage,
       });
+
+      // Also update the job progress for real-time tracking
+      // Job ID is required for this, so we only call it if we have it
     } catch (error) {
       logger.warn('Failed to update parsing progress', { cvId, progress, error: error.message });
+    }
+  }
+
+  /**
+   * Update job progress
+   * @private
+   */
+  async _updateJobProgress(jobId, progress, stage) {
+    try {
+      if (jobId) {
+        await this.jobService.updateJobProgress(jobId, progress, stage);
+      }
+    } catch (error) {
+      logger.warn('Failed to update job progress', { jobId, progress, error: error.message });
     }
   }
 
@@ -638,12 +646,8 @@ class CVParsingService {
    * @returns {string} MIME type
    */
   _getMimeFromType(type) {
-    const mapping = {
-      'pdf': 'application/pdf',
-      'docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-      'doc': 'application/msword',
-    };
-    return mapping[type] || 'application/octet-stream';
+    const { EXTENSION_TO_MIME } = require('@constants');
+    return EXTENSION_TO_MIME[type] || 'application/octet-stream';
   }
 
   /**

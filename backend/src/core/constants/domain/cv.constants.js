@@ -118,7 +118,6 @@ const CV_BULK_OPERATIONS = Object.freeze({
  * Base URL for public CV sharing
  */
 const CV_PUBLIC_URL = Object.freeze({
-  BASE_URL: 'https://cv-enhancer.com/cv',
   SHORT_ID_LENGTH: 8,
 });
 
