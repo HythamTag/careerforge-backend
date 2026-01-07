@@ -12,7 +12,9 @@ class OllamaProvider extends BaseProvider {
   constructor(options) {
     super();
     const ollamaConfig = config.ai.ollama;
-    this.host = options.host ? options.host : ollamaConfig.host;
+    const rawHost = options.host ? options.host : ollamaConfig.host;
+    // Remove trailing slash to prevent double-slash URLs
+    this.host = rawHost.replace(/\/+$/, '');
     this.model = options.model ? options.model : ollamaConfig.defaultModel;
     this.timeout = options.timeout ? options.timeout : ollamaConfig.timeout;
     this.name = 'ollama';
