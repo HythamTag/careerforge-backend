@@ -97,9 +97,17 @@
                                 "exec": [
                                     "if(pm.response.code === 201) {",
                                     "    var jsonData = pm.response.json();",
-                                    "    pm.collectionVariables.set('token', jsonData.data.token);",
-                                    "    pm.collectionVariables.set('userId', jsonData.data.user.id);",
-                                    "    console.log('Token and UserID saved to collection variables.');",
+                                    "    // Handle both verification enabled and disabled responses",
+                                    "    if (jsonData.data.token) {",
+                                    "        // Verification disabled - token returned directly",
+                                    "        pm.collectionVariables.set('token', jsonData.data.token);",
+                                    "        pm.collectionVariables.set('userId', jsonData.data.user.id);",
+                                    "        console.log('Token and UserID saved (auto-login).');",
+                                    "    } else {",
+                                    "        // Verification enabled - only userId returned",
+                                    "        pm.collectionVariables.set('userId', jsonData.data.userId);",
+                                    "        console.log('UserID saved. Email verification required.');",
+                                    "    }",
                                     "}"
                                 ],
                                 "type": "text/javascript"
