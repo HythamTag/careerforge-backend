@@ -252,6 +252,9 @@ class EnvironmentLoader {
       JWT_ACCESS_TOKEN_EXPIRY: process.env.JWT_ACCESS_TOKEN_EXPIRY || '15m',
       JWT_REFRESH_TOKEN_EXPIRY: process.env.JWT_REFRESH_TOKEN_EXPIRY || '7d',
 
+      // Email verification (disabled by default)
+      EMAIL_VERIFICATION_REQUIRED: this._parseBoolean(process.env.EMAIL_VERIFICATION_REQUIRED, false),
+
       // ==========================================
       // PUPPETEER CONFIGURATION
       // ==========================================

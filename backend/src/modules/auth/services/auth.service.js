@@ -44,29 +44,56 @@ class AuthService {
       throw ErrorFactory.validationFailed('User with this email already exists', ERROR_CODES.AUTH_EMAIL_ALREADY_EXISTS);
     }
 
-    // Generate email verification token
-    const emailVerificationToken = crypto.randomBytes(32).toString('hex');
+    // Check if email verification is required
+    const requiresVerification = this.config.security?.emailVerificationRequired === true;
 
     // Generate unique referral code to avoid MongoDB unique index conflict
     const refCode = crypto.randomBytes(8).toString('hex').toUpperCase();
 
-    // Create user
+    // Build user data
     const userData = {
       email: data.email,
       password: data.password, // Will be hashed by pre-save hook
       firstName: data.firstName,
       lastName: data.lastName,
       displayName: `${data.firstName} ${data.lastName}`,
-      emailVerificationToken,
-      emailVerificationExpires: new Date(Date.now() + TIME_CONSTANTS.EMAIL_VERIFICATION_EXPIRY_MS),
       referral: {
         refCode,
       },
     };
 
-    const user = await this.userRepository.create(userData);
-    // await this.sendVerificationEmail(user.email, emailVerificationToken);
+    // If verification required, add token and set status to pending
+    if (requiresVerification) {
+      const emailVerificationToken = crypto.randomBytes(32).toString('hex');
+      userData.emailVerificationToken = emailVerificationToken;
+      userData.emailVerificationExpires = new Date(Date.now() + TIME_CONSTANTS.EMAIL_VERIFICATION_EXPIRY_MS);
+      userData.status = USER_STATUS.PENDING_VERIFICATION;
+      userData.emailVerified = false;
+    } else {
+      // No verification needed - activate immediately
+      userData.status = USER_STATUS.ACTIVE;
+      userData.emailVerified = true;
+    }
 
+    const user = await this.userRepository.create(userData);
+
+    // If verification not required, return token immediately (auto-login)
+    if (!requiresVerification) {
+      const token = this._generateToken(user);
+      return {
+        token,
+        user: {
+          id: user._id,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          displayName: user.displayName,
+        },
+      };
+    }
+
+    // Verification required - return without token
+    // await this.sendVerificationEmail(user.email, emailVerificationToken);
     return {
       userId: user._id,
       email: user.email,

@@ -18,6 +18,7 @@ class SecurityConfig {
         refreshTokenExpiry: env.JWT_REFRESH_TOKEN_EXPIRY,
         algorithm: 'HS256',
       },
+      emailVerificationRequired: env.EMAIL_VERIFICATION_REQUIRED,
       headers: {
         contentSecurityPolicy: 'default-src \'self\'; script-src \'self\' \'unsafe-inline\'; style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com; font-src \'self\' https://fonts.gstatic.com; img-src \'self\' data: https:; connect-src \'self\' https://api.openai.com https://api.anthropic.com https://generativelanguage.googleapis.com;',
         strictTransportSecurity: 'max-age=31536000; includeSubDomains; preload',
