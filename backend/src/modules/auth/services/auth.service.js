@@ -38,8 +38,8 @@ class AuthService {
       throw ErrorFactory.validationFailed('Email, password, firstName, and lastName are required', ERROR_CODES.AUTH_MISSING_REQUIRED_FIELDS);
     }
 
-    // Check if user already exists
-    const existingUser = await this.userRepository.findActiveByEmail(data.email);
+    // Check if user already exists (any status, not just active)
+    const existingUser = await this.userRepository.findByEmail(data.email);
     if (existingUser) {
       throw ErrorFactory.validationFailed('User with this email already exists', ERROR_CODES.AUTH_EMAIL_ALREADY_EXISTS);
     }
