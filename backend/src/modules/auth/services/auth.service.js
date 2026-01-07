@@ -79,7 +79,7 @@ class AuthService {
 
     // If verification not required, return token immediately (auto-login)
     if (!requiresVerification) {
-      const token = this._generateToken(user);
+      const token = this.generateAccessToken(user);
       return {
         token,
         user: {
