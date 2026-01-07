@@ -1,17 +1,34 @@
 {
     "info": {
-        "_postman_id": "careerforge-api-v2-collection",
-        "name": "CareerForge API v2",
-        "description": "# CareerForge API v2\n\nOfficial API collection for the CareerForge Backend. This API provides comprehensive capabilities for CV management, AI-powered parsing, intelligent optimization, ATS analysis, and PDF generation.\n\n## Getting Started\n\n1. **Environment Setup**: The collection uses the `baseUrl` variable. Ensure it is set to your target environment (e.g., `https://propertied-geographically-scarlet.ngrok-free.dev`).\n2. **Authentication**: Most endpoints require a Bearer Token. \n    - Use the **Register** or **Login** request in the `Authentication` folder.\n    - The collection is scripted to automatically save the returned `token` and `userId` to the collection variables upon successful login/registration.\n    - Subsequent requests will automatically use these stored variables.\n3. **Workflows**: Common workflows include:\n    - **Upload & Parse**: Upload a CV -> Check Parsing Status.\n    - **Optimize**: Get CV Details -> Start Full Optimization -> Check Job Status.\n    - **Generate**: Select Template -> Generate PDF -> Download.\n\n## Support\nFor issues or questions, contact the backend team.",
+        "_postman_id": "careerforge-api-v3-complete",
+        "name": "CareerForge API v3 (Complete)",
+        "description": "# CareerForge API v3 - Complete Collection\n\nOfficial API collection for the CareerForge Backend. This API provides comprehensive capabilities for CV management, AI-powered parsing, intelligent optimization, ATS analysis, and PDF generation.\n\n## Getting Started\n\n1. **Environment Setup**: The collection uses the `baseUrl` variable. It defaults to Railway production.\n2. **Authentication**: Most endpoints require a Bearer Token.\n    - Use the **Register** or **Login** request in the `Authentication` folder.\n    - The collection automatically saves `token`, `userId`, and `cvId` to variables.\n3. **Workflows**:\n    - **Upload & Parse**: Upload a CV -> Check Parsing Status.\n    - **Optimize**: Get CV Details -> Start Full Optimization -> Check Job Status.\n    - **Generate**: Select Template -> Generate PDF -> Download.\n\n## Support\nFor issues or questions, contact the backend team.",
         "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
     },
     "item": [
         {
             "name": "1. Health & System",
-            "description": "Endpoints for checking system status, health, and readiness. Useful for monitoring and Kubernetes probes.",
+            "description": "Endpoints for checking system status, health, and readiness.",
             "item": [
                 {
                     "name": "Health Check",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/health",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "health"
+                            ]
+                        },
+                        "description": "Basic health check (no auth required)."
+                    }
+                },
+                {
+                    "name": "Health Check (v1)",
                     "request": {
                         "method": "GET",
                         "header": [],
@@ -25,9 +42,8 @@
                                 "health"
                             ]
                         },
-                        "description": "Returns the basic health status of the API, including uptime and timestamp."
-                    },
-                    "response": []
+                        "description": "Detailed health check with database status."
+                    }
                 },
                 {
                     "name": "Readiness Probe",
@@ -45,15 +61,32 @@
                                 "ready"
                             ]
                         },
-                        "description": "Checks if the service is ready to accept traffic. Verifies database and Redis connections."
-                    },
-                    "response": []
+                        "description": "Checks if the service is ready to accept traffic."
+                    }
+                },
+                {
+                    "name": "Metrics",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/v1/metrics",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "v1",
+                                "metrics"
+                            ]
+                        },
+                        "description": "Prometheus-format metrics for monitoring."
+                    }
                 }
             ]
         },
         {
             "name": "2. Authentication",
-            "description": "User authentication endpoints. includes registration, login, and profile management. **Note:** Successful login/register automatically sets the `token` variable.",
+            "description": "User authentication endpoints. Successful login/register automatically sets the `token` variable.",
             "item": [
                 {
                     "name": "Register",
@@ -62,15 +95,11 @@
                             "listen": "test",
                             "script": {
                                 "exec": [
-                                    "pm.test(\"Status code is 201\", function () {",
-                                    "    pm.response.to.have.status(201);",
-                                    "});",
-                                    "",
                                     "if(pm.response.code === 201) {",
                                     "    var jsonData = pm.response.json();",
-                                    "    pm.collectionVariables.set(\"token\", jsonData.data.token);",
-                                    "    pm.collectionVariables.set(\"userId\", jsonData.data.user.id);",
-                                    "    console.log(\"Token and UserID saved to collection variables.\");",
+                                    "    pm.collectionVariables.set('token', jsonData.data.token);",
+                                    "    pm.collectionVariables.set('userId', jsonData.data.user.id);",
+                                    "    console.log('Token and UserID saved to collection variables.');",
                                     "}"
                                 ],
                                 "type": "text/javascript"
@@ -100,9 +129,8 @@
                                 "register"
                             ]
                         },
-                        "description": "Registers a new user. \n- **Required**: email, password, firstName, lastName.\n- **Auto-Script**: Saves `token` to variables."
-                    },
-                    "response": []
+                        "description": "Registers a new user."
+                    }
                 },
                 {
                     "name": "Login",
@@ -111,15 +139,11 @@
                             "listen": "test",
                             "script": {
                                 "exec": [
-                                    "pm.test(\"Status code is 200\", function () {",
-                                    "    pm.response.to.have.status(200);",
-                                    "});",
-                                    "",
                                     "if(pm.response.code === 200) {",
                                     "    var jsonData = pm.response.json();",
-                                    "    pm.collectionVariables.set(\"token\", jsonData.data.token);",
-                                    "    pm.collectionVariables.set(\"userId\", jsonData.data.user.id);",
-                                    "    console.log(\"Token and UserID saved to collection variables.\");",
+                                    "    pm.collectionVariables.set('token', jsonData.data.token);",
+                                    "    pm.collectionVariables.set('userId', jsonData.data.user.id);",
+                                    "    console.log('Token and UserID saved to collection variables.');",
                                     "}"
                                 ],
                                 "type": "text/javascript"
@@ -149,9 +173,8 @@
                                 "login"
                             ]
                         },
-                        "description": "Authenticates a user.\n- **Required**: email, password.\n- **Auto-Script**: Saves `token` to variables."
-                    },
-                    "response": []
+                        "description": "Authenticates a user."
+                    }
                 },
                 {
                     "name": "Get User Profile",
@@ -175,14 +198,13 @@
                             ]
                         },
                         "description": "Retrieves the currently authenticated user's profile."
-                    },
-                    "response": []
+                    }
                 }
             ]
         },
         {
             "name": "3. CV Operations",
-            "description": "Core CRUD operations for CVs. Handles uploading, searching, and managing CV entities.",
+            "description": "Core CRUD operations for CVs.",
             "item": [
                 {
                     "name": "List CVs",
@@ -204,60 +226,8 @@
                                 "cvs"
                             ]
                         },
-                        "description": "Lists all CVs belonging to the authenticated user. Supports pagination."
-                    },
-                    "response": []
-                },
-                {
-                    "name": "Create CV (Manual)",
-                    "event": [
-                        {
-                            "listen": "test",
-                            "script": {
-                                "exec": [
-                                    "pm.test(\"Status code is 201\", function () {",
-                                    "    pm.response.to.have.status(201);",
-                                    "});",
-                                    "",
-                                    "if(pm.response.code === 201) {",
-                                    "    var jsonData = pm.response.json();",
-                                    "    pm.collectionVariables.set(\"cvId\", jsonData.data.id || jsonData.data.cv.id);",
-                                    "    console.log(\"CV ID saved: \" + pm.collectionVariables.get(\"cvId\"));",
-                                    "}"
-                                ],
-                                "type": "text/javascript"
-                            }
-                        }
-                    ],
-                    "request": {
-                        "method": "POST",
-                        "header": [
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{token}}"
-                            },
-                            {
-                                "key": "Content-Type",
-                                "value": "application/json"
-                            }
-                        ],
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n    \"fileName\": \"John_Doe_Full_Stack.pdf\",\n    \"parsedData\": {\n        \"personalInfo\": {\n            \"fullName\": \"John Doe\",\n            \"email\": \"john.doe@example.com\",\n            \"phone\": \"+1234567890\",\n            \"location\": \"San Francisco, CA\",\n            \"linkedin\": \"linkedin.com/in/johndoe\",\n            \"github\": \"github.com/johndoe\"\n        },\n        \"professionalSummary\": \"Experienced Full Stack Developer with 5+ years in building scalable web applications.\",\n        \"experience\": [\n            {\n                \"title\": \"Senior Developer\",\n                \"company\": \"Tech Corp\",\n                \"startDate\": \"2020-01\",\n                \"endDate\": \"Present\",\n                \"description\": \"Led a team of 5 developers...\"\n            }\n        ],\n        \"education\": [\n            {\n                \"degree\": \"B.S. Computer Science\",\n                \"school\": \"University of Tech\",\n                \"year\": \"2019\"\n            }\n        ],\n        \"skills\": [\"JavaScript\", \"React\", \"Node.js\", \"MongoDB\", \"AWS\"]\n    }\n}"
-                        },
-                        "url": {
-                            "raw": "{{baseUrl}}/v1/cvs",
-                            "host": [
-                                "{{baseUrl}}"
-                            ],
-                            "path": [
-                                "v1",
-                                "cvs"
-                            ]
-                        },
-                        "description": "Manually creates a CV record with JSON data. Useful for testing without file upload.\n- **Auto-Script**: Saves `cvId` to variables."
-                    },
-                    "response": []
+                        "description": "Lists all CVs belonging to the authenticated user."
+                    }
                 },
                 {
                     "name": "Upload CV (File)",
@@ -266,15 +236,11 @@
                             "listen": "test",
                             "script": {
                                 "exec": [
-                                    "pm.test(\"Status code is 201\", function () {",
-                                    "    pm.response.to.have.status(201);",
-                                    "});",
-                                    "",
                                     "if(pm.response.code === 201) {",
                                     "    var jsonData = pm.response.json();",
                                     "    var cvId = jsonData.data.cv ? jsonData.data.cv.id : jsonData.data.id;",
-                                    "    pm.collectionVariables.set(\"cvId\", cvId);",
-                                    "    console.log(\"CV ID saved from upload: \" + cvId);",
+                                    "    pm.collectionVariables.set('cvId', cvId);",
+                                    "    console.log('CV ID saved: ' + cvId);",
                                     "}"
                                 ],
                                 "type": "text/javascript"
@@ -310,9 +276,103 @@
                                 "upload"
                             ]
                         },
-                        "description": "Uploads a PDF file to create a new CV. Initiates parsing automatically.\n- **Body**: multipart/form-data with `file` field.\n- **Auto-Script**: Saves `cvId` to variables."
-                    },
-                    "response": []
+                        "description": "Uploads a PDF file to create a new CV. Auto-saves cvId."
+                    }
+                },
+                {
+                    "name": "Create CV (Manual JSON)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if(pm.response.code === 201) {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    pm.collectionVariables.set('cvId', jsonData.data.id || jsonData.data.cv.id);",
+                                    "    console.log('CV ID saved: ' + pm.collectionVariables.get('cvId'));",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"fileName\": \"John_Doe_Full_Stack.pdf\",\n    \"parsedData\": {\n        \"personalInfo\": {\n            \"fullName\": \"John Doe\",\n            \"email\": \"john.doe@example.com\",\n            \"phone\": \"+1234567890\",\n            \"location\": \"San Francisco, CA\"\n        },\n        \"professionalSummary\": \"Experienced Full Stack Developer with 5+ years experience.\",\n        \"experience\": [{\"title\": \"Senior Developer\", \"company\": \"Tech Corp\", \"startDate\": \"2020-01\", \"endDate\": \"Present\"}],\n        \"education\": [{\"degree\": \"B.S. Computer Science\", \"school\": \"University of Tech\", \"year\": \"2019\"}],\n        \"skills\": [\"JavaScript\", \"React\", \"Node.js\", \"MongoDB\", \"AWS\"]\n    }\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/v1/cvs",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "v1",
+                                "cvs"
+                            ]
+                        },
+                        "description": "Manually creates a CV record with JSON data."
+                    }
+                },
+                {
+                    "name": "Get CV Details",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/v1/cvs/{{cvId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "v1",
+                                "cvs",
+                                "{{cvId}}"
+                            ]
+                        },
+                        "description": "Gets full details of a specific CV."
+                    }
+                },
+                {
+                    "name": "Get CV Status",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/v1/cvs/{{cvId}}/status",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "v1",
+                                "cvs",
+                                "{{cvId}}",
+                                "status"
+                            ]
+                        },
+                        "description": "Gets the parsing/processing status of a CV."
+                    }
                 },
                 {
                     "name": "Search CVs",
@@ -337,25 +397,31 @@
                             "query": [
                                 {
                                     "key": "q",
-                                    "value": "developer",
-                                    "description": "Search query term"
+                                    "value": "developer"
                                 }
                             ]
                         },
                         "description": "Searches through CV content using keywords."
-                    },
-                    "response": []
+                    }
                 },
                 {
-                    "name": "Get CV Details",
+                    "name": "Update CV State (PATCH)",
                     "request": {
-                        "method": "GET",
+                        "method": "PATCH",
                         "header": [
                             {
                                 "key": "Authorization",
                                 "value": "Bearer {{token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
                             }
                         ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"published\": true,\n    \"archived\": false\n}"
+                        },
                         "url": {
                             "raw": "{{baseUrl}}/v1/cvs/{{cvId}}",
                             "host": [
@@ -367,9 +433,8 @@
                                 "{{cvId}}"
                             ]
                         },
-                        "description": "Gets full details of a specific CV by ID."
-                    },
-                    "response": []
+                        "description": "Updates CV metadata/state (publish, archive)."
+                    }
                 },
                 {
                     "name": "Duplicate CV",
@@ -402,41 +467,7 @@
                             ]
                         },
                         "description": "Creates a duplicate copy of an existing CV."
-                    },
-                    "response": []
-                },
-                {
-                    "name": "Update CV State",
-                    "request": {
-                        "method": "PATCH",
-                        "header": [
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{token}}"
-                            },
-                            {
-                                "key": "Content-Type",
-                                "value": "application/json"
-                            }
-                        ],
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n    \"published\": true,\n    \"archived\": false\n}"
-                        },
-                        "url": {
-                            "raw": "{{baseUrl}}/v1/cvs/{{cvId}}",
-                            "host": [
-                                "{{baseUrl}}"
-                            ],
-                            "path": [
-                                "v1",
-                                "cvs",
-                                "{{cvId}}"
-                            ]
-                        },
-                        "description": "Updates metadata/state of a CV (e.g., publish, archive)."
-                    },
-                    "response": []
+                    }
                 },
                 {
                     "name": "Bulk Operations",
@@ -467,9 +498,8 @@
                                 "bulk"
                             ]
                         },
-                        "description": "Performs actions on multiple CVs at once. Supported actions: `archive`, `delete`."
-                    },
-                    "response": []
+                        "description": "Performs actions on multiple CVs. Actions: archive, delete."
+                    }
                 },
                 {
                     "name": "Delete CV",
@@ -493,14 +523,138 @@
                             ]
                         },
                         "description": "Permanently deletes a CV."
-                    },
-                    "response": []
+                    }
                 }
             ]
         },
         {
-            "name": "4. Parsing Jobs",
-            "description": "Manage asynchronous parsing jobs. Used to track progress of CV text extraction.",
+            "name": "4. CV Versions",
+            "description": "CV version management for snapshots and history.",
+            "item": [
+                {
+                    "name": "List CV Versions",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/v1/cvs/{{cvId}}/versions",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "v1",
+                                "cvs",
+                                "{{cvId}}",
+                                "versions"
+                            ]
+                        },
+                        "description": "Gets all versions of a CV."
+                    }
+                },
+                {
+                    "name": "Create CV Version",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"v1.0\",\n    \"description\": \"Initial version\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/v1/cvs/{{cvId}}/versions",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "v1",
+                                "cvs",
+                                "{{cvId}}",
+                                "versions"
+                            ]
+                        },
+                        "description": "Creates a snapshot of the current CV state."
+                    }
+                },
+                {
+                    "name": "Get Version Details",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/v1/cvs/{{cvId}}/versions/{{versionId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "v1",
+                                "cvs",
+                                "{{cvId}}",
+                                "versions",
+                                "{{versionId}}"
+                            ]
+                        },
+                        "description": "Gets specific version details."
+                    }
+                },
+                {
+                    "name": "Activate Version",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/v1/cvs/{{cvId}}/versions/{{versionId}}/activate",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "v1",
+                                "cvs",
+                                "{{cvId}}",
+                                "versions",
+                                "{{versionId}}",
+                                "activate"
+                            ]
+                        },
+                        "description": "Restores the main CV to this version's state."
+                    }
+                }
+            ]
+        },
+        {
+            "name": "5. Parsing Jobs",
+            "description": "Manage asynchronous CV parsing jobs.",
             "item": [
                 {
                     "name": "Start Parsing",
@@ -531,8 +685,7 @@
                             ]
                         },
                         "description": "Manually triggers a parsing job for a CV."
-                    },
-                    "response": []
+                    }
                 },
                 {
                     "name": "Get Parsing History",
@@ -562,14 +715,13 @@
                             ]
                         },
                         "description": "Gets history of parsing jobs for a specific CV."
-                    },
-                    "response": []
+                    }
                 }
             ]
         },
         {
-            "name": "5. Optimization Jobs",
-            "description": "AI-powered optimization endpoints. Improve CV content or tailor it to specific job descriptions.",
+            "name": "6. Optimization Jobs",
+            "description": "AI-powered CV optimization endpoints.",
             "item": [
                 {
                     "name": "Start Full Optimization",
@@ -587,7 +739,7 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n    \"cvId\": \"{{cvId}}\",\n    \"jobDescription\": \"Senior Frontend Engineer needed. Must know React, TypeScript, and Node.js. Experience with AWS is a plus.\",\n    \"targetJobTitle\": \"Senior Frontend Engineer\"\n}"
+                            "raw": "{\n    \"cvId\": \"{{cvId}}\",\n    \"jobDescription\": \"Senior Frontend Engineer needed. Must know React, TypeScript, and Node.js.\",\n    \"targetJobTitle\": \"Senior Frontend Engineer\"\n}"
                         },
                         "url": {
                             "raw": "{{baseUrl}}/v1/optimization-jobs",
@@ -599,9 +751,8 @@
                                 "optimization-jobs"
                             ]
                         },
-                        "description": "Starts a comprehensive AI optimization job.\n- **Required**: `cvId`, `targetJobTitle`.\n- **Optional**: `jobDescription` (for tailoring)."
-                    },
-                    "response": []
+                        "description": "Starts a comprehensive AI optimization job."
+                    }
                 },
                 {
                     "name": "Tailor for Job",
@@ -632,18 +783,32 @@
                                 "tailor"
                             ]
                         },
-                        "description": "Specific endpoint to tailor existing CV identifiers to a new job description."
-                    },
-                    "response": []
+                        "description": "Tailors existing CV to a new job description."
+                    }
                 }
             ]
         },
         {
-            "name": "6. ATS Analyses",
-            "description": "Endpoints to analyze CVs against Applicant Tracking Systems (ATS) criteria.",
+            "name": "7. ATS Analyses",
+            "description": "Analyze CVs against Applicant Tracking Systems criteria.",
             "item": [
                 {
                     "name": "Start ATS Analysis",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if(pm.response.code === 202) {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    pm.collectionVariables.set('jobId', jsonData.data.id || jsonData.data.jobId);",
+                                    "    console.log('Job ID saved: ' + pm.collectionVariables.get('jobId'));",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
                     "request": {
                         "method": "POST",
                         "header": [
@@ -658,7 +823,7 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n    \"cvId\": \"{{cvId}}\",\n    \"jobDescription\": \"Job Description Here...\"\n}"
+                            "raw": "{\n    \"cvId\": \"{{cvId}}\",\n    \"targetJob\": {\n        \"title\": \"Software Engineer\",\n        \"description\": \"Looking for a software engineer with experience in JavaScript, React, and Node.js.\"\n    }\n}"
                         },
                         "url": {
                             "raw": "{{baseUrl}}/v1/ats-analyses",
@@ -670,18 +835,202 @@
                                 "ats-analyses"
                             ]
                         },
-                        "description": "Starts an ATS analysis job to score the CV against a job description."
-                    },
-                    "response": []
+                        "description": "Starts an ATS analysis job. Auto-saves jobId."
+                    }
+                },
+                {
+                    "name": "Get ATS History",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/v1/ats-analyses/history",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "v1",
+                                "ats-analyses",
+                                "history"
+                            ]
+                        },
+                        "description": "Gets ATS analysis history."
+                    }
+                },
+                {
+                    "name": "Get ATS Stats",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/v1/ats-analyses/stats",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "v1",
+                                "ats-analyses",
+                                "stats"
+                            ]
+                        },
+                        "description": "Gets overall ATS statistics."
+                    }
+                },
+                {
+                    "name": "Get ATS Trends",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/v1/ats-analyses/trends",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "v1",
+                                "ats-analyses",
+                                "trends"
+                            ]
+                        },
+                        "description": "Gets ATS scoring trends."
+                    }
+                },
+                {
+                    "name": "Get Recent Scores",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/v1/ats-analyses/recent-scores",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "v1",
+                                "ats-analyses",
+                                "recent-scores"
+                            ]
+                        },
+                        "description": "Gets recent ATS scores."
+                    }
+                },
+                {
+                    "name": "Get Analysis Status",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/v1/ats-analyses/{{jobId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "v1",
+                                "ats-analyses",
+                                "{{jobId}}"
+                            ]
+                        },
+                        "description": "Gets analysis job status."
+                    }
+                },
+                {
+                    "name": "Get Analysis Result",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/v1/ats-analyses/{{jobId}}/result",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "v1",
+                                "ats-analyses",
+                                "{{jobId}}",
+                                "result"
+                            ]
+                        },
+                        "description": "Gets the completed analysis result."
+                    }
+                },
+                {
+                    "name": "Cancel Analysis",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/v1/ats-analyses/{{jobId}}/cancel",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "v1",
+                                "ats-analyses",
+                                "{{jobId}}",
+                                "cancel"
+                            ]
+                        },
+                        "description": "Cancels a pending/processing ATS analysis."
+                    }
                 }
             ]
         },
         {
-            "name": "7. PDF Generation",
-            "description": "Endpoints to generate and download PDF versions of the optimized CVs.",
+            "name": "8. PDF Generation",
+            "description": "Generate and download PDF versions of CVs.",
             "item": [
                 {
                     "name": "Generate PDF",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if(pm.response.code === 202 || pm.response.code === 201) {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    pm.collectionVariables.set('jobId', jsonData.data.id || jsonData.data.jobId);",
+                                    "    console.log('Job ID saved: ' + pm.collectionVariables.get('jobId'));",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
                     "request": {
                         "method": "POST",
                         "header": [
@@ -708,9 +1057,8 @@
                                 "pdf-generations"
                             ]
                         },
-                        "description": "Starts a PDF generation job.\n- **Template Options**: `modern`, `classic`, `creative`."
-                    },
-                    "response": []
+                        "description": "Starts a PDF generation job. Templates: modern, classic, creative."
+                    }
                 },
                 {
                     "name": "Download PDF",
@@ -723,27 +1071,254 @@
                             }
                         ],
                         "url": {
-                            "raw": "{{baseUrl}}/v1/pdf-generations/:jobId/download",
+                            "raw": "{{baseUrl}}/v1/pdf-generations/{{jobId}}/download",
                             "host": [
                                 "{{baseUrl}}"
                             ],
                             "path": [
                                 "v1",
                                 "pdf-generations",
-                                ":jobId",
+                                "{{jobId}}",
                                 "download"
-                            ],
-                            "variable": [
-                                {
-                                    "key": "jobId",
-                                    "value": "JOB_ID_HERE",
-                                    "description": "ID of the completed PDF generation job"
-                                }
                             ]
                         },
-                        "description": "Downloads the generated PDF file. Requires `jobId` from the Generation response."
-                    },
-                    "response": []
+                        "description": "Downloads the generated PDF file."
+                    }
+                }
+            ]
+        },
+        {
+            "name": "9. Jobs Management",
+            "description": "Manage all background jobs (parsing, optimization, generation, ATS).",
+            "item": [
+                {
+                    "name": "List Jobs",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/v1/jobs",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "v1",
+                                "jobs"
+                            ]
+                        },
+                        "description": "Lists all background jobs for the user."
+                    }
+                },
+                {
+                    "name": "Get Job Stats",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/v1/jobs/stats",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "v1",
+                                "jobs",
+                                "stats"
+                            ]
+                        },
+                        "description": "Gets overall job statistics."
+                    }
+                },
+                {
+                    "name": "Get Job Details",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/v1/jobs/{{jobId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "v1",
+                                "jobs",
+                                "{{jobId}}"
+                            ]
+                        },
+                        "description": "Gets details of a specific job."
+                    }
+                },
+                {
+                    "name": "Get Job Logs",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/v1/jobs/{{jobId}}/logs",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "v1",
+                                "jobs",
+                                "{{jobId}}",
+                                "logs"
+                            ]
+                        },
+                        "description": "Gets execution logs for a job."
+                    }
+                },
+                {
+                    "name": "Cancel Job",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/v1/jobs/{{jobId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "v1",
+                                "jobs",
+                                "{{jobId}}"
+                            ]
+                        },
+                        "description": "Cancels a pending/processing job."
+                    }
+                },
+                {
+                    "name": "Retry Job",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/v1/jobs/{{jobId}}/retry",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "v1",
+                                "jobs",
+                                "{{jobId}}",
+                                "retry"
+                            ]
+                        },
+                        "description": "Retries a failed job."
+                    }
+                }
+            ]
+        },
+        {
+            "name": "10. Webhooks (Advanced)",
+            "description": "Webhook management for real-time notifications.",
+            "item": [
+                {
+                    "name": "Create Webhook",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"url\": \"https://your-server.com/webhook\",\n    \"events\": [\"cv.parsed\", \"cv.optimized\", \"pdf.generated\"]\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/v1/webhooks",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "v1",
+                                "webhooks"
+                            ]
+                        },
+                        "description": "Registers a new webhook endpoint."
+                    }
+                },
+                {
+                    "name": "List Webhooks",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/v1/webhooks",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "v1",
+                                "webhooks"
+                            ]
+                        },
+                        "description": "Lists all registered webhooks."
+                    }
+                },
+                {
+                    "name": "Get Webhook Stats",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/v1/webhooks/stats",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "v1",
+                                "webhooks",
+                                "stats"
+                            ]
+                        },
+                        "description": "Gets webhook delivery statistics."
+                    }
                 }
             ]
         }
@@ -760,12 +1335,22 @@
             "type": "string"
         },
         {
+            "key": "userId",
+            "value": "",
+            "type": "string"
+        },
+        {
             "key": "cvId",
             "value": "",
             "type": "string"
         },
         {
-            "key": "userId",
+            "key": "jobId",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "versionId",
             "value": "",
             "type": "string"
         }
