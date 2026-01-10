@@ -1,0 +1,79 @@
+# Render Blueprint for CareerForge Backend
+# https://render.com/docs/blueprint-spec
+
+services:
+  # Main API Server
+  - type: web
+    name: careerforge-api
+    runtime: node
+    region: frankfurt  # or oregon, singapore, etc.
+    plan: free  # or starter, standard
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: MONGODB_URI
+        sync: false  # Set manually in dashboard
+      - key: REDIS_HOST
+        fromService:
+          name: careerforge-redis
+          type: redis
+          property: host
+      - key: REDIS_PORT
+        fromService:
+          name: careerforge-redis
+          type: redis
+          property: port
+      - key: JWT_SECRET
+        generateValue: true  # Auto-generate secure secret
+      - key: AI_PROVIDER
+        value: gemini
+      - key: GEMINI_API_KEY
+        sync: false  # Set manually
+      - key: CORS_ALLOWED_ORIGINS
+        value: "*"
+      - key: EMAIL_VERIFICATION_REQUIRED
+        value: "false"
+      - key: STORAGE_TYPE
+        value: local
+    autoDeploy: true
+    healthCheckPath: /health
+
+  # Background Worker
+  - type: worker
+    name: careerforge-worker
+    runtime: node
+    region: frankfurt
+    plan: free
+    buildCommand: npm install
+    startCommand: npm run worker
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_URI
+        sync: false
+      - key: REDIS_HOST
+        fromService:
+          name: careerforge-redis
+          type: redis
+          property: host
+      - key: REDIS_PORT
+        fromService:
+          name: careerforge-redis
+          type: redis
+          property: port
+      - key: AI_PROVIDER
+        value: gemini
+      - key: GEMINI_API_KEY
+        sync: false
+    autoDeploy: true
+
+  # Redis for Job Queue
+  - type: redis
+    name: careerforge-redis
+    plan: free  # 25MB, good for dev
+    maxmemoryPolicy: allkeys-lru
+    ipAllowList: []  # Allow all IPs
